@@ -6,11 +6,17 @@ import { createClient } from "@supabase/supabase-js";
 import { currentUser } from "@clerk/nextjs/server";
 import { randomUUID } from "crypto";
 
-// Initialize Supabase client with service role key for server-side operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-load Supabase client to avoid build-time errors
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing Supabase environment variables");
+  }
+
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 // 표준화된 에러 응답 헬퍼
 function errorJson(
@@ -93,6 +99,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Supabase 연결 테스트
+    const supabase = getSupabaseClient();
     try {
       const { data: buckets, error: listError } =
         await supabase.storage.listBuckets();

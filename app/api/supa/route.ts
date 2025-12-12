@@ -4,21 +4,23 @@ import { currentUser } from "@clerk/nextjs/server";
 import { compressData } from "@/lib/compression";
 import { prisma } from "@/lib/prisma";
 
-// Initialize Supabase client with service role key for server-side operations
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Lazy-load Supabase client to avoid build-time errors
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error("Missing Supabase environment variables:", {
-    hasUrl: !!supabaseUrl,
-    hasKey: !!supabaseKey,
-  });
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing Supabase environment variables");
+  }
+
+  return createClient(supabaseUrl, supabaseKey);
 }
 
-const supabase = createClient(supabaseUrl || "", supabaseKey || "");
-
 export async function POST(request: NextRequest) {
-  if (!supabaseUrl || !supabaseKey) {
+  let supabase;
+  try {
+    supabase = getSupabaseClient();
+  } catch (error) {
     return NextResponse.json(
       { error: "Server configuration error: Missing Supabase credentials" },
       { status: 500 }
@@ -200,6 +202,7 @@ async function createExam(data: {
         : "not an array",
     });
 
+    const supabase = getSupabaseClient();
     const { data: exam, error } = await supabase
       .from("exams")
       .insert([examData])
@@ -281,6 +284,7 @@ async function updateExam(data: {
   update: Record<string, unknown>;
 }) {
   try {
+    const supabase = getSupabaseClient();
     const { data: exam, error } = await supabase
       .from("exams")
       .update(data.update)
@@ -310,6 +314,7 @@ async function submitExam(data: {
   feedbackResponses?: unknown[];
 }) {
   try {
+    const supabase = getSupabaseClient();
     // Compress the session data
     const sessionData = {
       chatHistory: data.chatHistory || [],
@@ -390,6 +395,7 @@ async function submitExam(data: {
 
 async function getExam(data: { code: string }) {
   try {
+    const supabase = getSupabaseClient();
     const { data: exam, error } = await supabase
       .from("exams")
       .select("*")
@@ -451,6 +457,7 @@ async function getExamById(data: { id: string }) {
       user.id
     );
 
+    const supabase = getSupabaseClient();
     const { data: exam, error } = await supabase
       .from("exams")
       .select(
@@ -524,6 +531,7 @@ async function getExamById(data: { id: string }) {
 
 async function getInstructorExams() {
   try {
+    const supabase = getSupabaseClient();
     // Get current user
     const user = await currentUser();
     if (!user) {
@@ -585,6 +593,7 @@ async function getInstructorExams() {
 
 async function createOrGetSession(data: { examId: string; studentId: string }) {
   try {
+    const supabase = getSupabaseClient();
     if (process.env.NODE_ENV === "development") {
       console.log("Creating or getting session for:", data);
     }
@@ -676,6 +685,7 @@ async function initExamSession(data: {
   deviceFingerprint?: string;
 }) {
   try {
+    const supabase = getSupabaseClient();
     console.log("[INIT_EXAM_SESSION] Starting session init:", {
       examCode: data.examCode,
       studentId: data.studentId,
@@ -949,6 +959,7 @@ async function saveDraft(data: {
   answer: string;
 }) {
   try {
+    const supabase = getSupabaseClient();
     // Check if submission already exists
     const { data: existingSubmission, error: checkError } = await supabase
       .from("submissions")
@@ -1072,6 +1083,7 @@ async function saveDraftAnswers(data: {
   answers: Array<{ questionId: string; text: string }>;
 }) {
   try {
+    const supabase = getSupabaseClient();
     const results = [];
 
     for (const answer of data.answers) {
@@ -1125,6 +1137,7 @@ async function saveDraftAnswers(data: {
 
 async function getSessionSubmissions(data: { sessionId: string }) {
   try {
+    const supabase = getSupabaseClient();
     const { data: submissions, error } = await supabase
       .from("submissions")
       .select("*")
@@ -1145,6 +1158,7 @@ async function getSessionSubmissions(data: { sessionId: string }) {
 
 async function getSessionMessages(data: { sessionId: string }) {
   try {
+    const supabase = getSupabaseClient();
     const { data: messages, error } = await supabase
       .from("messages")
       .select("*")
@@ -1167,6 +1181,7 @@ async function getSessionMessages(data: { sessionId: string }) {
 
 async function createFolder(data: { name: string; parent_id?: string | null }) {
   try {
+    const supabase = getSupabaseClient();
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -1231,6 +1246,7 @@ async function createFolder(data: { name: string; parent_id?: string | null }) {
 
 async function getFolderContents(data: { folder_id?: string | null }) {
   try {
+    const supabase = getSupabaseClient();
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -1365,6 +1381,7 @@ async function getFolderContents(data: { folder_id?: string | null }) {
 
 async function getBreadcrumb(data: { folder_id: string }) {
   try {
+    const supabase = getSupabaseClient();
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -1413,6 +1430,7 @@ async function moveNode(data: {
   new_sort_order?: number;
 }) {
   try {
+    const supabase = getSupabaseClient();
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -1453,6 +1471,7 @@ async function moveNode(data: {
 
 async function updateNode(data: { node_id: string; name?: string }) {
   try {
+    const supabase = getSupabaseClient();
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -1502,6 +1521,7 @@ async function updateNode(data: { node_id: string; name?: string }) {
 
 async function deleteNode(data: { node_id: string }) {
   try {
+    const supabase = getSupabaseClient();
     const user = await currentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -1567,6 +1587,7 @@ async function sessionHeartbeat(data: {
   studentId: string;
 }) {
   try {
+    const supabase = getSupabaseClient();
     // Verify the session belongs to the student
     const { data: session, error: sessionError } = await supabase
       .from("sessions")
@@ -1613,6 +1634,7 @@ async function deactivateSession(data: {
   studentId: string;
 }) {
   try {
+    const supabase = getSupabaseClient();
     // Verify the session belongs to the student
     const { data: session, error: sessionError } = await supabase
       .from("sessions")

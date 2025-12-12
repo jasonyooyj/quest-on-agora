@@ -28,11 +28,17 @@ async function getPDFParser() {
   return PDFParser;
 }
 
-// Supabase 클라이언트
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-load Supabase client to avoid build-time errors
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Missing Supabase environment variables");
+  }
+
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 /**
  * PDF 파일에서 텍스트 추출 (pdf2json 사용 - Node.js 전용)
@@ -287,6 +293,7 @@ export async function POST(request: NextRequest) {
 
     console.log("[extract-text] Downloading file from storage:", storagePath);
 
+    const supabase = getSupabaseClient();
     const { data: fileData, error: downloadError } = await supabase.storage
       .from("exam-materials")
       .download(storagePath);
