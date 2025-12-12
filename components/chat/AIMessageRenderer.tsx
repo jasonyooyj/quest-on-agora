@@ -19,7 +19,7 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
 }) => {
   return (
     <div className="bg-muted/90 text-foreground border border-border/60 backdrop-blur-sm rounded-3xl rounded-tl-md px-4 py-3 max-w-[55%] shadow-lg shadow-muted/20 transition-all duration-200 hover:shadow-xl hover:shadow-muted/30">
-      <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:mb-0 prose-p:mb-0 prose-p:last:mb-0 prose-ul:mb-0 prose-ol:mb-0 prose-li:mb-0 break-words [&_*]:break-words [&_*]:leading-[1.3]">
+      <div className="max-w-none break-words [&_*]:break-words [&_*]:leading-[1.4] text-sm">
         {/* 항상 마크다운으로 렌더링 */}
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkMath]}
@@ -46,24 +46,24 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
             {
               // 헤더 스타일링
               h1: ({ children }: React.ComponentProps<"h1">) => (
-                <h1 className="text-xl font-bold text-foreground mb-0 mt-1 first:mt-0 border-b pb-0.5 [&+*]:mt-0">
+                <h1 className="text-base font-bold text-foreground mb-1 mt-2 first:mt-0 border-b border-border/30 pb-1 [&+*]:mt-2">
                   {children}
                 </h1>
               ),
               h2: ({ children }: React.ComponentProps<"h2">) => (
-                <h2 className="text-lg font-bold text-foreground mb-0 mt-1 [&+*]:mt-0">
+                <h2 className="text-sm font-bold text-foreground mb-1 mt-2 first:mt-0 [&+*]:mt-2">
                   {children}
                 </h2>
               ),
               h3: ({ children }: React.ComponentProps<"h3">) => (
-                <h3 className="text-base font-semibold text-foreground mb-0 mt-0.5 [&+*]:mt-0">
+                <h3 className="text-sm font-semibold text-foreground mb-0.5 mt-1.5 first:mt-0 [&+*]:mt-1.5">
                   {children}
                 </h3>
               ),
 
               // 문단 스타일링
               p: ({ children }: React.ComponentProps<"p">) => (
-                <p className="text-sm leading-[1.3] mb-0 mt-0 last:mb-0 text-foreground/90 [&+*]:mt-0">
+                <p className="text-sm leading-[1.5] mb-1 mt-0 first:mt-0 last:mb-0 text-foreground/90 [&+p]:mt-1">
                   {children}
                 </p>
               ),
@@ -78,8 +78,8 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
                 const match = /language-(\w+)/.exec(className || "");
                 const isInline = !match || (node && node.tagName !== "PRE");
                 return !isInline && match ? (
-                  <div className="my-0 mt-0 mb-0 rounded-lg overflow-hidden shadow-sm border border-border/50 [&+*]:mt-0">
-                    <div className="bg-muted/50 px-4 py-1 text-xs font-mono text-muted-foreground border-b border-border/50 flex justify-between">
+                  <div className="my-2 mt-2 mb-2 rounded-lg overflow-hidden shadow-sm border border-border/50 [&+*]:mt-2">
+                    <div className="bg-muted/50 px-3 py-1.5 text-xs font-mono text-muted-foreground border-b border-border/50 flex justify-between">
                       <span>{match[1]}</span>
                     </div>
                     <SyntaxHighlighter
@@ -87,7 +87,12 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
                       style={vscDarkPlus as any}
                       language={match[1]}
                       PreTag="div"
-                      className="!m-0 !rounded-none !bg-[#1e1e1e]"
+                      className="!m-0 !rounded-none !bg-[#1e1e1e] !text-xs"
+                      customStyle={{
+                        fontSize: '0.75rem',
+                        lineHeight: '1.5',
+                        padding: '0.75rem',
+                      }}
                       showLineNumbers={true}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       {...(props as any)}
@@ -97,7 +102,7 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
                   </div>
                 ) : (
                   <code
-                    className="bg-muted text-primary px-1 py-0 rounded-md text-xs font-mono border border-border/50"
+                    className="bg-muted text-primary px-1.5 py-0.5 rounded text-xs font-mono border border-border/50"
                     {...props}
                   >
                     {children}
@@ -107,8 +112,8 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
 
               // 테이블 스타일링
               table: ({ children }: React.ComponentProps<"table">) => (
-                <div className="overflow-x-auto my-0 mt-0 mb-0 border border-border/50 rounded-lg shadow-sm bg-white dark:bg-gray-800 [&+*]:mt-0">
-                  <table className="min-w-full divide-y divide-border">
+                <div className="overflow-x-auto my-2 mt-2 mb-2 border border-border/50 rounded-lg shadow-sm bg-white dark:bg-gray-800 [&+*]:mt-2">
+                  <table className="min-w-full divide-y divide-border text-sm">
                     {children}
                   </table>
                 </div>
@@ -129,29 +134,29 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
                 </tr>
               ),
               th: ({ children }: React.ComponentProps<"th">) => (
-                <th className="px-4 py-3 text-left text-sm font-bold text-foreground">
+                <th className="px-3 py-2 text-left text-xs font-bold text-foreground">
                   {children}
                 </th>
               ),
               td: ({ children }: React.ComponentProps<"td">) => (
-                <td className="px-4 py-3 text-sm text-foreground/90 whitespace-normal break-words">
+                <td className="px-3 py-2 text-xs text-foreground/90 whitespace-normal break-words">
                   {children}
                 </td>
               ),
 
               // 리스트 스타일링
               ul: ({ children }: React.ComponentProps<"ul">) => (
-                <ul className="list-disc list-outside ml-5 mb-0 mt-0 space-y-0 marker:text-muted-foreground [&>li]:mb-0 [&>li]:mt-0 [&>li]:first:mt-0 [&>li+li]:mt-0 [&>li]:last:mb-0 [&+*]:mt-0 [&_p]:mb-0 [&_p]:mt-0 [&_p]:leading-[1.3] [&_p]:first:mt-0 [&_p]:last:mb-0 [&_ul]:mb-0 [&_ul]:mt-0 [&_ul]:last:mb-0 [&_ol]:mb-0 [&_ol]:mt-0 [&_ol]:last:mb-0">
+                <ul className="list-disc list-outside ml-4 mb-1 mt-1 space-y-0.5 marker:text-muted-foreground [&>li]:mb-0 [&>li]:mt-0 [&>li]:first:mt-0 [&>li+li]:mt-1 [&>li]:last:mb-0 [&+*]:mt-2 [&_p]:mb-0 [&_p]:mt-0 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_p]:leading-[1.5] [&_ul]:mb-0 [&_ul]:mt-1 [&_ul]:last:mb-0 [&_ol]:mb-0 [&_ol]:mt-1 [&_ol]:last:mb-0">
                   {children}
                 </ul>
               ),
               ol: ({ children }: React.ComponentProps<"ol">) => (
-                <ol className="list-decimal list-outside ml-5 mb-0 mt-0 space-y-0 marker:text-muted-foreground marker:font-medium [&>li]:mb-0 [&>li]:mt-0 [&>li]:first:mt-0 [&>li+li]:mt-0 [&>li]:last:mb-0 [&+*]:mt-0 [&_p]:mb-0 [&_p]:mt-0 [&_p]:leading-[1.3] [&_p]:first:mt-0 [&_p]:last:mb-0 [&_ul]:mb-0 [&_ul]:mt-0 [&_ul]:last:mb-0 [&_ol]:mb-0 [&_ol]:mt-0 [&_ol]:last:mb-0">
+                <ol className="list-decimal list-outside ml-4 mb-1 mt-1 space-y-0.5 marker:text-muted-foreground marker:font-medium [&>li]:mb-0 [&>li]:mt-0 [&>li]:first:mt-0 [&>li+li]:mt-1 [&>li]:last:mb-0 [&+*]:mt-2 [&_p]:mb-0 [&_p]:mt-0 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_p]:leading-[1.5] [&_ul]:mb-0 [&_ul]:mt-1 [&_ul]:last:mb-0 [&_ol]:mb-0 [&_ol]:mt-1 [&_ol]:last:mb-0">
                   {children}
                 </ol>
               ),
               li: ({ children }: React.ComponentProps<"li">) => (
-                <li className="text-sm leading-[1.3] pl-1 mb-0 mt-0 first:mt-0 [&+li]:mt-0 [&>*]:last:mb-0 [&>p]:mb-0 [&>p]:mt-0 [&>p]:first:mt-0 [&>p]:last:mb-0 [&>p]:leading-[1.3] [&>ul]:mb-0 [&>ul]:mt-0 [&>ul]:first:mt-0 [&>ul]:last:mb-0 [&>ol]:mb-0 [&>ol]:mt-0 [&>ol]:first:mt-0 [&>ol]:last:mb-0 [&_p]:mb-0 [&_p]:mt-0 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_p]:leading-[1.3] [&_ul]:mb-0 [&_ul]:mt-0 [&_ul]:last:mb-0 [&_ol]:mb-0 [&_ol]:mt-0 [&_ol]:last:mb-0">
+                <li className="text-sm leading-[1.5] pl-1 mb-0 mt-0 first:mt-0 [&+li]:mt-1 [&>*]:last:mb-0 [&>p]:mb-0 [&>p]:mt-0 [&>p]:first:mt-0 [&>p]:last:mb-0 [&>p]:leading-[1.5] [&>ul]:mb-0 [&>ul]:mt-1 [&>ul]:first:mt-0 [&>ul]:last:mb-0 [&>ol]:mb-0 [&>ol]:mt-1 [&>ol]:first:mt-0 [&>ol]:last:mb-0 [&_p]:mb-0 [&_p]:mt-0 [&_p]:first:mt-0 [&_p]:last:mb-0 [&_p]:leading-[1.5] [&_ul]:mb-0 [&_ul]:mt-1 [&_ul]:last:mb-0 [&_ol]:mb-0 [&_ol]:mt-1 [&_ol]:last:mb-0">
                   {children}
                 </li>
               ),
@@ -182,7 +187,7 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
               blockquote: ({
                 children,
               }: React.ComponentProps<"blockquote">) => (
-                <blockquote className="border-l-4 border-primary/30 pl-2 py-0 bg-muted/30 rounded-r-lg italic text-muted-foreground my-0 mt-0 mb-0 [&+*]:mt-0 shadow-sm">
+                <blockquote className="border-l-4 border-primary/30 pl-3 py-1 bg-muted/30 rounded-r-lg italic text-sm text-muted-foreground my-2 mt-2 mb-2 [&+*]:mt-2 shadow-sm">
                   {children}
                 </blockquote>
               ),
@@ -190,20 +195,20 @@ const AIMessageRenderer: React.FC<AIMessageRendererProps> = ({
               // 수학 식 렌더링 (remark-math 플러그인용)
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               math: ({ children }: any) => (
-                <div className="my-0 mt-0 mb-0 overflow-x-auto p-0.5 bg-muted/20 rounded-lg text-center [&+*]:mt-0">
+                <div className="my-2 mt-2 mb-2 overflow-x-auto p-2 bg-muted/20 rounded-lg text-center [&+*]:mt-2">
                   {children}
                 </div>
               ),
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               inlineMath: ({ children }: any) => (
-                <span className="inline-block mx-1 px-1 bg-muted/20 rounded">
+                <span className="inline-block mx-0.5 px-1 bg-muted/20 rounded text-sm">
                   {children}
                 </span>
               ),
 
               // 수평선
               hr: (): React.ReactElement => (
-                <hr className="border-border my-0 mt-0 mb-0 [&+*]:mt-0" />
+                <hr className="border-border my-2 mt-2 mb-2 [&+*]:mt-2" />
               ),
 
               // 취소선 스타일링 (물결표 오작동 방지)

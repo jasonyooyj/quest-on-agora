@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -33,13 +35,48 @@ export default function ExamCodeEntry() {
   const [isLoading, setIsLoading] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  // Check for error messages from query params
+  const errorParam = searchParams.get("error");
+  const errorMessage = searchParams.get("message");
+
+  // Show error toast if error params exist
+  useEffect(() => {
+    if (errorParam && errorMessage) {
+      toast.error(decodeURIComponent(errorMessage));
+    }
+  }, [errorParam, errorMessage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (examCode.length !== 6) return;
 
-    // Show the instructions dialog
-    setShowInstructions(true);
+    setIsLoading(true);
+    try {
+      // Check if it's a discussion code first
+      const discussionResponse = await fetch("/api/discussion/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ joinCode: examCode }),
+      });
+
+      if (discussionResponse.ok) {
+        const data = await discussionResponse.json();
+        // Redirect to discussion page
+        router.push(`/student/discussion/${data.session.id}`);
+        return;
+      }
+
+      // If not a discussion, show exam instructions
+      setShowInstructions(true);
+    } catch (error) {
+      console.error("Error checking code:", error);
+      // If error, assume it's an exam code and show instructions
+      setShowInstructions(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleConfirmAndNavigate = () => {

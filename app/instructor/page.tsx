@@ -25,6 +25,7 @@ import {
   Copy,
   Trash2,
   FolderPlus,
+  MessageSquare,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import {
@@ -159,10 +160,51 @@ export default function InstructorHome() {
         const data = await response.json();
         setNodes(data.nodes || []);
       } else {
-        console.error("Failed to fetch folder contents");
+        let errorData: { error?: string; details?: string } = {};
+        let responseText = "";
+        try {
+          responseText = await response.text();
+          if (responseText) {
+            try {
+              errorData = JSON.parse(responseText);
+            } catch (parseError) {
+              console.error("Failed to parse error response as JSON:", {
+                parseError,
+                responseText: responseText.substring(0, 200),
+              });
+              errorData = {
+                error: `서버 응답 파싱 실패 (${response.status})`,
+                details: responseText.substring(0, 100),
+              };
+            }
+          } else {
+            errorData = {
+              error: `서버 오류 (${response.status}): ${response.statusText}`,
+              details: "응답 본문이 비어있습니다.",
+            };
+          }
+        } catch (textError) {
+          console.error("Failed to read error response:", textError);
+          errorData = {
+            error: `서버 오류 (${response.status}): ${response.statusText}`,
+            details: "응답을 읽을 수 없습니다.",
+          };
+        }
+        console.error("Failed to fetch folder contents:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+          responseText: responseText.substring(0, 200),
+        });
+        toast.error(
+          errorData.error ||
+            errorData.details ||
+            "폴더 내용을 불러오는데 실패했습니다."
+        );
       }
     } catch (error) {
       console.error("Error loading folder contents:", error);
+      toast.error("폴더 내용을 불러오는데 실패했습니다.");
     } finally {
       setIsLoading(false);
     }
@@ -524,6 +566,12 @@ export default function InstructorHome() {
       icon: List,
       active: pathname === "/instructor/exams",
     },
+    {
+      title: "토론 관리",
+      href: "/instructor/discussions",
+      icon: MessageSquare,
+      active: pathname === "/instructor/discussions" || pathname.startsWith("/instructor/discussions/"),
+    },
   ];
 
   const SidebarContent = () => (
@@ -674,6 +722,24 @@ export default function InstructorHome() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2 shrink-0">
+                    <div className="hidden sm:flex items-center space-x-2">
+                      <Link href="/instructor/discussions/new">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="min-h-[44px]"
+                        >
+                          <MessageSquare className="w-4 h-4 mr-2" />
+                          토론 만들기
+                        </Button>
+                      </Link>
+                      <Link href="/instructor/new">
+                        <Button size="sm" className="min-h-[44px]">
+                          <Plus className="w-4 h-4 mr-2" />
+                          시험 만들기
+                        </Button>
+                      </Link>
+                    </div>
                     <Badge
                       variant="outline"
                       className="bg-primary/10 text-primary border-primary/20 text-xs hidden sm:inline-flex"
@@ -776,6 +842,14 @@ export default function InstructorHome() {
                               >
                                 <FileText className="w-4 h-4 mr-2" />새 시험
                               </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() =>
+                                  router.push("/instructor/discussions/new")
+                                }
+                                className="text-purple-700 focus:text-purple-800 focus:bg-purple-50"
+                              >
+                                <MessageSquare className="w-4 h-4 mr-2" />새 토론
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                           <Link href="/instructor/drive">
@@ -860,6 +934,15 @@ export default function InstructorHome() {
                               >
                                 <FolderPlus className="w-4 h-4 mr-2" />
                                 폴더 만들기
+                              </Button>
+                            </Link>
+                            <Link href="/instructor/discussions/new">
+                              <Button
+                                size="sm"
+                                className="min-h-[44px] bg-purple-700 hover:bg-purple-800 text-white"
+                              >
+                                <MessageSquare className="w-4 h-4 mr-2" />
+                                토론 만들기
                               </Button>
                             </Link>
                             <Link href="/instructor/new">

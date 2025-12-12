@@ -139,11 +139,41 @@ export default function ExamDetail({
         });
 
         if (!examResponse.ok) {
-          const errorText = await examResponse.text();
-          console.error("API Error Response:", errorText);
-          throw new Error(
-            `Failed to fetch exam details: ${examResponse.status} ${examResponse.statusText}`
-          );
+          let errorMessage = `Failed to fetch exam details: ${examResponse.status} ${examResponse.statusText}`;
+          try {
+            const errorData = await examResponse.json();
+            if (errorData.error) {
+              errorMessage = errorData.error;
+              if (errorData.details) {
+                errorMessage += ` - ${errorData.details}`;
+              }
+            }
+          } catch {
+            // If JSON parsing fails, use the text response
+            const errorText = await examResponse.text();
+            console.error("API Error Response:", errorText);
+            if (errorText) {
+              try {
+                const parsedError = JSON.parse(errorText);
+                if (parsedError.error) {
+                  errorMessage = parsedError.error;
+                  if (parsedError.details) {
+                    errorMessage += ` - ${parsedError.details}`;
+                  }
+                }
+              } catch {
+                // If it's not JSON, use the text as is
+                errorMessage = errorText || errorMessage;
+              }
+            }
+          }
+          console.error("API Error:", {
+            status: examResponse.status,
+            statusText: examResponse.statusText,
+            message: errorMessage,
+            examId: resolvedParams.examId,
+          });
+          throw new Error(errorMessage);
         }
 
         const examResult = await examResponse.json();

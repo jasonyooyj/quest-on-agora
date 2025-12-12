@@ -199,8 +199,89 @@ export default function ExamPage() {
           }),
         });
 
-        if (response.ok) {
-          const result = await response.json();
+        if (!response.ok) {
+          let errorText = "";
+          try {
+            errorText = await response.text();
+          } catch (e) {
+            console.error("Failed to read error response:", e);
+            errorText = "";
+          }
+
+          console.error("Failed to initialize exam session:", {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText || "No error message",
+            examCode,
+            studentId: user.id,
+            url: response.url,
+          });
+          
+          // Also log as separate messages for better visibility
+          console.error(`Status: ${response.status} ${response.statusText}`);
+          console.error(`Error text: ${errorText || "(empty)"}`);
+          console.error(`Exam code: ${examCode}`);
+          console.error(`Student ID: ${user.id}`);
+          
+          let errorMessage = "시험 세션을 초기화할 수 없습니다.";
+          
+          if (errorText) {
+            try {
+              const errorData = JSON.parse(errorText);
+              if (errorData.error) {
+                errorMessage = errorData.error;
+                if (errorData.message) {
+                  errorMessage += `: ${errorData.message}`;
+                }
+              } else if (errorData.message) {
+                errorMessage = errorData.message;
+              }
+            } catch {
+              // If it's not JSON, use the text as is
+              errorMessage = errorText;
+            }
+          }
+
+          // Handle specific status codes
+          if (response.status === 400) {
+            // Check if it's a discussion code
+            try {
+              const errorData = JSON.parse(errorText);
+              if (errorData.error === "DISCUSSION_CODE_DETECTED") {
+                // This is a discussion code, not an exam code
+                console.log("Discussion code detected, redirecting to join page");
+                router.push("/join?error=discussion_code&message=" + encodeURIComponent("이 코드는 토론 세션 코드입니다. 토론 세션은 별도의 참여 방법이 필요합니다."));
+                return;
+              }
+            } catch {
+              // Not a discussion code, continue with error handling
+            }
+            errorMessage = errorText || "잘못된 요청입니다.";
+          } else if (response.status === 404) {
+            errorMessage = "시험을 찾을 수 없습니다. 시험 코드를 확인해주세요.";
+          } else if (response.status === 409) {
+            // CONCURRENT_ACCESS_BLOCKED
+            if (errorText) {
+              try {
+                const errorData = JSON.parse(errorText);
+                if (errorData.message) {
+                  errorMessage = errorData.message;
+                }
+              } catch {
+                errorMessage = "이미 다른 기기에서 시험이 진행 중입니다.";
+              }
+            } else {
+              errorMessage = "이미 다른 기기에서 시험이 진행 중입니다.";
+            }
+          } else if (response.status === 500) {
+            errorMessage = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+          }
+
+          setSessionError(true);
+          throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
 
           if (result.exam) {
             setExam(result.exam);
@@ -235,26 +316,24 @@ export default function ExamPage() {
           } else {
             router.push("/join?error=exam_not_found");
           }
-        } else {
-          const errorData = await response.json().catch(() => ({}));
-
-          // Handle concurrent access error
-          if (
-            response.status === 409 &&
-            errorData.error === "CONCURRENT_ACCESS_BLOCKED"
-          ) {
-            alert(
-              errorData.message ||
-                "이미 다른 기기에서 시험이 진행 중입니다. 동시 접속은 불가능합니다."
-            );
-            router.push("/");
+      } catch (error) {
+        console.error("Error initializing exam:", {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          examCode,
+          studentId: user?.id,
+        });
+        
+        // Only redirect if it's not a user-facing error (like concurrent access)
+        if (error instanceof Error) {
+          const errorMessage = error.message;
+          if (errorMessage.includes("다른 기기") || errorMessage.includes("CONCURRENT")) {
+            // Already handled in the error block above
             return;
           }
-
-          router.push("/join?error=network_error");
         }
-      } catch (error) {
-        console.error("Error initializing exam:", error);
+        
+        setSessionError(true);
         router.push("/join?error=network_error");
       } finally {
         setExamLoading(false);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { currentUser } from "@clerk/nextjs/server";
 import { compressData } from "@/lib/compression";
+import { prisma } from "@/lib/prisma";
 
 // Initialize Supabase client with service role key for server-side operations
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -382,43 +383,42 @@ async function getExamById(data: { id: string }) {
   try {
     console.log("API: getExamById called with data:", data);
 
+    // Validate input
+    if (!data || !data.id) {
+      console.error("API: Invalid input - missing exam ID");
+      return NextResponse.json(
+        { error: "Exam ID is required" },
+        { status: 400 }
+      );
+    }
+
     // Get current user
     const user = await currentUser();
     if (!user) {
-      if (process.env.NODE_ENV === "development") {
-        console.log("API: No user found");
-      }
+      console.error("API: No user found - unauthorized");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("API: User found:", user.id);
-    }
+    console.log("API: User found:", user.id);
 
     // Check if user is instructor
     const userRole = user.unsafeMetadata?.role as string;
-    if (process.env.NODE_ENV === "development") {
-      console.log("API: User role:", userRole);
-    }
+    console.log("API: User role:", userRole);
 
     if (userRole !== "instructor") {
-      if (process.env.NODE_ENV === "development") {
-        console.log("API: User is not instructor");
-      }
+      console.error("API: User is not instructor - access denied");
       return NextResponse.json(
         { error: "Instructor access required" },
         { status: 403 }
       );
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        "API: Querying exam with ID:",
-        data.id,
-        "for instructor:",
-        user.id
-      );
-    }
+    console.log(
+      "API: Querying exam with ID:",
+      data.id,
+      "for instructor:",
+      user.id
+    );
 
     const { data: exam, error } = await supabase
       .from("exams")
@@ -430,20 +430,64 @@ async function getExamById(data: { id: string }) {
       .single();
 
     if (error) {
-      console.error("API: Database error:", error);
+      console.error("API: Database error:", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        examId: data.id,
+        instructorId: user.id,
+      });
+
       if (error.code === "PGRST116") {
-        return NextResponse.json({ error: "Exam not found" }, { status: 404 });
+        // No rows returned - exam not found or doesn't belong to this instructor
+        return NextResponse.json(
+          {
+            error: "Exam not found",
+            details:
+              "The exam does not exist or you do not have permission to access it",
+          },
+          { status: 404 }
+        );
       }
+
+      // Re-throw to be caught by outer catch block
       throw error;
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("API: Exam found:", exam);
+    if (!exam) {
+      console.error("API: Exam query returned null");
+      return NextResponse.json(
+        {
+          error: "Exam not found",
+          details: "The exam does not exist or you do not have permission to access it",
+        },
+        { status: 404 }
+      );
     }
+
+    console.log("API: Exam found successfully:", {
+      id: exam.id,
+      title: exam.title,
+      code: exam.code,
+    });
     return NextResponse.json({ exam });
   } catch (error) {
-    console.error("Get exam by ID error:", error);
-    return NextResponse.json({ error: "Failed to get exam" }, { status: 500 });
+    console.error("Get exam by ID error:", {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      examId: data?.id,
+    });
+    return NextResponse.json(
+      {
+        error: "Failed to get exam",
+        details:
+          error instanceof Error
+            ? error.message
+            : "An unexpected error occurred while fetching the exam",
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -615,6 +659,28 @@ async function initExamSession(data: {
       .single();
 
     if (examError || !exam) {
+      // Check if it's a discussion join code instead
+      try {
+        const discussionSession = await prisma.discussion_sessions.findUnique({
+          where: { join_code: data.examCode },
+        });
+
+        if (discussionSession) {
+          // This is a discussion code, not an exam code
+          return NextResponse.json(
+            {
+              error: "DISCUSSION_CODE_DETECTED",
+              message: "이 코드는 토론 세션 코드입니다.",
+              discussionSessionId: discussionSession.id,
+            },
+            { status: 400 }
+          );
+        }
+      } catch (discussionError) {
+        console.error("Error checking discussion session:", discussionError);
+        // Continue with exam not found error
+      }
+
       return NextResponse.json({ error: "Exam not found" }, { status: 404 });
     }
 
@@ -1209,36 +1275,41 @@ async function getFolderContents(data: { folder_id?: string | null }) {
     );
 
     if (examNodes.length > 0) {
-      const examIds = examNodes.map((node) => node.exam_id);
-      const { data: sessionsData, error: sessionsError } = await supabase
-        .from("sessions")
-        .select("exam_id, student_id")
-        .in("exam_id", examIds as string[]);
+      const examIds = examNodes
+        .map((node) => node.exam_id)
+        .filter((id): id is string => id !== null && id !== undefined);
+      
+      if (examIds.length > 0) {
+        const { data: sessionsData, error: sessionsError } = await supabase
+          .from("sessions")
+          .select("exam_id, student_id")
+          .in("exam_id", examIds);
 
-      if (sessionsError) {
-        console.error("Session count query error:", sessionsError);
-      } else if (sessionsData) {
-        const studentCountMap = sessionsData.reduce<
-          Record<string, Set<string>>
-        >((acc, session) => {
-          if (!session.exam_id || !session.student_id) return acc;
-          if (!acc[session.exam_id]) {
-            acc[session.exam_id] = new Set();
-          }
-          acc[session.exam_id].add(session.student_id);
-          return acc;
-        }, {});
+        if (sessionsError) {
+          console.error("Session count query error:", sessionsError);
+        } else if (sessionsData) {
+          const studentCountMap = sessionsData.reduce<
+            Record<string, Set<string>>
+          >((acc, session) => {
+            if (!session.exam_id || !session.student_id) return acc;
+            if (!acc[session.exam_id]) {
+              acc[session.exam_id] = new Set();
+            }
+            acc[session.exam_id].add(session.student_id);
+            return acc;
+          }, {});
 
-        nodesWithCounts = nodesWithCounts.map((node) => {
-          if (node.kind === "exam" && node.exam_id) {
-            const countSet = studentCountMap[node.exam_id];
-            return {
-              ...node,
-              student_count: countSet ? countSet.size : 0,
-            };
-          }
-          return node;
-        });
+          nodesWithCounts = nodesWithCounts.map((node) => {
+            if (node.kind === "exam" && node.exam_id) {
+              const countSet = studentCountMap[node.exam_id];
+              return {
+                ...node,
+                student_count: countSet ? countSet.size : 0,
+              };
+            }
+            return node;
+          });
+        }
       }
     }
 

@@ -38,8 +38,8 @@ Quest-On는 강사와 학생을 연결하는 현대적인 학습 플랫폼입니
 1. 저장소 클론
 
 ```bash
-git clone https://github.com/jcmaker/quest-on.git
-cd quest-on
+git clone <your-repository-url>
+cd quest-on-yeongjun-agora
 ```
 
 2. 의존성 설치
@@ -75,7 +75,7 @@ pnpm dev
 ## 프로젝트 구조
 
 ```
-quest-on-mvp/
+quest-on-yeongjun-agora/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # 인증 관련 페이지
 │   ├── api/               # API 라우트

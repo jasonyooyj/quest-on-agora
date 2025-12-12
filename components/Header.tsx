@@ -107,7 +107,7 @@ export function Header() {
                   aria-current={isLinkActive("/join") ? "page" : undefined}
                 >
                   <UserPlus className="h-4 w-4" />
-                  <span>시험 참여</span>
+                  <span>시험/토론 참여</span>
                 </Link>
               </>
             )}

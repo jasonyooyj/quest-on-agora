@@ -22,6 +22,11 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 
+# Prisma Database Connection (Supabase PostgreSQL)
+# Get this from: Supabase Dashboard → Settings → Database → Connection string
+# Use the "Connection pooling" or "Direct connection" string
+DATABASE_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+
 # OpenAI
 OPENAI_API_KEY=your_openai_api_key_here
 ```
@@ -43,7 +48,22 @@ OPENAI_API_KEY=your_openai_api_key_here
 1. Go to [supabase.com](https://supabase.com) and create a project
 2. Get your project URL and anon key
 3. Create a service role key for server-side operations
-4. Set up the following tables (SQL provided below)
+4. **Get your DATABASE_URL**:
+   - Go to Supabase Dashboard → Settings → Database
+   - Scroll down to "Connection string" section
+   - **Important**: Select the "Connection pooling" tab (NOT "Direct connection")
+   - Select "Session" mode (required for Prisma)
+   - Copy the connection string - it should look like:
+     ```
+     postgresql://postgres.[PROJECT_REF]:[YOUR-PASSWORD]@aws-1-[REGION].pooler.supabase.com:6543/postgres
+     ```
+   - **Replace `[YOUR-PASSWORD]`** with your actual database password
+   - **Verify the port is 6543** (not 5432) - Connection pooling uses port 6543
+   - **Verify the host contains "pooler.supabase.com"** (not just "supabase.co")
+   - If you don't know your database password:
+     - Go to Settings → Database → Database password
+     - You can reset it if needed (this will require updating all connection strings)
+5. Set up the following tables (SQL provided below)
 
 ### 4. OpenAI Setup
 

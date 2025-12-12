@@ -20,6 +20,7 @@ import {
   LayoutGrid,
   List,
   Copy,
+  MessageSquare,
 } from "lucide-react";
 import {
   Dialog,
@@ -872,6 +873,13 @@ export default function InstructorDrive() {
                       >
                         <FileText className="w-4 h-4 mr-2" />새 시험
                       </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={() =>
+                          router.push("/instructor/discussions/new")
+                        }
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />새 토론
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                   <Link href="/instructor/exams">
@@ -944,6 +952,15 @@ export default function InstructorDrive() {
                       <FolderPlus className="w-4 h-4 mr-2" />
                       폴더 만들기
                     </Button>
+                    <Link href="/instructor/discussions/new">
+                      <Button 
+                        size="sm"
+                        className="bg-purple-700 hover:bg-purple-800 text-white"
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        토론 만들기
+                      </Button>
+                    </Link>
                     <Link href="/instructor/new">
                       <Button size="sm">
                         <Plus className="w-4 h-4 mr-2" />
