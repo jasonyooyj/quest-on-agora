@@ -26,7 +26,28 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { action, data } = await request.json();
+    let requestBody;
+    try {
+      requestBody = await request.json();
+    } catch (jsonError) {
+      console.error("[api] Failed to parse request JSON:", jsonError);
+      return NextResponse.json(
+        {
+          error: "Invalid request format",
+          details: jsonError instanceof Error ? jsonError.message : "Failed to parse JSON",
+        },
+        { status: 400 }
+      );
+    }
+
+    const { action, data } = requestBody;
+
+    if (!action) {
+      return NextResponse.json(
+        { error: "Missing action parameter" },
+        { status: 400 }
+      );
+    }
 
     switch (action) {
       case "create_exam":
@@ -74,12 +95,22 @@ export async function POST(request: NextRequest) {
       case "get_instructor_drive":
         return await getInstructorDrive();
       default:
-        return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+        return NextResponse.json(
+          { error: "Invalid action", details: `Unknown action: ${action}` },
+          { status: 400 }
+        );
     }
   } catch (error) {
-    console.error("Supabase API error:", error);
+    console.error("[api] Supabase API error:", {
+      error,
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error occurred",
+      },
       { status: 500 }
     );
   }

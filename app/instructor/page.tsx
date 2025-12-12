@@ -160,13 +160,20 @@ export default function InstructorHome() {
         const data = await response.json();
         setNodes(data.nodes || []);
       } else {
-        let errorData: { error?: string; details?: string } = {};
+        let errorData: { error?: string; details?: string } = {
+          error: `서버 오류 (${response.status})`,
+          details: response.statusText || "알 수 없는 오류",
+        };
         let responseText = "";
         try {
           responseText = await response.text();
           if (responseText) {
             try {
-              errorData = JSON.parse(responseText);
+              const parsed = JSON.parse(responseText);
+              errorData = {
+                error: parsed.error || errorData.error,
+                details: parsed.details || parsed.error || errorData.details,
+              };
             } catch (parseError) {
               console.error("Failed to parse error response as JSON:", {
                 parseError,
@@ -174,14 +181,9 @@ export default function InstructorHome() {
               });
               errorData = {
                 error: `서버 응답 파싱 실패 (${response.status})`,
-                details: responseText.substring(0, 100),
+                details: responseText.substring(0, 100) || "응답을 파싱할 수 없습니다.",
               };
             }
-          } else {
-            errorData = {
-              error: `서버 오류 (${response.status}): ${response.statusText}`,
-              details: "응답 본문이 비어있습니다.",
-            };
           }
         } catch (textError) {
           console.error("Failed to read error response:", textError);
