@@ -246,6 +246,12 @@ export async function POST(
         const settings = session.settings as { aiContext?: string } | null;
         const aiContext = settings?.aiContext || null;
 
+        // Debug logging for AI context
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[AI Context] Settings:`, JSON.stringify(settings, null, 2));
+          console.log(`[AI Context] Extracted aiContext:`, aiContext ? `"${aiContext.substring(0, 100)}..."` : "null");
+        }
+
         const systemPrompt = `당신은 토론 세션에서 학생과 대화하는 AI 조교입니다.
 
 토론 주제: ${session.title}
@@ -289,6 +295,15 @@ ${aiContext ? "- 위의 '추가 컨텍스트'에 명시된 강사자의 지시�
 4. 토론 주제와 관련된 구체적인 예시나 사례를 제시할 수 있습니다.
 5. 답변은 간결하고 핵심적이어야 합니다.
 6. 반드시 한국어로 응답합니다.`;
+
+        // Debug logging for system prompt
+        if (process.env.NODE_ENV === "development") {
+          console.log(`[AI Context] System prompt length: ${systemPrompt.length}`);
+          console.log(`[AI Context] System prompt includes aiContext:`, systemPrompt.includes("추가 컨텍스트"));
+          if (aiContext) {
+            console.log(`[AI Context] System prompt contains aiContext text:`, systemPrompt.includes(aiContext.substring(0, 50)));
+          }
+        }
 
         console.log(`[AI Response] Calling OpenAI Responses API with model: ${AI_MODEL}`);
         

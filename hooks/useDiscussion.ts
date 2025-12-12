@@ -47,7 +47,8 @@ export function useDiscussionParticipants(sessionId: string) {
       return data.participants;
     },
     enabled: !!sessionId,
-    staleTime: 1000 * 30, // 30 seconds
+    staleTime: 1000 * 5, // 5 seconds - reduced for more frequent updates
+    refetchInterval: 1000 * 15, // Refetch every 15 seconds as fallback
   });
 
   // Subscribe to realtime updates
@@ -55,7 +56,9 @@ export function useDiscussionParticipants(sessionId: string) {
     if (!sessionId) return;
 
     const supabase = createSupabaseClient();
-    const channel = supabase
+    
+    // Channel for participant table changes
+    const participantsChannel = supabase
       .channel(`discussion-participants:${sessionId}`)
       .on(
         "postgres_changes",
@@ -66,21 +69,46 @@ export function useDiscussionParticipants(sessionId: string) {
           filter: `session_id=eq.${sessionId}`,
         },
         () => {
-          // Invalidate and refetch on any change
-          queryClient.invalidateQueries({
+          // Immediately refetch on any change
+          console.log("[Realtime] Participant change detected, refetching...");
+          queryClient.refetchQueries({
             queryKey: ["discussion-participants", sessionId],
           });
         }
       )
       .subscribe();
 
-    subscriptionRef.current = channel;
+    // Also listen to message changes (which update participant last_active_at)
+    const messagesChannel = supabase
+      .channel(`discussion-participants-messages:${sessionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "discussion_messages",
+          filter: `session_id=eq.${sessionId}`,
+        },
+        () => {
+          // When new message is created, participant was updated, so refetch
+          console.log("[Realtime] New message detected, refetching participants...");
+          queryClient.refetchQueries({
+            queryKey: ["discussion-participants", sessionId],
+          });
+        }
+      )
+      .subscribe();
+
+    subscriptionRef.current = participantsChannel;
 
     return () => {
-      if (subscriptionRef.current) {
-        supabase.removeChannel(subscriptionRef.current);
-        subscriptionRef.current = null;
+      if (participantsChannel) {
+        supabase.removeChannel(participantsChannel);
       }
+      if (messagesChannel) {
+        supabase.removeChannel(messagesChannel);
+      }
+      subscriptionRef.current = null;
     };
   }, [sessionId, queryClient]);
 
@@ -128,11 +156,43 @@ export function useParticipantMessages(
           filter: `participant_id=eq.${participantId}`,
         },
         (payload) => {
-          // Optimistically add the new message
-          queryClient.setQueryData<DiscussionMessage[]>(
-            ["discussion-messages", sessionId, participantId],
-            (old = []) => [...old, payload.new as DiscussionMessage]
-          );
+          // Only add messages that are visible to students
+          // Database uses snake_case, but we need to convert to camelCase
+          const dbMessage = payload.new as any;
+          const isVisibleToStudent = dbMessage.is_visible_to_student ?? true;
+          
+          if (isVisibleToStudent !== false) {
+            // Convert database format to DiscussionMessage format
+            const newMessage: DiscussionMessage = {
+              id: dbMessage.id,
+              sessionId: dbMessage.session_id,
+              participantId: dbMessage.participant_id,
+              role: dbMessage.role,
+              content: dbMessage.content,
+              messageType: dbMessage.message_type,
+              isVisibleToStudent: isVisibleToStudent,
+              createdAt: dbMessage.created_at
+                ? new Date(dbMessage.created_at).toISOString()
+                : new Date().toISOString(),
+              metadata: dbMessage.metadata,
+            };
+            
+            // Optimistically add the new message
+            queryClient.setQueryData<DiscussionMessage[]>(
+              ["discussion-messages", sessionId, participantId],
+              (old = []) => {
+                // Check if message already exists to avoid duplicates
+                const exists = old.some((msg) => msg.id === newMessage.id);
+                if (exists) return old;
+                return [...old, newMessage];
+              }
+            );
+            
+            // Also invalidate to ensure we get the latest data from server
+            queryClient.invalidateQueries({
+              queryKey: ["discussion-messages", sessionId, participantId],
+            });
+          }
         }
       )
       .subscribe();

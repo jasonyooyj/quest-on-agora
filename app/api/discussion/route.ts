@@ -28,6 +28,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { title, description, settings } = body;
 
+    // Debug logging for settings
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[Discussion Create] Settings received:`, JSON.stringify(settings, null, 2));
+      const settingsObj = settings as { aiContext?: string } | null;
+      if (settingsObj?.aiContext) {
+        console.log(`[Discussion Create] AI Context found: "${settingsObj.aiContext.substring(0, 100)}..."`);
+      } else {
+        console.log(`[Discussion Create] AI Context: null or empty`);
+      }
+    }
+
     if (!title || typeof title !== "string") {
       return NextResponse.json(
         { error: "Title is required" },
@@ -58,6 +69,17 @@ export async function POST(request: NextRequest) {
         settings: settings || { anonymous: true, stanceOptions: ["pro", "con", "neutral"] },
       },
     });
+
+    // Debug logging for saved settings
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[Discussion Create] Settings saved:`, JSON.stringify(session.settings, null, 2));
+      const savedSettings = session.settings as { aiContext?: string } | null;
+      if (savedSettings?.aiContext) {
+        console.log(`[Discussion Create] AI Context saved successfully: "${savedSettings.aiContext.substring(0, 100)}..."`);
+      } else {
+        console.log(`[Discussion Create] AI Context not found in saved settings`);
+      }
+    }
 
     return NextResponse.json({
       session: {

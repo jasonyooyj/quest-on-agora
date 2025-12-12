@@ -160,7 +160,6 @@ export default function StudentDiscussionPage({
   const sendMessage = useMutation({
     mutationFn: async (message: string) => {
       if (!participant?.id) throw new Error("Not a participant");
-      setIsTyping(true);
       const response = await fetch(`/api/discussion/${sessionId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -176,9 +175,13 @@ export default function StudentDiscussionPage({
       }
       return response.json();
     },
+    onMutate: () => {
+      // Set typing indicator immediately when user sends message
+      setIsTyping(true);
+      scrollToBottom();
+    },
     onSuccess: () => {
       setChatMessage("");
-      scrollToBottom();
       // Immediately invalidate to show user message
       queryClient.invalidateQueries({
         queryKey: ["discussion-messages", sessionId, participant?.id],
@@ -192,7 +195,7 @@ export default function StudentDiscussionPage({
       
       // Poll for AI response (AI 응답이 생성될 때까지 주기적으로 확인)
       let pollCount = 0;
-      const maxPolls = 20; // 최대 20번 (약 10초)
+      const maxPolls = 40; // 최대 40번 (약 20초)
       pollingIntervalRef.current = setInterval(async () => {
         pollCount++;
         console.log(`[Client] Polling for AI response (attempt ${pollCount}/${maxPolls})`);
@@ -532,6 +535,26 @@ export default function StudentDiscussionPage({
                                 {msg.content}
                               </p>
                               <p className="text-xs mt-2 sm:mt-2.5 opacity-80 text-right font-medium">
+                                {new Date(msg.createdAt).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </p>
+                            </div>
+                          ) : msg.role === "instructor" ? (
+                            <div className="bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-200 dark:border-amber-800 rounded-2xl rounded-tl-md px-4 sm:px-5 py-3 sm:py-3.5 max-w-[85%] sm:max-w-[70%] shadow-lg relative transition-all duration-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className="bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-200 border-amber-300 dark:border-amber-700 text-xs font-semibold">
+                                  교수 메시지
+                                </Badge>
+                              </div>
+                              <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words text-amber-900 dark:text-amber-100">
+                                {msg.content}
+                              </p>
+                              <p className="text-xs mt-2 sm:mt-2.5 opacity-70 text-left font-medium text-amber-700 dark:text-amber-300">
                                 {new Date(msg.createdAt).toLocaleTimeString(
                                   [],
                                   {

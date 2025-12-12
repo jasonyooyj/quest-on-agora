@@ -25,6 +25,7 @@ import {
   useInstructorNote,
 } from "@/hooks/useDiscussion";
 import { InterventionDialog } from "./InterventionDialog";
+import AIMessageRenderer from "@/components/chat/AIMessageRenderer";
 import type { DiscussionParticipant, PinnedQuote } from "@/types/discussion";
 
 interface StudentDetailPanelProps {
@@ -317,55 +318,60 @@ export function StudentDetailPanel({
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                <div
-                  className={`max-w-[85%] rounded-lg p-3 ${
-                    message.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : message.role === "ai"
-                      ? "bg-muted"
-                      : message.role === "instructor"
-                      ? "bg-amber-50 border border-amber-200"
-                      : "bg-blue-50 border border-blue-200"
-                  }`}
-                >
-                  {message.role === "instructor" && (
-                    <div className="text-[10px] text-amber-600 mb-1 font-medium">
-                      교수 메시지
-                    </div>
-                  )}
-                  {message.role === "system" && (
-                    <div className="text-[10px] text-blue-600 mb-1 font-medium">
-                      시스템
-                    </div>
-                  )}
-                  <p className="text-sm whitespace-pre-wrap break-words">
-                    {message.content}
-                  </p>
+                {message.role === "ai" ? (
+                  <AIMessageRenderer
+                    content={message.content}
+                    timestamp={message.createdAt}
+                  />
+                ) : (
                   <div
-                    className={`text-[10px] mt-1.5 flex items-center justify-between gap-2 ${
+                    className={`max-w-[85%] rounded-lg p-3 ${
                       message.role === "user"
-                        ? "text-primary-foreground/70"
-                        : "text-muted-foreground"
+                        ? "bg-primary text-primary-foreground"
+                        : message.role === "instructor"
+                        ? "bg-amber-50 border border-amber-200"
+                        : "bg-blue-50 border border-blue-200"
                     }`}
                   >
-                    <span>
-                      {formatDistanceToNow(new Date(message.createdAt), {
-                        addSuffix: true,
-                        locale: ko,
-                      })}
-                    </span>
-                    {message.role === "user" && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => handlePinMessage(message.content)}
-                      >
-                        <Pin className="w-3 h-3" />
-                      </Button>
+                    {message.role === "instructor" && (
+                      <div className="text-[10px] text-amber-600 mb-1 font-medium">
+                        교수 메시지
+                      </div>
                     )}
+                    {message.role === "system" && (
+                      <div className="text-[10px] text-blue-600 mb-1 font-medium">
+                        시스템
+                      </div>
+                    )}
+                    <p className="text-sm whitespace-pre-wrap break-words">
+                      {message.content}
+                    </p>
+                    <div
+                      className={`text-[10px] mt-1.5 flex items-center justify-between gap-2 ${
+                        message.role === "user"
+                          ? "text-primary-foreground/70"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      <span>
+                        {formatDistanceToNow(new Date(message.createdAt), {
+                          addSuffix: true,
+                          locale: ko,
+                        })}
+                      </span>
+                      {message.role === "user" && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handlePinMessage(message.content)}
+                        >
+                          <Pin className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ))
           )}
