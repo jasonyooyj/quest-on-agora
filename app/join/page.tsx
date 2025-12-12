@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -30,23 +30,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { FileText } from "lucide-react";
 
-export default function ExamCodeEntry() {
-  const [examCode, setExamCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [showInstructions, setShowInstructions] = useState(false);
-  const router = useRouter();
+// Component that uses useSearchParams - must be wrapped in Suspense
+function ErrorToastHandler() {
   const searchParams = useSearchParams();
-  
-  // Check for error messages from query params
   const errorParam = searchParams.get("error");
   const errorMessage = searchParams.get("message");
 
-  // Show error toast if error params exist
   useEffect(() => {
     if (errorParam && errorMessage) {
       toast.error(decodeURIComponent(errorMessage));
     }
   }, [errorParam, errorMessage]);
+
+  return null;
+}
+
+function ExamCodeEntryContent() {
+  const [examCode, setExamCode] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -366,5 +369,16 @@ export default function ExamCodeEntry() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+export default function ExamCodeEntry() {
+  return (
+    <>
+      <Suspense fallback={null}>
+        <ErrorToastHandler />
+      </Suspense>
+      <ExamCodeEntryContent />
+    </>
   );
 }
