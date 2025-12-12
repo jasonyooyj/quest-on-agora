@@ -184,7 +184,16 @@ ${responsesText}${messagesText}
       participants.map((p) => p.id)
     );
     
-    const topics = (result.topics || []).map((topic: any) => {
+    type TopicResult = {
+      id: string;
+      label: string;
+      keywords: string[];
+      participantCount: number;
+      sampleEvidence: string;
+      participantIds: string[];
+    };
+    
+    const topics: TopicResult[] = (result.topics || []).map((topic: any): TopicResult => {
       const validIds = Array.isArray(topic.participantIds)
         ? topic.participantIds.filter((id: string) => validParticipantIds.has(id))
         : [];
@@ -197,7 +206,7 @@ ${responsesText}${messagesText}
         sampleEvidence: topic.sampleEvidence || "",
         participantIds: validIds,
       };
-    }).filter((topic: { participantIds: string[] }) => topic.participantIds.length > 0); // Only include topics with valid participants
+    }).filter((topic) => topic.participantIds.length > 0); // Only include topics with valid participants
 
     return NextResponse.json({ topics });
   } catch (error) {

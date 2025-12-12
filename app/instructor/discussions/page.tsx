@@ -6,7 +6,7 @@ import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   GraduationCap,
   MessageSquare,
@@ -32,6 +32,7 @@ interface Discussion {
 export default function DiscussionsPage() {
   const router = useRouter();
   const { isSignedIn, isLoaded, user } = useUser();
+  const queryClient = useQueryClient();
 
   // Get user role from metadata
   const userRole = (user?.unsafeMetadata?.role as string) || "student";
@@ -61,9 +62,40 @@ export default function DiscussionsPage() {
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      const response = await fetch(`/api/discussion/${sessionId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to delete discussion");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      // Invalidate and refetch discussions
+      queryClient.invalidateQueries({
+        queryKey: ["instructor-discussions", user?.id],
+      });
+      toast.success("토론이 삭제되었습니다");
+    },
+    onError: (error: Error) => {
+      console.error("Error deleting discussion:", error);
+      toast.error(error.message || "토론 삭제에 실패했습니다");
+    },
+  });
+
   const copyJoinCode = (code: string) => {
     navigator.clipboard.writeText(code);
     toast.success("참여 코드가 복사되었습니다");
+  };
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
   };
 
   const activeCount = discussions.filter((d) => d.status === "active").length;
@@ -217,6 +249,7 @@ export default function DiscussionsPage() {
                       key={discussion.id}
                       discussion={discussion}
                       onCopyCode={copyJoinCode}
+                      onDelete={handleDelete}
                     />
                   ))}
                 </div>

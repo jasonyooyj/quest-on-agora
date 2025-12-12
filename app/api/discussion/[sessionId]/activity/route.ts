@@ -27,10 +27,23 @@ export async function GET(
     }
 
     // Verify session ownership
-    const session = await prisma.discussion_sessions.findUnique({
-      where: { id: sessionId },
-      select: { instructor_id: true },
-    });
+    let session;
+    try {
+      session = await prisma.discussion_sessions.findUnique({
+        where: { id: sessionId },
+        select: { instructor_id: true },
+      });
+    } catch (sessionError) {
+      console.error("Error fetching session:", {
+        error: sessionError,
+        message: sessionError instanceof Error ? sessionError.message : "Unknown error",
+        sessionId,
+      });
+      return NextResponse.json(
+        { error: "Failed to verify session" },
+        { status: 500 }
+      );
+    }
 
     if (!session) {
       return NextResponse.json({ error: "Session not found" }, { status: 404 });
@@ -63,6 +76,7 @@ export async function GET(
       console.error("Database error fetching messages:", {
         error: dbError,
         message: dbError instanceof Error ? dbError.message : "Unknown error",
+        stack: dbError instanceof Error ? dbError.stack : undefined,
         sessionId,
       });
       // Return empty stats instead of failing
@@ -112,19 +126,21 @@ export async function GET(
       totalMessages: messages.length,
     });
   } catch (error) {
-    console.error("Error fetching activity:", {
+    console.error("Error fetching activity stats:", {
       error,
+      errorType: error instanceof Error ? error.constructor.name : typeof error,
       message: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
       sessionId: sessionId || "unknown",
     });
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: error instanceof Error ? error.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    
+    // Return empty stats instead of failing completely
+    // This prevents the UI from breaking
+    return NextResponse.json({
+      messagesPerInterval: Array(10).fill(0),
+      timestamps: [],
+      totalMessages: 0,
+    });
   }
 }
 

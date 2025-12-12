@@ -33,7 +33,6 @@ import AIMessageRenderer from "@/components/chat/AIMessageRenderer";
 import type { DiscussionParticipant, PinnedQuote, InterventionType } from "@/types/discussion";
 import { INTERVENTION_TEMPLATES } from "@/types/discussion";
 import { toast } from "sonner";
-import { StickyNote } from "lucide-react";
 
 interface StudentDetailPanelProps {
   sessionId: string;

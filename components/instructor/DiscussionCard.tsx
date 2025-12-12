@@ -1,8 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Copy, Calendar, Eye, Users, MessageSquare } from "lucide-react";
+import { Copy, Calendar, Eye, Users, MessageSquare, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface DiscussionCardProps {
   discussion: {
@@ -16,11 +27,13 @@ interface DiscussionCardProps {
     participantCount: number;
   };
   onCopyCode?: (code: string) => void;
+  onDelete?: (id: string) => void;
 }
 
 export function DiscussionCard({
   discussion,
   onCopyCode,
+  onDelete,
 }: DiscussionCardProps) {
   const getStatusBadgeProps = (status: string) => {
     if (status === "active") {
@@ -114,6 +127,38 @@ export function DiscussionCard({
             보기
           </Button>
         </Link>
+        {onDelete && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="min-h-[44px] min-w-[44px] text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className={iconSize} />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>토론 삭제 확인</AlertDialogTitle>
+                <AlertDialogDescription>
+                  정말로 "{discussion.title}" 토론을 삭제하시겠습니까?
+                  <br />
+                  이 작업은 되돌릴 수 없으며, 모든 토론 데이터가 영구적으로 삭제됩니다.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>취소</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => onDelete(discussion.id)}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  삭제
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </div>
   );

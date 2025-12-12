@@ -73,3 +73,49 @@ export async function GET(
     );
   }
 }
+
+// DELETE /api/discussion/[sessionId] - Delete a discussion session
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ sessionId: string }> }
+) {
+  try {
+    const user = await currentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { sessionId } = await params;
+    const userRole = user.unsafeMetadata?.role as string;
+
+    if (userRole !== "instructor") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Verify ownership before deleting
+    const session = await prisma.discussion_sessions.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session) {
+      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    }
+
+    if (session.instructor_id !== user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Delete the session (cascade deletes will handle related records)
+    await prisma.discussion_sessions.delete({
+      where: { id: sessionId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting discussion session:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
