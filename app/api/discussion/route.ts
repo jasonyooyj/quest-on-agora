@@ -58,6 +58,17 @@ export async function POST(request: NextRequest) {
       attempts++;
     }
 
+    // Create the session with default settings if not provided
+    const defaultSettings = {
+      anonymous: true,
+      stanceOptions: ["pro", "con", "neutral"] as const,
+      aiMode: "socratic" as const,
+    };
+    
+    const finalSettings = settings
+      ? { ...defaultSettings, ...settings }
+      : defaultSettings;
+
     // Create the session
     const session = await prisma.discussion_sessions.create({
       data: {
@@ -66,7 +77,7 @@ export async function POST(request: NextRequest) {
         description: description || null,
         status: "active",
         join_code: joinCode,
-        settings: settings || { anonymous: true, stanceOptions: ["pro", "con", "neutral"] },
+        settings: finalSettings,
       },
     });
 
@@ -125,7 +136,17 @@ export async function GET(request: NextRequest) {
       orderBy: { created_at: "desc" },
     });
 
-    const formattedSessions = sessions.map((s) => ({
+    const formattedSessions = sessions.map((s: {
+      id: string;
+      title: string;
+      description: string | null;
+      status: string;
+      join_code: string;
+      settings: unknown;
+      created_at: Date;
+      closed_at: Date | null;
+      _count: { participants: number };
+    }) => ({
       id: s.id,
       title: s.title,
       description: s.description,

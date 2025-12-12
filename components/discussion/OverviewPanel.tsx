@@ -70,6 +70,48 @@ export function OverviewPanel({
     });
   }, [participants]);
 
+  // Calculate attention reasons summary
+  const attentionReasons = useMemo(() => {
+    if (needsAttention.length === 0) return [];
+    
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+    
+    const reasons: string[] = [];
+    let helpCount = 0;
+    let inactiveCount = 0;
+    let noActivityCount = 0;
+    let longInactiveCount = 0;
+    
+    needsAttention.forEach((p) => {
+      const lastActive = new Date(p.lastActiveAt);
+      
+      if (p.needsHelp) helpCount++;
+      if (!p.isSubmitted && p.messageCount === 0) noActivityCount++;
+      if (p.isOnline && lastActive < fiveMinutesAgo) {
+        if (lastActive < fifteenMinutesAgo) {
+          longInactiveCount++;
+        } else {
+          inactiveCount++;
+        }
+      }
+    });
+    
+    if (helpCount > 0) {
+      reasons.push(`도움 요청 ${helpCount}명`);
+    }
+    if (longInactiveCount > 0) {
+      reasons.push(`15분 이상 활동 없음 ${longInactiveCount}명`);
+    } else if (inactiveCount > 0) {
+      reasons.push(`5분 이상 활동 없음 ${inactiveCount}명`);
+    }
+    if (noActivityCount > 0) {
+      reasons.push(`대화 없음 ${noActivityCount}명`);
+    }
+    
+    return reasons;
+  }, [needsAttention]);
+
   return (
     <div className="space-y-4">
       {/* Stance Distribution Card */}
@@ -208,6 +250,11 @@ export function OverviewPanel({
             <CardTitle className="text-sm font-medium flex items-center gap-2 text-amber-700">
               <AlertTriangle className="w-4 h-4" />
               주의 필요
+              {attentionReasons.length > 0 && (
+                <span className="text-xs font-normal text-amber-600/80 ml-1">
+                  ({attentionReasons.join(", ")})
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent>

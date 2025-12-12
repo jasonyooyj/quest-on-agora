@@ -4,12 +4,14 @@ export type DiscussionStatus = "draft" | "active" | "closed";
 export type Stance = "pro" | "con" | "neutral";
 export type MessageRole = "user" | "ai" | "instructor" | "system";
 export type InterventionType = "nudge" | "evidence_request" | "counterexample" | "custom";
+export type AIMode = "socratic" | "debate";
 
 export interface DiscussionSettings {
   anonymous: boolean;
   stanceOptions: Stance[];
   endTime?: string;
   allowStanceChange?: boolean;
+  aiMode?: AIMode; // AI 모드: "socratic" (소크라테스식 질문) 또는 "debate" (반대 논리 제시)
 }
 
 export interface DiscussionSession {

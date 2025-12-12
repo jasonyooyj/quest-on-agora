@@ -64,6 +64,7 @@ export async function PATCH(
     if (body.evidence1 !== undefined) updateData.evidence_1 = body.evidence1;
     if (body.evidence2 !== undefined) updateData.evidence_2 = body.evidence2;
     if (body.isSubmitted !== undefined) updateData.is_submitted = body.isSubmitted;
+    if (body.needsHelp !== undefined) updateData.needs_help = body.needsHelp;
 
     const updated = await prisma.discussion_participants.update({
       where: { id: participantId },
@@ -91,6 +92,7 @@ export async function PATCH(
         evidence1: updated.evidence_1, // Legacy support
         evidence2: updated.evidence_2, // Legacy support
         isSubmitted: updated.is_submitted,
+        needsHelp: updated.needs_help,
       },
     });
   } catch (error) {

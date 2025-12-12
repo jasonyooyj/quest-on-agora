@@ -197,7 +197,7 @@ ${responsesText}${messagesText}
         sampleEvidence: topic.sampleEvidence || "",
         participantIds: validIds,
       };
-    }).filter((topic) => topic.participantIds.length > 0); // Only include topics with valid participants
+    }).filter((topic: { participantIds: string[] }) => topic.participantIds.length > 0); // Only include topics with valid participants
 
     return NextResponse.json({ topics });
   } catch (error) {

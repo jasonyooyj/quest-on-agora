@@ -10,12 +10,15 @@ import {
   AlertTriangle,
   ArrowDown,
   CheckCircle,
+  FileQuestion,
   FileText,
   Lightbulb,
   Loader2,
   MessageSquare,
   Pin,
+  Scale,
   Send,
+  StickyNote,
   User,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -23,10 +26,14 @@ import { ko } from "date-fns/locale";
 import {
   useParticipantMessages,
   useInstructorNote,
+  useSendIntervention,
 } from "@/hooks/useDiscussion";
 import { InterventionDialog } from "./InterventionDialog";
 import AIMessageRenderer from "@/components/chat/AIMessageRenderer";
-import type { DiscussionParticipant, PinnedQuote } from "@/types/discussion";
+import type { DiscussionParticipant, PinnedQuote, InterventionType } from "@/types/discussion";
+import { INTERVENTION_TEMPLATES } from "@/types/discussion";
+import { toast } from "sonner";
+import { StickyNote } from "lucide-react";
 
 interface StudentDetailPanelProps {
   sessionId: string;
@@ -41,7 +48,8 @@ export function StudentDetailPanel({
   isAnonymous,
   onPinQuote,
 }: StudentDetailPanelProps) {
-  const [showIntervention, setShowIntervention] = useState(false);
+  const [showNoteDialog, setShowNoteDialog] = useState(false);
+  const [chatMessage, setChatMessage] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -52,6 +60,7 @@ export function StudentDetailPanel({
     saveNote,
     isLoading: noteLoading,
   } = useInstructorNote(participant?.id || null);
+  const sendIntervention = useSendIntervention(sessionId);
 
   const [noteText, setNoteText] = useState("");
 
@@ -90,6 +99,32 @@ export function StudentDetailPanel({
       content,
       displayName,
     });
+  };
+
+  const handleTemplateClick = (type: InterventionType) => {
+    const templates = INTERVENTION_TEMPLATES.filter((t) => t.type === type);
+    if (templates.length > 0) {
+      // 첫 번째 템플릿의 메시지를 입력창에 자동 입력
+      // 기존 메시지가 있으면 덮어쓰기
+      setChatMessage(templates[0].prompt);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!participant || !chatMessage.trim()) return;
+
+    try {
+      await sendIntervention.mutateAsync({
+        participantId: participant.id,
+        content: chatMessage.trim(),
+        messageType: "custom",
+        isVisibleToStudent: true,
+      });
+      setChatMessage("");
+      toast.success("메시지가 전송되었습니다");
+    } catch {
+      toast.error("메시지 전송에 실패했습니다");
+    }
   };
 
   // Empty state
@@ -192,15 +227,6 @@ export function StudentDetailPanel({
 
         {/* Action Buttons */}
         <div className="flex gap-2 mt-3 flex-wrap">
-          <Button
-            size="sm"
-            variant="outline"
-            className="text-xs h-8"
-            onClick={() => setShowIntervention(true)}
-          >
-            <Lightbulb className="w-3.5 h-3.5 mr-1" />
-            개입
-          </Button>
           {participant.needsHelp && (
             <Badge
               variant="outline"
@@ -265,6 +291,44 @@ export function StudentDetailPanel({
           </div>
         </div>
       )}
+
+      {/* Intervention Type Buttons */}
+      <div className="px-4 py-3 border-b shrink-0 bg-muted/30">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-medium text-muted-foreground">
+            교수 메모
+          </div>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="text-xs h-7"
+            onClick={() => setShowNoteDialog(true)}
+          >
+            <StickyNote className="w-3.5 h-3.5 mr-1" />
+            메모 남기기
+          </Button>
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          {(
+            [
+              { type: "nudge" as const, label: "격려/힌트", icon: Lightbulb },
+              { type: "evidence_request" as const, label: "근거 요청", icon: FileQuestion },
+              { type: "counterexample" as const, label: "반례 질문", icon: Scale },
+            ] as const
+          ).map(({ type, label, icon: Icon }) => (
+            <Button
+              key={type}
+              size="sm"
+              variant="outline"
+              className="text-xs h-9 justify-start gap-2"
+              onClick={() => handleTemplateClick(type)}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       {/* Chat Transcript */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -378,26 +442,29 @@ export function StudentDetailPanel({
         </div>
       </div>
 
-      {/* Instructor Note */}
-      <div className="p-4 border-t shrink-0">
-        <div className="text-xs font-medium text-muted-foreground mb-2">
-          교수 메모 (학생에게 보이지 않음)
-        </div>
+      {/* Chat Input */}
+      <div className="p-4 border-t shrink-0 bg-background">
         <div className="flex gap-2">
           <Textarea
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            placeholder="이 학생에 대한 메모를 남기세요..."
+            value={chatMessage}
+            onChange={(e) => setChatMessage(e.target.value)}
+            placeholder="학생에게 메시지를 입력하세요..."
             className="min-h-[60px] text-sm resize-none"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
           />
           <Button
             size="icon"
-            variant="outline"
-            onClick={handleSaveNote}
-            disabled={saveNote.isPending || !noteText.trim()}
+            variant="default"
+            onClick={handleSendMessage}
+            disabled={sendIntervention.isPending || !chatMessage.trim() || !participant}
             className="shrink-0"
           >
-            {saveNote.isPending ? (
+            {sendIntervention.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Send className="w-4 h-4" />
@@ -406,14 +473,24 @@ export function StudentDetailPanel({
         </div>
       </div>
 
-      {/* Intervention Dialog */}
+      {/* Instructor Note Dialog */}
       {participant && (
         <InterventionDialog
-          open={showIntervention}
-          onOpenChange={setShowIntervention}
+          open={showNoteDialog}
+          onOpenChange={setShowNoteDialog}
           sessionId={sessionId}
           participantId={participant.id}
           participantName={getDisplayName()}
+          initialType="custom"
+          isNoteMode={true}
+          noteText={noteText}
+          onNoteChange={setNoteText}
+          onSaveNote={() => {
+            if (noteText.trim()) {
+              saveNote.mutate(noteText.trim());
+            }
+          }}
+          isSaving={saveNote.isPending}
         />
       )}
     </div>

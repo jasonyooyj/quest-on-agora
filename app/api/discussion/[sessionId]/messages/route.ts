@@ -242,59 +242,98 @@ export async function POST(
                 ? "중립"
                 : "미정";
 
-        // Extract AI context from settings
-        const settings = session.settings as { aiContext?: string } | null;
+        // Extract AI context and mode from settings
+        const settings = session.settings as { aiContext?: string; aiMode?: "socratic" | "debate" } | null;
         const aiContext = settings?.aiContext || null;
+        const aiMode = settings?.aiMode || "socratic"; // 기본값: socratic
 
-        // Debug logging for AI context
+        // Debug logging for AI context and mode
         if (process.env.NODE_ENV === "development") {
           console.log(`[AI Context] Settings:`, JSON.stringify(settings, null, 2));
           console.log(`[AI Context] Extracted aiContext:`, aiContext ? `"${aiContext.substring(0, 100)}..."` : "null");
+          console.log(`[AI Mode] Mode: ${aiMode}`);
         }
 
-        const systemPrompt = `당신은 토론 세션에서 학생과 대화하는 AI 조교입니다.
+        // Parse evidence array
+        let evidenceArray: string[] = [];
+        if (participant.evidence) {
+          try {
+            evidenceArray = Array.isArray(participant.evidence)
+              ? participant.evidence
+              : JSON.parse(participant.evidence as string);
+          } catch {
+            evidenceArray = [];
+          }
+        }
+        // Fallback to legacy format
+        if (evidenceArray.length === 0) {
+          if (participant.evidence_1) evidenceArray.push(participant.evidence_1);
+          if (participant.evidence_2) evidenceArray.push(participant.evidence_2);
+        }
 
-토론 주제: ${session.title}
+        // Build base context
+        const baseContext = `토론 주제: ${session.title}
 ${session.description ? `설명: ${session.description}` : ""}
 ${aiContext ? `\n추가 컨텍스트 (강사자 지시사항):\n${aiContext}` : ""}
 
 학생 정보:
 - 입장: ${stanceLabel}
 ${participant.stance_statement ? `- 입장 진술: ${participant.stance_statement}` : ""}
-${(() => {
-  // Parse evidence array from JSON
-  let evidenceArray: string[] = [];
-  if (participant.evidence) {
-    try {
-      evidenceArray = Array.isArray(participant.evidence)
-        ? participant.evidence
-        : JSON.parse(participant.evidence as string);
-    } catch {
-      evidenceArray = [];
-    }
-  }
-  // Fallback to legacy format
-  if (evidenceArray.length === 0) {
-    if (participant.evidence_1) evidenceArray.push(participant.evidence_1);
-    if (participant.evidence_2) evidenceArray.push(participant.evidence_2);
-  }
-  return evidenceArray.map((ev, idx) => `- 근거 ${idx + 1}: ${ev}`).join("\n");
-})()}
+${evidenceArray.length > 0 ? evidenceArray.map((ev, idx) => `- 근거 ${idx + 1}: ${ev}`).join("\n") : ""}`;
 
-역할:
-- 학생의 사고를 확장시키고 깊이 있게 탐구하도록 돕습니다.
-- 학생의 입장과 근거를 바탕으로 질문하고 토론을 이끕니다.
-- 비판적 사고를 자극하는 질문을 제시합니다.
+        // Build mode-specific system prompt
+        let systemPrompt = "";
+        
+        if (aiMode === "socratic") {
+          // Socratic 모드: 질문으로 파고듦
+          systemPrompt = `당신은 토론 세션에서 학생과 대화하는 AI 조교입니다. 소크라테스식 대화법을 사용하여 학생의 사고를 깊이 있게 탐구합니다.
+
+${baseContext}
+
+역할 (소크라테스 모드):
+- 학생에게 직접적인 답을 주지 않고, 질문을 통해 스스로 생각하도록 유도합니다.
+- 학생의 주장이나 근거에 대해 "왜 그렇게 생각하시나요?", "그렇다면 만약...라면 어떻게 될까요?" 같은 질문을 제시합니다.
+- 학생의 사고 과정을 단계별로 탐구하는 질문을 합니다.
+- 학생이 자신의 생각을 더 명확히 하고 깊이 있게 탐구하도록 돕습니다.
 - 존댓말을 사용하며 친근하고 전문적인 톤을 유지합니다.
 ${aiContext ? "- 위의 '추가 컨텍스트'에 명시된 강사자의 지시사항을 반드시 고려하여 대화를 진행합니다." : ""}
 
-규칙:
-1. 학생의 질문에 직접적이고 명확하게 답변합니다.
-2. 학생의 입장과 근거를 고려하여 대화를 진행합니다.
-3. 추가적인 질문이나 반대 의견을 제시하여 사고를 확장시킵니다.
-4. 토론 주제와 관련된 구체적인 예시나 사례를 제시할 수 있습니다.
-5. 답변은 간결하고 핵심적이어야 합니다.
+규칙 (소크라테스 모드):
+1. 절대 직접적인 답변을 주지 않습니다. 항상 질문으로 응답합니다.
+2. 학생의 주장이나 근거에 대해 "왜?", "어떻게?", "만약...라면?" 같은 탐구적 질문을 제시합니다.
+3. 학생이 답변하기 어려운 질문을 통해 사고를 확장시킵니다.
+4. 학생의 입장과 근거를 바탕으로 논리적 모순이나 보완이 필요한 부분을 질문으로 지적합니다.
+5. 질문은 간결하고 핵심적이어야 하며, 한 번에 하나의 핵심 사고를 탐구합니다.
 6. 반드시 한국어로 응답합니다.`;
+        } else {
+          // Debate 모드: 반대편 논리를 강하게 제시
+          const oppositeStance = 
+            participant.stance === "pro" ? "반대 (con)"
+            : participant.stance === "con" ? "찬성 (pro)"
+            : participant.stance === "neutral" ? "반대 또는 찬성"
+            : "반대 입장";
+
+          systemPrompt = `당신은 토론 세션에서 학생과 대화하는 AI 조교입니다. 토론 모드로 학생의 주장에 대해 반대편 논리를 강하게 제시하여 학생의 주장을 검증하고 강화합니다.
+
+${baseContext}
+
+역할 (토론 모드):
+- 학생의 주장에 대해 ${oppositeStance} 입장의 논리를 강하게 제시합니다.
+- 반대편 입장의 핵심 주장, 근거, 논리를 구체적으로 제시합니다.
+- 학생의 주장에 대한 반박이나 비판적 관점을 제시합니다.
+- 학생이 자신의 주장을 더 탄탄하게 다듬을 수 있도록 도전적인 관점을 제공합니다.
+- 존댓말을 사용하며 친근하고 전문적인 톤을 유지하되, 논리적으로 강하게 제시합니다.
+${aiContext ? "- 위의 '추가 컨텍스트'에 명시된 강사자의 지시사항을 반드시 고려하여 대화를 진행합니다." : ""}
+
+규칙 (토론 모드):
+1. 학생의 주장에 대해 ${oppositeStance} 입장의 논리를 구체적이고 강하게 제시합니다.
+2. 반대편 입장의 핵심 주장과 근거를 명확하게 설명합니다.
+3. 학생의 주장이 약한 부분이나 논리적 허점을 지적합니다.
+4. 반대편 입장의 구체적인 예시나 사례를 제시합니다.
+5. 학생이 자신의 주장을 더 강화할 수 있도록 도전적인 관점을 제공하되, 존중하는 톤을 유지합니다.
+6. 답변은 간결하고 핵심적이어야 하며, 반대편 논리를 명확하게 제시합니다.
+7. 반드시 한국어로 응답합니다.`;
+        }
 
         // Debug logging for system prompt
         if (process.env.NODE_ENV === "development") {

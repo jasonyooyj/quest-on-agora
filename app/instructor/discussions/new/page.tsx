@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Loader2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import type { AIMode } from "@/types/discussion";
 
 export default function NewDiscussionPage() {
   const router = useRouter();
@@ -21,6 +23,7 @@ export default function NewDiscussionPage() {
   const [description, setDescription] = useState("");
   const [aiContext, setAiContext] = useState("");
   const [anonymous, setAnonymous] = useState(true);
+  const [aiMode, setAiMode] = useState<AIMode>("socratic");
 
   const handleCreate = async () => {
     if (!title.trim()) {
@@ -40,6 +43,7 @@ export default function NewDiscussionPage() {
             anonymous,
             stanceOptions: ["pro", "con", "neutral"],
             aiContext: aiContext.trim() || null,
+            aiMode,
           },
         }),
       });
@@ -138,6 +142,35 @@ export default function NewDiscussionPage() {
               <p className="text-xs text-muted-foreground">
                 이 정보는 AI 조교가 학생과 대화할 때 참고하게 됩니다. 토론 주제와 관련된 추가 배경 정보, 특별히 다뤄야 할 관점, 참고할 사례 등을 입력할 수 있습니다.
               </p>
+            </div>
+
+            {/* AI Mode Selection */}
+            <div className="space-y-3">
+              <Label>AI 모드 *</Label>
+              <RadioGroup value={aiMode} onValueChange={(value) => setAiMode(value as AIMode)}>
+                <div className="flex items-start space-x-3 p-4 rounded-lg border bg-muted/30">
+                  <RadioGroupItem value="socratic" id="socratic" className="mt-1" />
+                  <div className="flex-1 space-y-1">
+                    <Label htmlFor="socratic" className="font-medium cursor-pointer">
+                      소크라테스 모드
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      AI가 바로 답을 주지 않고 질문으로 사고를 깊이 있게 파고듭니다.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-3 p-4 rounded-lg border bg-muted/30">
+                  <RadioGroupItem value="debate" id="debate" className="mt-1" />
+                  <div className="flex-1 space-y-1">
+                    <Label htmlFor="debate" className="font-medium cursor-pointer">
+                      토론 모드
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      AI가 반대편 논리를 강하게 제시하여 학생의 주장을 검증합니다.
+                    </p>
+                  </div>
+                </div>
+              </RadioGroup>
             </div>
 
             {/* Anonymous Mode */}

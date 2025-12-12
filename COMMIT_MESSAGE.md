@@ -1,70 +1,59 @@
-# Commit Summary
+# Git Commit Summary
 
-## 개요
-토론 세션의 AI 컨텍스트 디버깅, UI 개선, 실시간 업데이트 최적화 및 OpenAI 모델 업데이트
+## Summary
+feat: 토론 세션 AI 모드 추가 및 교수 메시지 UI 개선
 
-## 주요 변경사항
+## Description
 
-### 1. AI 컨텍스트 디버깅 로깅 추가
-- **파일**: `app/api/discussion/route.ts`, `app/api/discussion/[sessionId]/messages/route.ts`
-- **변경 내용**:
-  - 토론 세션 생성 시 AI 컨텍스트 설정 저장/로드 과정에 개발 환경 디버그 로깅 추가
-  - AI 메시지 생성 시 시스템 프롬프트에 AI 컨텍스트 포함 여부 확인 로깅 추가
-  - 개발 환경에서만 동작하도록 `NODE_ENV === "development"` 조건 추가
+### 주요 변경사항
 
-### 2. 학생 토론 페이지 UI 개선
-- **파일**: `app/student/discussion/[sessionId]/page.tsx`
-- **변경 내용**:
-  - 교수 메시지(instructor role) 표시 UI 추가 (amber 색상 테마)
-  - 타이핑 인디케이터 타이밍 개선: `onMutate`에서 즉시 설정하여 사용자 경험 향상
-  - AI 응답 폴링 최대 횟수 증가: 20회 → 40회 (약 10초 → 20초)
-  - 스크롤 타이밍 최적화: 메시지 전송 시 즉시 스크롤
+#### 1. AI 대화 모드 추가 (Socratic vs Debate)
+- 토론 세션에서 AI 대화 방식을 선택할 수 있는 `aiMode` 설정 추가
+- **Socratic 모드**: 소크라테스식 대화법으로 질문을 통해 학생의 사고를 탐구
+- **Debate 모드**: 반대편 논리를 강하게 제시하여 학생의 주장을 검증하고 강화
+- 세션 생성 시 기본값은 `socratic` 모드로 설정
 
-### 3. StudentDetailPanel 리팩토링
-- **파일**: `components/discussion/StudentDetailPanel.tsx`
-- **변경 내용**:
-  - AI 메시지 렌더링을 `AIMessageRenderer` 컴포넌트로 통일
-  - 메시지 타입별 조건부 렌더링 구조 개선
-  - 코드 중복 제거 및 일관성 향상
+#### 2. 교수 메시지 UI 개선
+- 학생 화면에서 교수 메시지를 명확하게 구분하여 표시 (amber 배경, "교수 메시지" 배지)
+- 교수 화면(StudentDetailPanel)에서 교수 메시지와 시스템 메시지를 구분하여 표시
+- AIMessageRenderer를 StudentDetailPanel에 통합하여 AI 메시지 렌더링 개선
 
-### 4. 실시간 참가자 업데이트 최적화
-- **파일**: `hooks/useDiscussion.ts`
-- **변경 내용**:
-  - `staleTime` 감소: 30초 → 5초 (더 빠른 업데이트)
-  - `refetchInterval` 추가: 15초마다 폴백 리패치
-  - 실시간 구독 개선:
-    - 참가자 테이블 변경 감지 채널
-    - 메시지 생성 시 참가자 정보 업데이트 감지 채널 추가
-  - `invalidateQueries` → `refetchQueries`로 변경하여 즉시 리패치
-  - 디버그 로깅 추가
+#### 3. 교수 메모 기능 추가
+- InterventionDialog에 교수 메모 모드 추가 (`isNoteMode` prop)
+- 학생별 개인 메모 저장 및 불러오기 기능
+- 메모는 학생에게 보이지 않으며 교수만 확인 가능
 
-### 5. OpenAI 모델 업데이트
-- **파일**: `lib/openai.ts`
-- **변경 내용**:
-  - AI 모델 상수 변경: `"gpt-5.2"` → `"gpt-5.2-chat-latest"`
+#### 4. 학생 화면 개선
+- 교수 메시지 표시 UI 개선 (amber 배경, 배지 추가)
+- AI 응답 대기 중 타이핑 인디케이터 개선
+- AI 응답 폴링 로직 추가 (0.5초 간격, 최대 20초)
+- 실시간 메시지 업데이트를 위한 쿼리 무효화 최적화
 
-## 기술적 세부사항
+#### 5. API 개선
+- AI 컨텍스트 및 모드 처리 로직 개선
+- 근거(evidence) 배열 처리 개선 (새 형식 지원 및 레거시 형식 fallback)
+- 세션 생성 시 기본 설정(anonymous, stanceOptions, aiMode) 자동 적용
+- 개발 환경에서 AI 컨텍스트 및 모드 디버그 로깅 추가
 
-### 디버깅 개선
-- 개발 환경에서 AI 컨텍스트 전달 과정을 추적할 수 있는 로깅 추가
-- 시스템 프롬프트 생성 과정의 가시성 향상
+#### 6. 기타 UI/UX 개선
+- OverviewPanel에 활동 통계 표시 추가
+- StudentDetailPanel에 교수 메모 버튼 및 템플릿 버튼 추가
+- 메시지 전송 시 자동 스크롤 및 타이핑 인디케이터 표시
 
-### 사용자 경험 개선
-- 교수 메시지 시각적 구분 강화
-- 타이핑 인디케이터 반응 속도 개선
-- 실시간 참가자 상태 업데이트 지연 감소
+### 변경된 파일
+- `app/api/discussion/[sessionId]/messages/route.ts` - AI 모드 처리 및 컨텍스트 개선
+- `app/api/discussion/[sessionId]/participants/[participantId]/route.ts` - 근거 배열 처리
+- `app/api/discussion/[sessionId]/topics/route.ts` - 타입 개선
+- `app/api/discussion/route.ts` - 세션 생성 시 기본 설정 추가
+- `app/instructor/discussions/new/page.tsx` - AI 모드 선택 UI 추가
+- `app/student/discussion/[sessionId]/page.tsx` - 교수 메시지 UI 및 폴링 로직 추가
+- `components/discussion/InterventionDialog.tsx` - 교수 메모 모드 추가
+- `components/discussion/OverviewPanel.tsx` - 활동 통계 표시 추가
+- `components/discussion/StudentDetailPanel.tsx` - AIMessageRenderer 통합 및 UI 개선
+- `types/discussion.ts` - 타입 정의 추가
 
-### 코드 품질
-- 컴포넌트 재사용성 향상 (`AIMessageRenderer` 통합)
-- 실시간 구독 로직 개선 및 메모리 누수 방지
-
-## 영향 범위
-- **백엔드**: API 라우트에 디버그 로깅 추가 (프로덕션에는 영향 없음)
-- **프론트엔드**: UI 개선 및 실시간 업데이트 최적화
-- **AI 모델**: 최신 채팅 모델로 업데이트
-
-## 테스트 권장사항
-- [ ] 토론 세션 생성 시 AI 컨텍스트가 올바르게 저장/로드되는지 확인
-- [ ] 교수 메시지가 학생 페이지에서 올바르게 표시되는지 확인
-- [ ] 실시간 참가자 상태 업데이트가 정상 작동하는지 확인
-- [ ] AI 응답 생성이 새로운 모델로 정상 작동하는지 확인
+### 기술적 세부사항
+- AI 모드에 따라 다른 system prompt 생성
+- 근거 데이터 형식: 배열 형식 우선, 레거시 형식(evidence_1, evidence_2) fallback
+- 실시간 업데이트를 위한 TanStack Query 쿼리 무효화 최적화
+- 개발 환경에서만 디버그 로깅 활성화

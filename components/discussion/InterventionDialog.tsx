@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,12 @@ interface InterventionDialogProps {
   sessionId: string;
   participantId: string;
   participantName: string;
+  initialType?: InterventionType;
+  isNoteMode?: boolean;
+  noteText?: string;
+  onNoteChange?: (text: string) => void;
+  onSaveNote?: () => void;
+  isSaving?: boolean;
 }
 
 export function InterventionDialog({
@@ -39,11 +45,26 @@ export function InterventionDialog({
   sessionId,
   participantId,
   participantName,
+  initialType = "nudge",
+  isNoteMode = false,
+  noteText = "",
+  onNoteChange,
+  onSaveNote,
+  isSaving = false,
 }: InterventionDialogProps) {
-  const [interventionType, setInterventionType] = useState<InterventionType>("nudge");
+  const [interventionType, setInterventionType] = useState<InterventionType>(initialType);
   const [content, setContent] = useState("");
   const [isVisibleToStudent, setIsVisibleToStudent] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+
+  // Update intervention type when initialType changes (when dialog opens with different type)
+  useEffect(() => {
+    if (open && !isNoteMode) {
+      setInterventionType(initialType);
+      setContent("");
+      setSelectedTemplateId("");
+    }
+  }, [open, initialType, isNoteMode]);
 
   const sendIntervention = useSendIntervention(sessionId);
 
@@ -105,11 +126,61 @@ export function InterventionDialog({
     }
   };
 
+  // Note mode: Simple textarea for instructor notes
+  if (isNoteMode) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>교수 메모</DialogTitle>
+            <DialogDescription>
+              {participantName} 학생에 대한 개인 메모입니다 (학생에게 보이지 않음)
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>메모 내용</Label>
+              <Textarea
+                value={noteText}
+                onChange={(e) => onNoteChange?.(e.target.value)}
+                placeholder="이 학생에 대한 메모를 남기세요..."
+                className="min-h-[200px]"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              취소
+            </Button>
+            <Button
+              onClick={() => {
+                onSaveNote?.();
+                onOpenChange(false);
+              }}
+              disabled={isSaving || !noteText.trim()}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  저장 중...
+                </>
+              ) : (
+                "저장"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>학생 개입</DialogTitle>
+          <DialogTitle>교수 메모</DialogTitle>
           <DialogDescription>
             {participantName} 학생에게 메시지를 보내거나 AI에게 지시를 전달합니다
           </DialogDescription>

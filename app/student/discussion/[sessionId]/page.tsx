@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, use, useRef, useCallback } from "react";
-import { Loader2, MessageSquare, Users, CheckCircle2, Plus, X, ArrowUp, MessageCircle } from "lucide-react";
+import { Loader2, MessageSquare, Users, CheckCircle2, Plus, X, ArrowUp, MessageCircle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -146,6 +146,34 @@ export default function StudentDiscussionPage({
     },
     onError: () => {
       toast.error("근거 저장에 실패했습니다");
+    },
+  });
+
+  // Toggle help request
+  const toggleHelpRequest = useMutation({
+    mutationFn: async (needsHelp: boolean) => {
+      if (!participant?.id) throw new Error("Not a participant");
+      const response = await fetch(
+        `/api/discussion/${sessionId}/participants/${participant.id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            needsHelp,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Failed to update help request");
+      return response.json();
+    },
+    onSuccess: (_, needsHelp) => {
+      toast.success(needsHelp ? "도움 요청이 전송되었습니다" : "도움 요청이 취소되었습니다");
+      queryClient.invalidateQueries({
+        queryKey: ["discussion-participant", sessionId, user?.id],
+      });
+    },
+    onError: () => {
+      toast.error("도움 요청 업데이트에 실패했습니다");
     },
   });
 
@@ -329,12 +357,26 @@ export default function StudentDiscussionPage({
         <div className="container max-w-[1920px] mx-auto">
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-2xl sm:text-3xl font-bold">{session.title}</h1>
-            {isSubmitted && (
-              <Badge className="bg-green-100 text-green-800">
-                <CheckCircle2 className="w-3 h-3 mr-1" />
-                제출 완료
-              </Badge>
-            )}
+            <div className="flex items-center gap-2">
+              {participant && (
+                <Button
+                  variant={participant.needsHelp ? "destructive" : "outline"}
+                  size="sm"
+                  onClick={() => toggleHelpRequest.mutate(!participant.needsHelp)}
+                  disabled={toggleHelpRequest.isPending}
+                  className="gap-2"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                  {participant.needsHelp ? "도움 요청 취소" : "도움 요청"}
+                </Button>
+              )}
+              {isSubmitted && (
+                <Badge className="bg-green-100 text-green-800">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  제출 완료
+                </Badge>
+              )}
+            </div>
           </div>
           {session.description && (
             <p className="text-sm sm:text-base text-muted-foreground">{session.description}</p>
