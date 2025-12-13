@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Loader2, MessageSquare, HelpCircle } from "lucide-react";
+import { ArrowLeft, Loader2, MessageSquare, HelpCircle, Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import type { AIMode } from "@/types/discussion";
 import {
@@ -34,12 +34,32 @@ export default function NewDiscussionPage() {
   const [useCustomStances, setUseCustomStances] = useState(false);
   const [stanceA, setStanceA] = useState("찬성");
   const [stanceB, setStanceB] = useState("반대");
+  // 추가 입장들 (기본값: "중립")
+  const [additionalStances, setAdditionalStances] = useState<Array<{ id: string; label: string }>>([]);
 
   // 토론 시간 설정 (분 단위)
   const [duration, setDuration] = useState(15);
 
   // 시간에 따른 예상 문답 횟수 계산 (약 3분당 1회 문답)
   const estimatedTurns = Math.max(3, Math.round(duration / 3));
+
+  // 추가 입장 추가
+  const addAdditionalStance = () => {
+    const nextId = String.fromCharCode(67 + additionalStances.length); // C, D, E, ...
+    setAdditionalStances([...additionalStances, { id: `stance_${nextId.toLowerCase()}`, label: "중립" }]);
+  };
+
+  // 추가 입장 제거
+  const removeAdditionalStance = (id: string) => {
+    setAdditionalStances(additionalStances.filter((s) => s.id !== id));
+  };
+
+  // 추가 입장 라벨 업데이트
+  const updateAdditionalStance = (id: string, label: string) => {
+    setAdditionalStances(
+      additionalStances.map((s) => (s.id === id ? { ...s, label } : s))
+    );
+  };
 
   const handleCreate = async () => {
     if (!title.trim()) {
@@ -49,6 +69,32 @@ export default function NewDiscussionPage() {
 
     setIsCreating(true);
     try {
+      // 동적으로 stanceOptions와 stanceLabels 생성
+      let stanceOptions: string[];
+      let stanceLabels: Record<string, string>;
+
+      if (useCustomStances) {
+        // 커스텀 입장 사용 시
+        stanceOptions = ["pro", "con", ...additionalStances.map((s) => s.id)];
+        stanceLabels = {
+          pro: stanceA.trim(),
+          con: stanceB.trim(),
+          ...additionalStances.reduce((acc, s) => {
+            acc[s.id] = s.label.trim() || "중립";
+            return acc;
+          }, {} as Record<string, string>),
+        };
+        // neutral은 항상 포함
+        if (!stanceOptions.includes("neutral")) {
+          stanceOptions.push("neutral");
+        }
+        stanceLabels.neutral = "중립";
+      } else {
+        // 기본 입장 사용 시
+        stanceOptions = ["pro", "con", "neutral"];
+        stanceLabels = { pro: "찬성", con: "반대", neutral: "중립" };
+      }
+
       const response = await fetch("/api/discussion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -57,12 +103,8 @@ export default function NewDiscussionPage() {
           description: description.trim() || null,
           settings: {
             anonymous,
-            stanceOptions: useCustomStances
-              ? [stanceA.trim(), stanceB.trim(), "neutral"]
-              : ["pro", "con", "neutral"],
-            stanceLabels: useCustomStances
-              ? { pro: stanceA.trim(), con: stanceB.trim(), neutral: "중립" }
-              : { pro: "찬성", con: "반대", neutral: "중립" },
+            stanceOptions,
+            stanceLabels,
             aiContext: aiContext.trim() || null,
             aiMode,
             maxTurns: estimatedTurns,
@@ -208,25 +250,66 @@ export default function NewDiscussionPage() {
                 <Switch checked={useCustomStances} onCheckedChange={setUseCustomStances} />
               </div>
               {useCustomStances && (
-                <div className="grid grid-cols-2 gap-3 pl-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="stanceA">입장 A</Label>
-                    <Input
-                      id="stanceA"
-                      placeholder="예: 기술 낙관론"
-                      value={stanceA}
-                      onChange={(e) => setStanceA(e.target.value)}
-                    />
+                <div className="space-y-3 pl-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="stanceA">입장 A</Label>
+                      <Input
+                        id="stanceA"
+                        placeholder="예: 기술 낙관론"
+                        value={stanceA}
+                        onChange={(e) => setStanceA(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="stanceB">입장 B</Label>
+                      <Input
+                        id="stanceB"
+                        placeholder="예: 기술 비관론"
+                        value={stanceB}
+                        onChange={(e) => setStanceB(e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="stanceB">입장 B</Label>
-                    <Input
-                      id="stanceB"
-                      placeholder="예: 기술 비관론"
-                      value={stanceB}
-                      onChange={(e) => setStanceB(e.target.value)}
-                    />
-                  </div>
+                  
+                  {/* 추가 입장들 */}
+                  {additionalStances.map((stance, index) => {
+                    const stanceLetter = String.fromCharCode(67 + index); // C, D, E, ...
+                    return (
+                      <div key={stance.id} className="flex items-end gap-2">
+                        <div className="flex-1 space-y-2">
+                          <Label htmlFor={stance.id}>입장 {stanceLetter}</Label>
+                          <Input
+                            id={stance.id}
+                            placeholder="예: 중립"
+                            value={stance.label}
+                            onChange={(e) => updateAdditionalStance(stance.id, e.target.value)}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeAdditionalStance(stance.id)}
+                          className="mb-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* 입장 추가 버튼 */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addAdditionalStance}
+                    className="w-full"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    입장 추가
+                  </Button>
                 </div>
               )}
             </div>

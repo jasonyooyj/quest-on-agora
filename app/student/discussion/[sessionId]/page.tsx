@@ -385,7 +385,7 @@ export default function StudentDiscussionPage({
   const settings = session.settings as {
     anonymous?: boolean;
     stanceOptions?: string[];
-    stanceLabels?: { pro: string; con: string; neutral: string };
+    stanceLabels?: Record<string, string>;
   };
   const stanceOptions = settings?.stanceOptions || ["pro", "con", "neutral"];
   const stanceLabels = settings?.stanceLabels || { pro: "찬성", con: "반대", neutral: "중립" };
@@ -450,15 +450,14 @@ export default function StudentDiscussionPage({
                       <SelectValue placeholder="입장을 선택하세요" />
                     </SelectTrigger>
                     <SelectContent>
-                      {stanceOptions.includes("pro") && (
-                        <SelectItem value="pro">{stanceLabels.pro}</SelectItem>
-                      )}
-                      {stanceOptions.includes("con") && (
-                        <SelectItem value="con">{stanceLabels.con}</SelectItem>
-                      )}
-                      {stanceOptions.includes("neutral") && (
-                        <SelectItem value="neutral">{stanceLabels.neutral}</SelectItem>
-                      )}
+                      {stanceOptions.map((option) => {
+                        const label = stanceLabels[option] || option;
+                        return (
+                          <SelectItem key={option} value={option}>
+                            {label}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>

@@ -81,3 +81,48 @@
 ### 문답 횟수 계산 공식
 - `estimatedTurns = Math.max(3, Math.round(duration / 3))`
 - 예: 15분 → 5회, 30분 → 10회, 45분 → 15회
+
+---
+
+## 추가 입장 기능 구현 (2024-12-19)
+
+### 요구사항
+- 토론 생성 시 커스텀 입장 옵션에서 입장을 추가할 수 있게 함
+- 추가된 입장은 "입장 C", "입장 D" 등으로 표시됨
+- 추가 입장은 기본값 "중립"으로 설정되지만 텍스트로 수정 가능
+
+### 변경된 파일
+
+1. **[app/instructor/discussions/new/page.tsx](app/instructor/discussions/new/page.tsx)**
+   - `additionalStances` 상태 추가 (추가 입장들을 배열로 관리)
+   - `addAdditionalStance()`: 입장 추가 함수 (기본값 "중립")
+   - `removeAdditionalStance()`: 입장 제거 함수
+   - `updateAdditionalStance()`: 입장 라벨 업데이트 함수
+   - UI에 "입장 추가" 버튼 및 각 입장의 제거 버튼 추가
+   - `handleCreate()`에서 동적으로 `stanceOptions`와 `stanceLabels` 생성
+     - 입장 A, B는 기존대로 "pro", "con"으로 매핑
+     - 추가 입장은 "stance_c", "stance_d" 등으로 ID 생성
+     - 모든 입장을 `stanceLabels`에 매핑
+
+2. **[app/student/discussion/[sessionId]/page.tsx](app/student/discussion/[sessionId]/page.tsx)**
+   - `stanceLabels` 타입을 `Record<string, string>`로 변경 (동적 입장 지원)
+   - 입장 선택 드롭다운을 `stanceOptions` 배열을 순회하여 동적으로 렌더링
+   - 기존 하드코딩된 "pro", "con", "neutral" 제거
+
+3. **[app/api/discussion/[sessionId]/messages/route.ts](app/api/discussion/[sessionId]/messages/route.ts)**
+   - `stanceLabels` 타입을 `Record<string, string>`로 변경
+   - 입장 라벨 조회 로직을 동적으로 처리 (`stanceLabels[participant.stance]`)
+
+### 주요 변경 사항 요약
+
+| 기능 | 변경 내용 |
+|------|---------|
+| 추가 입장 관리 | 강사가 입장 C, D, E 등을 추가/제거 가능 |
+| 기본값 설정 | 추가 입장은 기본값 "중립"으로 설정되지만 텍스트로 수정 가능 |
+| 동적 렌더링 | 학생 페이지에서 모든 입장 옵션을 동적으로 렌더링 |
+| 타입 안정성 | `stanceLabels`를 `Record<string, string>`로 변경하여 동적 입장 지원 |
+
+### 기술적 세부사항
+- 추가 입장 ID 형식: `stance_c`, `stance_d`, `stance_e` 등
+- UI 라벨: "입장 C", "입장 D", "입장 E" 등 (자동 계산)
+- `neutral`은 항상 포함되며, 추가 입장과 함께 표시됨

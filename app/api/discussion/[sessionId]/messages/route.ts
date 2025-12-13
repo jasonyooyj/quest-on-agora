@@ -237,7 +237,7 @@ export async function POST(
           aiContext?: string;
           aiMode?: "socratic" | "debate";
           maxTurns?: number;
-          stanceLabels?: { pro: string; con: string; neutral: string };
+          stanceLabels?: Record<string, string>;
         } | null;
         const aiContext = settings?.aiContext || null;
         const aiMode = settings?.aiMode || "socratic"; // 기본값: socratic
@@ -245,14 +245,9 @@ export async function POST(
         const stanceLabels = settings?.stanceLabels || { pro: "찬성", con: "반대", neutral: "중립" };
 
         // Build system prompt with discussion context
-        const stanceLabel =
-          participant.stance === "pro"
-            ? stanceLabels.pro
-            : participant.stance === "con"
-              ? stanceLabels.con
-              : participant.stance === "neutral"
-                ? stanceLabels.neutral
-                : "미정";
+        const stanceLabel = participant.stance
+          ? stanceLabels[participant.stance] || participant.stance
+          : "미정";
 
         // Count current user messages for this participant
         const userMessageCount = await prisma.discussion_messages.count({
