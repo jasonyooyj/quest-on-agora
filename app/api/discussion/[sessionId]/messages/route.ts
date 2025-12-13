@@ -232,16 +232,6 @@ export async function POST(
           );
         }
 
-        // Build system prompt with discussion context
-        const stanceLabel =
-          participant.stance === "pro"
-            ? stanceLabels.pro
-            : participant.stance === "con"
-              ? stanceLabels.con
-              : participant.stance === "neutral"
-                ? stanceLabels.neutral
-                : "미정";
-
         // Extract AI context, mode, and maxTurns from settings
         const settings = session.settings as {
           aiContext?: string;
@@ -253,6 +243,16 @@ export async function POST(
         const aiMode = settings?.aiMode || "socratic"; // 기본값: socratic
         const maxTurns = settings?.maxTurns || 5; // 기본값: 5회
         const stanceLabels = settings?.stanceLabels || { pro: "찬성", con: "반대", neutral: "중립" };
+
+        // Build system prompt with discussion context
+        const stanceLabel =
+          participant.stance === "pro"
+            ? stanceLabels.pro
+            : participant.stance === "con"
+              ? stanceLabels.con
+              : participant.stance === "neutral"
+                ? stanceLabels.neutral
+                : "미정";
 
         // Count current user messages for this participant
         const userMessageCount = await prisma.discussion_messages.count({
