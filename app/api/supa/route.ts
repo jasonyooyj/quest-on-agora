@@ -1293,10 +1293,10 @@ async function getFolderContents(data: { folder_id?: string | null }) {
       query = query.eq("parent_id", parentId);
     }
 
-    // Apply ordering - 최신순으로 정렬
-    const { data: nodes, error } = await query.order("updated_at", {
-      ascending: false,
-    }); // 최근 수정된 것이 먼저
+    // Apply ordering - 정렬 순서대로 정렬
+    const { data: nodes, error } = await query.order("sort_order", {
+      ascending: true,
+    });
 
     if (error) {
       console.error("[api] Supabase query error in getFolderContents:", {
@@ -1325,37 +1325,42 @@ async function getFolderContents(data: { folder_id?: string | null }) {
       const examIds = examNodes
         .map((node) => node.exam_id)
         .filter((id): id is string => id !== null && id !== undefined);
-      
+
       if (examIds.length > 0) {
-        const { data: sessionsData, error: sessionsError } = await supabase
-          .from("sessions")
-          .select("exam_id, student_id")
-          .in("exam_id", examIds);
+        try {
+          const { data: sessionsData, error: sessionsError } = await supabase
+            .from("sessions")
+            .select("exam_id, student_id")
+            .in("exam_id", examIds);
 
-        if (sessionsError) {
-          console.error("Session count query error:", sessionsError);
-        } else if (sessionsData) {
-          const studentCountMap = sessionsData.reduce<
-            Record<string, Set<string>>
-          >((acc, session) => {
-            if (!session.exam_id || !session.student_id) return acc;
-            if (!acc[session.exam_id]) {
-              acc[session.exam_id] = new Set();
-            }
-            acc[session.exam_id].add(session.student_id);
-            return acc;
-          }, {});
+          if (sessionsError) {
+            console.error("Session count query error:", sessionsError);
+          } else if (sessionsData && Array.isArray(sessionsData)) {
+            const studentCountMap = sessionsData.reduce<
+              Record<string, Set<string>>
+            >((acc, session) => {
+              if (!session.exam_id || !session.student_id) return acc;
+              if (!acc[session.exam_id]) {
+                acc[session.exam_id] = new Set();
+              }
+              acc[session.exam_id].add(session.student_id);
+              return acc;
+            }, {});
 
-          nodesWithCounts = nodesWithCounts.map((node) => {
-            if (node.kind === "exam" && node.exam_id) {
-              const countSet = studentCountMap[node.exam_id];
-              return {
-                ...node,
-                student_count: countSet ? countSet.size : 0,
-              };
-            }
-            return node;
-          });
+            nodesWithCounts = nodesWithCounts.map((node) => {
+              if (node.kind === "exam" && node.exam_id) {
+                const countSet = studentCountMap[node.exam_id];
+                return {
+                  ...node,
+                  student_count: countSet ? countSet.size : 0,
+                };
+              }
+              return node;
+            });
+          }
+        } catch (countError) {
+          console.error("Error calculating student counts:", countError);
+          // Continue without student counts rather than failing entire request
         }
       }
     }
