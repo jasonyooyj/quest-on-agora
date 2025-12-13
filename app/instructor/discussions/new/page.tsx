@@ -10,9 +10,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Loader2, MessageSquare } from "lucide-react";
+import { ArrowLeft, Loader2, MessageSquare, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import type { AIMode } from "@/types/discussion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function NewDiscussionPage() {
   const router = useRouter();
@@ -24,6 +29,17 @@ export default function NewDiscussionPage() {
   const [aiContext, setAiContext] = useState("");
   const [anonymous, setAnonymous] = useState(true);
   const [aiMode, setAiMode] = useState<AIMode>("socratic");
+
+  // 커스텀 입장 옵션
+  const [useCustomStances, setUseCustomStances] = useState(false);
+  const [stanceA, setStanceA] = useState("찬성");
+  const [stanceB, setStanceB] = useState("반대");
+
+  // 토론 시간 설정 (분 단위)
+  const [duration, setDuration] = useState(15);
+
+  // 시간에 따른 예상 문답 횟수 계산 (약 3분당 1회 문답)
+  const estimatedTurns = Math.max(3, Math.round(duration / 3));
 
   const handleCreate = async () => {
     if (!title.trim()) {
@@ -41,9 +57,16 @@ export default function NewDiscussionPage() {
           description: description.trim() || null,
           settings: {
             anonymous,
-            stanceOptions: ["pro", "con", "neutral"],
+            stanceOptions: useCustomStances
+              ? [stanceA.trim(), stanceB.trim(), "neutral"]
+              : ["pro", "con", "neutral"],
+            stanceLabels: useCustomStances
+              ? { pro: stanceA.trim(), con: stanceB.trim(), neutral: "중립" }
+              : { pro: "찬성", con: "반대", neutral: "중립" },
             aiContext: aiContext.trim() || null,
             aiMode,
+            maxTurns: estimatedTurns,
+            duration,
           },
         }),
       });
@@ -173,12 +196,97 @@ export default function NewDiscussionPage() {
               </RadioGroup>
             </div>
 
+            {/* Custom Stance Options */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
+                <div className="space-y-0.5">
+                  <Label className="font-medium">커스텀 입장 옵션</Label>
+                  <p className="text-xs text-muted-foreground">
+                    기본 &quot;찬성/반대&quot; 대신 직접 입장 이름을 설정합니다
+                  </p>
+                </div>
+                <Switch checked={useCustomStances} onCheckedChange={setUseCustomStances} />
+              </div>
+              {useCustomStances && (
+                <div className="grid grid-cols-2 gap-3 pl-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="stanceA">입장 A</Label>
+                    <Input
+                      id="stanceA"
+                      placeholder="예: 기술 낙관론"
+                      value={stanceA}
+                      onChange={(e) => setStanceA(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="stanceB">입장 B</Label>
+                    <Input
+                      id="stanceB"
+                      placeholder="예: 기술 비관론"
+                      value={stanceB}
+                      onChange={(e) => setStanceB(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Discussion Duration */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Label>예상 토론 시간</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      이 시간은 절대적인 토론 시간이 아닙니다. 설정한 시간을 기반으로 학생이 AI와 대화하는 문답 횟수가 결정됩니다. 문답 횟수에 도달하면 AI가 마무리 질문을 제시합니다.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-muted-foreground min-w-[60px]">
+                    {duration}분
+                  </span>
+                  <input
+                    type="range"
+                    min="5"
+                    max="60"
+                    step="5"
+                    value={duration}
+                    onChange={(e) => setDuration(parseInt(e.target.value))}
+                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {[10, 15, 20, 30, 45].map((time) => (
+                    <Button
+                      key={time}
+                      type="button"
+                      variant={duration === time ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setDuration(time)}
+                      className="text-xs"
+                    >
+                      {time}분
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  예상 문답 횟수: <span className="font-medium text-foreground">{estimatedTurns}회</span>
+                </p>
+              </div>
+            </div>
+
             {/* Anonymous Mode */}
             <div className="flex items-center justify-between p-4 rounded-lg border bg-muted/30">
               <div className="space-y-0.5">
                 <Label className="font-medium">익명 모드</Label>
                 <p className="text-xs text-muted-foreground">
-                  학생들의 실명을 숨기고 "Student 1", "Student 2" 등으로 표시합니다
+                  학생들의 실명을 숨기고 &quot;Student 1&quot;, &quot;Student 2&quot; 등으로 표시합니다
                 </p>
               </div>
               <Switch checked={anonymous} onCheckedChange={setAnonymous} />

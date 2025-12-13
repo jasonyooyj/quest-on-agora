@@ -235,23 +235,43 @@ export async function POST(
         // Build system prompt with discussion context
         const stanceLabel =
           participant.stance === "pro"
-            ? "찬성"
+            ? stanceLabels.pro
             : participant.stance === "con"
-              ? "반대"
+              ? stanceLabels.con
               : participant.stance === "neutral"
-                ? "중립"
+                ? stanceLabels.neutral
                 : "미정";
 
-        // Extract AI context and mode from settings
-        const settings = session.settings as { aiContext?: string; aiMode?: "socratic" | "debate" } | null;
+        // Extract AI context, mode, and maxTurns from settings
+        const settings = session.settings as {
+          aiContext?: string;
+          aiMode?: "socratic" | "debate";
+          maxTurns?: number;
+          stanceLabels?: { pro: string; con: string; neutral: string };
+        } | null;
         const aiContext = settings?.aiContext || null;
         const aiMode = settings?.aiMode || "socratic"; // 기본값: socratic
+        const maxTurns = settings?.maxTurns || 5; // 기본값: 5회
+        const stanceLabels = settings?.stanceLabels || { pro: "찬성", con: "반대", neutral: "중립" };
+
+        // Count current user messages for this participant
+        const userMessageCount = await prisma.discussion_messages.count({
+          where: {
+            session_id: sessionId,
+            participant_id: participantId,
+            role: "user",
+          },
+        });
+
+        // Determine if we're in the closing phase
+        const isClosingPhase = userMessageCount >= maxTurns;
 
         // Debug logging for AI context and mode
         if (process.env.NODE_ENV === "development") {
           console.log(`[AI Context] Settings:`, JSON.stringify(settings, null, 2));
           console.log(`[AI Context] Extracted aiContext:`, aiContext ? `"${aiContext.substring(0, 100)}..."` : "null");
           console.log(`[AI Mode] Mode: ${aiMode}`);
+          console.log(`[AI Turns] Current: ${userMessageCount}, Max: ${maxTurns}, Closing: ${isClosingPhase}`);
         }
 
         // Parse evidence array
@@ -284,6 +304,18 @@ ${evidenceArray.length > 0 ? evidenceArray.map((ev, idx) => `- 근거 ${idx + 1}
         // Build mode-specific system prompt
         let systemPrompt = "";
         
+        // Build closing phase instruction if needed
+        const closingInstruction = isClosingPhase
+          ? `
+
+**[마무리 단계]**
+이제 토론의 마무리 단계입니다. 학생이 이 토론을 통해 무엇을 배웠는지, 자신의 입장이 어떻게 발전했는지 성찰하도록 유도하는 마무리 질문을 제시해주세요.
+- 학생의 주장과 근거를 요약해주세요.
+- 이 토론을 통해 생각이 어떻게 변화하거나 심화되었는지 물어보세요.
+- 앞으로 더 고민해볼 부분이 무엇인지 제안해주세요.
+- 이 질문이 마지막 질문임을 자연스럽게 알려주세요.`
+          : "";
+
         if (aiMode === "socratic") {
           // Socratic 모드: 질문으로 파고듦
           systemPrompt = `당신은 토론 세션에서 학생과 대화하는 AI 조교입니다. 소크라테스식 대화법을 사용하여 학생의 사고를 깊이 있게 탐구합니다.
@@ -304,7 +336,7 @@ ${aiContext ? "- 위의 '추가 컨텍스트'에 명시된 강사자의 지시�
 3. 학생이 답변하기 어려운 질문을 통해 사고를 확장시킵니다.
 4. 학생의 입장과 근거를 바탕으로 논리적 모순이나 보완이 필요한 부분을 질문으로 지적합니다.
 5. 질문은 간결하고 핵심적이어야 하며, 한 번에 하나의 핵심 사고를 탐구합니다.
-6. 반드시 한국어로 응답합니다.`;
+6. 반드시 한국어로 응답합니다.${closingInstruction}`;
         } else {
           // Debate 모드: 반대편 논리를 강하게 제시
           const oppositeStance = 
@@ -332,7 +364,7 @@ ${aiContext ? "- 위의 '추가 컨텍스트'에 명시된 강사자의 지시�
 4. 반대편 입장의 구체적인 예시나 사례를 제시합니다.
 5. 학생이 자신의 주장을 더 강화할 수 있도록 도전적인 관점을 제공하되, 존중하는 톤을 유지합니다.
 6. 답변은 간결하고 핵심적이어야 하며, 반대편 논리를 명확하게 제시합니다.
-7. 반드시 한국어로 응답합니다.`;
+7. 반드시 한국어로 응답합니다.${closingInstruction}`;
         }
 
         // Debug logging for system prompt

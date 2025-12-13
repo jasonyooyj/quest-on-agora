@@ -203,14 +203,45 @@ export default function StudentDiscussionPage({
       }
       return response.json();
     },
-    onMutate: () => {
+    onMutate: async (message: string) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({
+        queryKey: ["discussion-messages", sessionId, participant?.id],
+      });
+
+      // Snapshot the previous value
+      const previousMessages = queryClient.getQueryData<DiscussionMessage[]>([
+        "discussion-messages",
+        sessionId,
+        participant?.id,
+      ]);
+
+      // Optimistically add the new message
+      const optimisticMessage: DiscussionMessage = {
+        id: `temp-${Date.now()}`,
+        sessionId,
+        participantId: participant?.id || "",
+        role: "user",
+        content: message,
+        createdAt: new Date().toISOString(),
+        isVisibleToStudent: true,
+      };
+
+      queryClient.setQueryData<DiscussionMessage[]>(
+        ["discussion-messages", sessionId, participant?.id],
+        (old) => [...(old || []), optimisticMessage]
+      );
+
       // Set typing indicator immediately when user sends message
       setIsTyping(true);
       scrollToBottom();
+
+      // Return context with the previous value
+      return { previousMessages };
     },
     onSuccess: () => {
       setChatMessage("");
-      // Immediately invalidate to show user message
+      // Invalidate to sync with server (will get actual message ID)
       queryClient.invalidateQueries({
         queryKey: ["discussion-messages", sessionId, participant?.id],
       });
@@ -272,9 +303,16 @@ export default function StudentDiscussionPage({
         }
       }, 500); // 0.5초마다 확인
     },
-    onError: (error: Error) => {
+    onError: (error: Error, _variables, context) => {
       console.error("[Client] Error sending message:", error);
       setIsTyping(false);
+      // Rollback to previous messages on error
+      if (context?.previousMessages) {
+        queryClient.setQueryData(
+          ["discussion-messages", sessionId, participant?.id],
+          context.previousMessages
+        );
+      }
       toast.error(error.message || "메시지 전송에 실패했습니다");
     },
   });
@@ -347,8 +385,10 @@ export default function StudentDiscussionPage({
   const settings = session.settings as {
     anonymous?: boolean;
     stanceOptions?: string[];
+    stanceLabels?: { pro: string; con: string; neutral: string };
   };
   const stanceOptions = settings?.stanceOptions || ["pro", "con", "neutral"];
+  const stanceLabels = settings?.stanceLabels || { pro: "찬성", con: "반대", neutral: "중립" };
 
   return (
     <div className="h-screen flex flex-col bg-background">
@@ -411,13 +451,13 @@ export default function StudentDiscussionPage({
                     </SelectTrigger>
                     <SelectContent>
                       {stanceOptions.includes("pro") && (
-                        <SelectItem value="pro">찬성</SelectItem>
+                        <SelectItem value="pro">{stanceLabels.pro}</SelectItem>
                       )}
                       {stanceOptions.includes("con") && (
-                        <SelectItem value="con">반대</SelectItem>
+                        <SelectItem value="con">{stanceLabels.con}</SelectItem>
                       )}
                       {stanceOptions.includes("neutral") && (
-                        <SelectItem value="neutral">중립</SelectItem>
+                        <SelectItem value="neutral">{stanceLabels.neutral}</SelectItem>
                       )}
                     </SelectContent>
                   </Select>

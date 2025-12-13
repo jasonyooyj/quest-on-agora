@@ -10,21 +10,17 @@ import {
   Users,
 } from "lucide-react";
 import type { StanceDistribution, DiscussionParticipant } from "@/types/discussion";
-import { useActivityStats } from "@/hooks/useDiscussion";
 
 interface OverviewPanelProps {
   stanceDistribution?: StanceDistribution;
   participants: DiscussionParticipant[];
-  sessionId: string;
+  sessionId?: string; // kept for backwards compatibility but no longer used
 }
 
 export function OverviewPanel({
   stanceDistribution,
   participants,
-  sessionId,
 }: OverviewPanelProps) {
-  // Fetch activity stats
-  const { data: activityStats, isLoading: activityLoading } = useActivityStats(sessionId);
 
   // Calculate distribution from participants if not provided
   const distribution = useMemo(() => {
@@ -52,10 +48,6 @@ export function OverviewPanel({
     (sum, p) => sum + (p.messageCount || 0),
     0
   );
-
-  // Get activity data for chart
-  const activityData = activityStats?.messagesPerInterval || [];
-  const maxActivity = activityData.length > 0 ? Math.max(...activityData, 1) : 1;
 
   // Find students who might need attention
   const needsAttention = useMemo(() => {
@@ -209,36 +201,6 @@ export function OverviewPanel({
                 <div className="text-[10px] text-muted-foreground">총 메시지</div>
               </div>
             </div>
-          </div>
-
-          {/* Recent 5-minute Activity Chart */}
-          <div className="mt-3 pt-3 border-t">
-            <div className="text-[10px] text-muted-foreground mb-1">
-              최근 5분 활동
-            </div>
-            {activityLoading ? (
-              <div className="h-8 flex items-center justify-center text-[10px] text-muted-foreground">
-                로딩 중...
-              </div>
-            ) : activityData.length > 0 ? (
-              <div className="h-8 flex items-end gap-0.5">
-                {activityData.map((count, i) => {
-                  const height = maxActivity > 0 ? (count / maxActivity) * 100 : 0;
-                  return (
-                    <div
-                      key={i}
-                      className="flex-1 bg-primary/20 rounded-t transition-all duration-300"
-                      style={{ height: `${Math.max(10, height)}%` }}
-                      title={`${count}개 메시지`}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="h-8 flex items-center justify-center text-[10px] text-muted-foreground">
-                활동 없음
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
