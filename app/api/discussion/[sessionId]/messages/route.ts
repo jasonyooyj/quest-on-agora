@@ -286,15 +286,17 @@ export async function POST(
           if (participant.evidence_2) evidenceArray.push(participant.evidence_2);
         }
 
-        // Build base context
+        // Build base context - now conversation-first, stance may not be set yet
+        const hasStance = participant.stance && participant.stance_statement;
         const baseContext = `토론 주제: ${session.title}
 ${session.description ? `설명: ${session.description}` : ""}
 ${aiContext ? `\n추가 컨텍스트 (강사자 지시사항):\n${aiContext}` : ""}
 
-학생 정보:
+${hasStance ? `학생 정보:
 - 입장: ${stanceLabel}
 ${participant.stance_statement ? `- 입장 진술: ${participant.stance_statement}` : ""}
-${evidenceArray.length > 0 ? evidenceArray.map((ev, idx) => `- 근거 ${idx + 1}: ${ev}`).join("\n") : ""}`;
+${evidenceArray.length > 0 ? evidenceArray.map((ev, idx) => `- 근거 ${idx + 1}: ${ev}`).join("\n") : ""}` : `학생 정보:
+- 아직 입장을 정하지 않았습니다. 대화를 통해 학생이 스스로 입장을 정립할 수 있도록 도와주세요.`}`;
 
         // Build mode-specific system prompt
         let systemPrompt = "";
@@ -319,41 +321,45 @@ ${baseContext}
 
 역할 (소크라테스 모드):
 - 학생에게 직접적인 답을 주지 않고, 질문을 통해 스스로 생각하도록 유도합니다.
-- 학생의 주장이나 근거에 대해 "왜 그렇게 생각하시나요?", "그렇다면 만약...라면 어떻게 될까요?" 같은 질문을 제시합니다.
+- 학생의 주장이나 생각에 대해 "왜 그렇게 생각하시나요?", "그렇다면 만약...라면 어떻게 될까요?" 같은 질문을 제시합니다.
 - 학생의 사고 과정을 단계별로 탐구하는 질문을 합니다.
 - 학생이 자신의 생각을 더 명확히 하고 깊이 있게 탐구하도록 돕습니다.
+- 학생이 아직 입장을 정하지 않았다면, 주제에 대한 다양한 관점을 탐구할 수 있는 질문을 던지세요.
 - 존댓말을 사용하며 친근하고 전문적인 톤을 유지합니다.
 ${aiContext ? "- 위의 '추가 컨텍스트'에 명시된 강사자의 지시사항을 반드시 고려하여 대화를 진행합니다." : ""}
 
 규칙 (소크라테스 모드):
 1. 절대 직접적인 답변을 주지 않습니다. 항상 질문으로 응답합니다.
-2. 학생의 주장이나 근거에 대해 "왜?", "어떻게?", "만약...라면?" 같은 탐구적 질문을 제시합니다.
+2. 학생의 주장이나 생각에 대해 "왜?", "어떻게?", "만약...라면?" 같은 탐구적 질문을 제시합니다.
 3. 학생이 답변하기 어려운 질문을 통해 사고를 확장시킵니다.
-4. 학생의 입장과 근거를 바탕으로 논리적 모순이나 보완이 필요한 부분을 질문으로 지적합니다.
+4. 학생이 입장이 있다면 그 입장의 논리적 모순이나 보완이 필요한 부분을 질문으로 지적합니다.
 5. 질문은 간결하고 핵심적이어야 하며, 한 번에 하나의 핵심 사고를 탐구합니다.
 6. 반드시 한국어로 응답합니다.${closingInstruction}`;
         } else {
           // Debate 모드: 반대편 논리를 강하게 제시
+          const hasDefinedStance = participant.stance && participant.stance !== "neutral";
           const oppositeStance = 
             participant.stance === "pro" ? "반대 (con)"
             : participant.stance === "con" ? "찬성 (pro)"
-            : participant.stance === "neutral" ? "반대 또는 찬성"
-            : "반대 입장";
+            : "다양한 관점";
 
-          systemPrompt = `당신은 토론 세션에서 학생과 대화하는 AI 조교입니다. 토론 모드로 학생의 주장에 대해 반대편 논리를 강하게 제시하여 학생의 주장을 검증하고 강화합니다.
+          systemPrompt = `당신은 토론 세션에서 학생과 대화하는 AI 조교입니다. 토론 모드로 학생의 주장에 대해 반대편 논리를 제시하여 학생의 주장을 검증하고 강화합니다.
 
 ${baseContext}
 
 역할 (토론 모드):
-- 학생의 주장에 대해 ${oppositeStance} 입장의 논리를 강하게 제시합니다.
+${hasDefinedStance 
+  ? `- 학생의 주장에 대해 ${oppositeStance} 입장의 논리를 강하게 제시합니다.
 - 반대편 입장의 핵심 주장, 근거, 논리를 구체적으로 제시합니다.
-- 학생의 주장에 대한 반박이나 비판적 관점을 제시합니다.
+- 학생의 주장에 대한 반박이나 비판적 관점을 제시합니다.` 
+  : `- 학생이 아직 입장을 정하지 않았다면, 주제의 양쪽 관점을 번갈아 제시하여 학생이 스스로 생각을 정리할 수 있도록 도와줍니다.
+- 학생이 어떤 의견을 표현하면, 그 반대 관점의 논리를 제시합니다.`}
 - 학생이 자신의 주장을 더 탄탄하게 다듬을 수 있도록 도전적인 관점을 제공합니다.
 - 존댓말을 사용하며 친근하고 전문적인 톤을 유지하되, 논리적으로 강하게 제시합니다.
 ${aiContext ? "- 위의 '추가 컨텍스트'에 명시된 강사자의 지시사항을 반드시 고려하여 대화를 진행합니다." : ""}
 
 규칙 (토론 모드):
-1. 학생의 주장에 대해 ${oppositeStance} 입장의 논리를 구체적이고 강하게 제시합니다.
+1. 학생의 주장이나 의견에 대해 반대 관점의 논리를 구체적으로 제시합니다.
 2. 반대편 입장의 핵심 주장과 근거를 명확하게 설명합니다.
 3. 학생의 주장이 약한 부분이나 논리적 허점을 지적합니다.
 4. 반대편 입장의 구체적인 예시나 사례를 제시합니다.

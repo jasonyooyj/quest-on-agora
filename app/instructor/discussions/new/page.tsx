@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { ArrowLeft, Loader2, MessageSquare, HelpCircle, Plus, X } from "lucide-react";
+import { ArrowLeft, Loader2, MessageSquare, HelpCircle, Plus, X, Sparkles, FileText, Upload } from "lucide-react";
 import { toast } from "sonner";
 import type { AIMode } from "@/types/discussion";
 import {
@@ -18,6 +18,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+interface GeneratedTopic {
+  title: string;
+  description: string;
+  stances?: {
+    pro: string;
+    con: string;
+  };
+}
 
 export default function NewDiscussionPage() {
   const router = useRouter();
@@ -29,6 +38,13 @@ export default function NewDiscussionPage() {
   const [aiContext, setAiContext] = useState("");
   const [anonymous, setAnonymous] = useState(true);
   const [aiMode, setAiMode] = useState<AIMode>("socratic");
+
+  // 파일 업로드 및 토론 주제 생성 관련 상태
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string; mimeType: string } | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingTopics, setIsGeneratingTopics] = useState(false);
+  const [generatedTopics, setGeneratedTopics] = useState<GeneratedTopic[]>([]);
 
   // 커스텀 입장 옵션
   const [useCustomStances, setUseCustomStances] = useState(false);
@@ -59,6 +75,111 @@ export default function NewDiscussionPage() {
     setAdditionalStances(
       additionalStances.map((s) => (s.id === id ? { ...s, label } : s))
     );
+  };
+
+  // 파일 업로드 처리
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 파일 형식 검증
+    const allowedTypes = [
+      "application/pdf",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("PDF, DOCX, PPTX 파일만 지원합니다.");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("파일 업로드 실패");
+      }
+
+      const data = await response.json();
+      setUploadedFile({
+        url: data.url,
+        name: data.meta.originalName,
+        mimeType: data.meta.mime,
+      });
+      toast.success("파일이 업로드되었습니다.");
+    } catch (error) {
+      console.error("File upload error:", error);
+      toast.error("파일 업로드에 실패했습니다.");
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // 토론 주제 생성
+  const handleGenerateTopics = async () => {
+    if (!aiContext.trim() && !uploadedFile) {
+      toast.error("AI 컨텍스트를 입력하거나 자료 파일을 업로드해주세요.");
+      return;
+    }
+
+    setIsGeneratingTopics(true);
+    try {
+      const response = await fetch("/api/discussion/generate-topics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          context: aiContext.trim(),
+          fileUrl: uploadedFile?.url,
+          fileName: uploadedFile?.name,
+          mimeType: uploadedFile?.mimeType,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "토론 주제 생성 실패");
+      }
+
+      const data = await response.json();
+      setGeneratedTopics(data.topics || []);
+      
+      if (data.topics?.length > 0) {
+        toast.success(`${data.topics.length}개의 토론 주제가 생성되었습니다.`);
+      } else {
+        toast.info("생성된 토론 주제가 없습니다.");
+      }
+    } catch (error) {
+      console.error("Topic generation error:", error);
+      toast.error(error instanceof Error ? error.message : "토론 주제 생성에 실패했습니다.");
+    } finally {
+      setIsGeneratingTopics(false);
+    }
+  };
+
+  // 생성된 토론 주제 선택
+  const handleSelectTopic = (topic: GeneratedTopic) => {
+    setTitle(topic.title);
+    setDescription(topic.description);
+    
+    // 커스텀 입장도 자동 설정
+    if (topic.stances) {
+      setUseCustomStances(true);
+      setStanceA(topic.stances.pro);
+      setStanceB(topic.stances.con);
+    }
+    
+    toast.success("토론 주제가 선택되었습니다.");
   };
 
   const handleCreate = async () => {
@@ -194,20 +315,137 @@ export default function NewDiscussionPage() {
               />
             </div>
 
-            {/* AI Context */}
-            <div className="space-y-2">
-              <Label htmlFor="aiContext">AI 컨텍스트 (선택)</Label>
-              <Textarea
-                id="aiContext"
-                placeholder="AI 조교에게 전달할 추가 정보나 지시사항을 입력하세요. 예: 특정 관점을 강조하거나, 특정 사례를 언급하도록 안내 등..."
-                value={aiContext}
-                onChange={(e) => setAiContext(e.target.value)}
-                rows={4}
-              />
+            {/* AI Context with File Upload */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="aiContext">AI 컨텍스트 / 자료</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>
+                        텍스트를 입력하거나 PDF/문서 파일을 업로드하면 AI가 토론 주제를 자동으로 생성해줍니다.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+                <Textarea
+                  id="aiContext"
+                  placeholder="AI 조교에게 전달할 추가 정보나 지시사항을 입력하세요. 예: 수업 내용, 특정 관점, 참고할 사례 등..."
+                  value={aiContext}
+                  onChange={(e) => setAiContext(e.target.value)}
+                  rows={4}
+                />
+              </div>
+
+              {/* File Upload */}
+              <div className="space-y-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.pptx"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                
+                {!uploadedFile ? (
+                  <div
+                    className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-purple-400 hover:bg-purple-50/50 transition-colors"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isUploading ? (
+                      <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>업로드 중...</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <Upload className="w-6 h-6" />
+                        <span className="text-sm">PDF, DOCX, PPTX 파일을 업로드하세요</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-purple-50 border border-purple-200">
+                    <div className="flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-purple-600" />
+                      <span className="text-sm font-medium">{uploadedFile.name}</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setUploadedFile(null)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Generate Topics Button */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleGenerateTopics}
+                disabled={isGeneratingTopics || (!aiContext.trim() && !uploadedFile)}
+              >
+                {isGeneratingTopics ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    토론 주제 생성 중...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    AI로 토론 주제 생성하기
+                  </>
+                )}
+              </Button>
+
               <p className="text-xs text-muted-foreground">
                 이 정보는 AI 조교가 학생과 대화할 때 참고하게 됩니다. 토론 주제와 관련된 추가 배경 정보, 특별히 다뤄야 할 관점, 참고할 사례 등을 입력할 수 있습니다.
               </p>
             </div>
+
+            {/* Generated Topics */}
+            {generatedTopics.length > 0 && (
+              <div className="space-y-3">
+                <Label>생성된 토론 주제</Label>
+                <div className="space-y-2">
+                  {generatedTopics.map((topic, index) => (
+                    <div
+                      key={index}
+                      className="p-4 rounded-lg border bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 cursor-pointer transition-colors"
+                      onClick={() => handleSelectTopic(topic)}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">{topic.title}</h4>
+                          <p className="text-xs text-muted-foreground mt-1">{topic.description}</p>
+                          {topic.stances && (
+                            <div className="flex gap-2 mt-2">
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                                {topic.stances.pro}
+                              </span>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                                {topic.stances.con}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <Button type="button" variant="ghost" size="sm" className="shrink-0">
+                          선택
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* AI Mode Selection */}
             <div className="space-y-3">
