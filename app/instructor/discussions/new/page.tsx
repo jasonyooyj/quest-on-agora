@@ -401,7 +401,7 @@ export default function NewDiscussionPage() {
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 mr-2" />
-                    AI로 토론 주제 생성하기
+                    AI로 토론 주제/입장/설명 작성하기
                   </>
                 )}
               </Button>
