@@ -515,7 +515,7 @@ export default function StudentDiscussionPage({
                   >
                     {msg.role === "user" ? (
                       <div className="bg-primary text-primary-foreground rounded-2xl rounded-tr-md px-4 sm:px-5 py-3 sm:py-3.5 max-w-[85%] sm:max-w-[70%] shadow-lg shadow-primary/20 relative transition-all duration-200 hover:shadow-xl hover:shadow-primary/30">
-                        <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words">
+                        <p className="text-sm leading-[1.5] whitespace-pre-wrap break-words">
                           {msg.content}
                         </p>
                         <p className="text-xs mt-2 sm:mt-2.5 opacity-80 text-right font-medium">
@@ -535,7 +535,7 @@ export default function StudentDiscussionPage({
                             교수 메시지
                           </Badge>
                         </div>
-                        <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap break-words text-amber-900 dark:text-amber-100">
+                        <p className="text-sm leading-[1.5] whitespace-pre-wrap break-words text-amber-900 dark:text-amber-100">
                           {msg.content}
                         </p>
                         <p className="text-xs mt-2 sm:mt-2.5 opacity-70 text-left font-medium text-amber-700 dark:text-amber-300">
