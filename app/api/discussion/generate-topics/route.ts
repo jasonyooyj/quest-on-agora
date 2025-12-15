@@ -110,7 +110,6 @@ export async function POST(request: NextRequest) {
           content: `다음 학습 자료를 바탕으로 토론 주제를 생성해주세요:\n\n${truncatedContent}`
         }
       ],
-      temperature: 0.7,
       max_completion_tokens: 2000,
       response_format: { type: "json_object" }
     });
