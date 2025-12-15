@@ -34,6 +34,7 @@ import {
   Menu,
   LayoutDashboard,
   History,
+  MessageSquare,
 } from "lucide-react";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -417,10 +418,16 @@ export default function StudentDashboard() {
       active: pathname === "/student",
     },
     {
-      title: "새 시험 시작",
+      title: "시험 참여",
       href: "/join",
       icon: Plus,
       active: pathname === "/join",
+    },
+    {
+      title: "토론 참여",
+      href: "/join/discussion",
+      icon: MessageSquare,
+      active: pathname === "/join/discussion",
     },
   ];
 

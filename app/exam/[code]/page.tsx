@@ -250,7 +250,12 @@ export default function ExamPage() {
               if (errorData.error === "DISCUSSION_CODE_DETECTED") {
                 // This is a discussion code, not an exam code
                 console.log("Discussion code detected, redirecting to join page");
-                router.push("/join?error=discussion_code&message=" + encodeURIComponent("이 코드는 토론 세션 코드입니다. 토론 세션은 별도의 참여 방법이 필요합니다."));
+                // 토론 코드는 전용 토론 참여 페이지에서 처리
+                router.push(
+                  `/join/discussion?error=discussion_code&code=${encodeURIComponent(
+                    examCode
+                  )}`
+                );
                 return;
               }
             } catch {

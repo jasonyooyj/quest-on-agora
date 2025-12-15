@@ -896,13 +896,24 @@ export default function LandingPage() {
                     <span>새로운 시험 경험</span>
                   </li>
                 </ul>
-                <Link href="/join" className="block">
+                <Link href="/join" className="block mb-3">
                   <Button
                     size="lg"
                     className="w-full bg-chart-2 hover:bg-chart-2/90 min-h-[56px] sm:min-h-[48px] focus:outline-none focus:ring-2 focus:ring-chart-2 focus:ring-offset-2"
                     aria-label="시험 코드 입력 페이지로 이동"
                   >
                     시험 코드 입력
+                    <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
+                  </Button>
+                </Link>
+                <Link href="/join/discussion" className="block">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full min-h-[52px] sm:min-h-[46px]"
+                    aria-label="토론 코드 입력 페이지로 이동"
+                  >
+                    토론 코드 입력
                     <ArrowRight className="w-5 h-5 ml-2" aria-hidden="true" />
                   </Button>
                 </Link>

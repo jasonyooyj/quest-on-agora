@@ -37,7 +37,18 @@ function ErrorToastHandler() {
   const errorMessage = searchParams.get("message");
 
   useEffect(() => {
-    if (errorParam && errorMessage) {
+    if (!errorParam) return;
+
+    // Known error codes
+    if (errorParam === "discussion_code") {
+      toast.error(
+        "이 코드는 토론 세션 코드입니다. 토론 참여 페이지에서 다시 입력해주세요."
+      );
+      return;
+    }
+
+    // Fallback: use message param if provided
+    if (errorMessage) {
       toast.error(decodeURIComponent(errorMessage));
     }
   }, [errorParam, errorMessage]);
@@ -55,31 +66,9 @@ function ExamCodeEntryContent() {
     e.preventDefault();
     if (examCode.length !== 6) return;
 
-    setIsLoading(true);
-    try {
-      // Check if it's a discussion code first
-      const discussionResponse = await fetch("/api/discussion/join", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ joinCode: examCode }),
-      });
-
-      if (discussionResponse.ok) {
-        const data = await discussionResponse.json();
-        // Redirect to discussion page
-        router.push(`/student/discussion/${data.session.id}`);
-        return;
-      }
-
-      // If not a discussion, show exam instructions
-      setShowInstructions(true);
-    } catch (error) {
-      console.error("Error checking code:", error);
-      // If error, assume it's an exam code and show instructions
-      setShowInstructions(true);
-    } finally {
-      setIsLoading(false);
-    }
+    // 더 이상 토론 코드를 자동으로 처리하지 않고,
+    // 항상 시험용 코드로 간주하여 안내 다이얼로그를 보여준다.
+    setShowInstructions(true);
   };
 
   const handleConfirmAndNavigate = () => {
@@ -134,6 +123,15 @@ function ExamCodeEntryContent() {
                 >
                   {isLoading ? "입력 중..." : "시험 입장"}
                 </Button>
+                <div className="mt-3 text-center text-xs text-muted-foreground">
+                  토론 코드가 있다면{" "}
+                  <Link
+                    href="/join/discussion"
+                    className="underline underline-offset-2"
+                  >
+                    토론 참여하기
+                  </Link>
+                </div>
               </form>
             </CardContent>
           </Card>
