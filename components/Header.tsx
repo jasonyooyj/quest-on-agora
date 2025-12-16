@@ -6,19 +6,22 @@ import { Button } from "@/components/ui/button";
 import { UserMenu } from "@/components/auth/UserMenu";
 import Link from "next/link";
 import Image from "next/image";
-import { GraduationCap, Users, FilePlus, UserPlus } from "lucide-react";
+import { GraduationCap, Users, FilePlus, UserPlus, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Header() {
   const { isSignedIn, isLoaded, user } = useUser();
   const pathname = usePathname();
 
-  // Get user role from metadata
-  const userRole = (user?.unsafeMetadata?.role as string) || "student";
-  const hasRole = Boolean(user?.unsafeMetadata?.role);
+  // Get user role from metadata (case-insensitive check)
+  const rawRole = user?.unsafeMetadata?.role as string | undefined;
+  const userRole = rawRole?.toLowerCase() || "student";
+  const hasRole = Boolean(rawRole);
 
   const isLinkActive = (href: string) => {
-    if (href === "/instructor") {
+    if (href === "/") {
+      return pathname === "/";
+    } else if (href === "/instructor") {
       return (
         pathname.startsWith("/instructor") &&
         !pathname.startsWith("/instructor/new")
@@ -60,14 +63,25 @@ export function Header() {
             </div>
           </Link>
 
-          {/* Vertical Separator */}
-          {isSignedIn && hasRole && (
+          {/* Vertical Separator - show when signed in */}
+          {isLoaded && isSignedIn && (
             <div className="h-6 w-px bg-gray-300 dark:bg-gray-700" />
           )}
 
           {/* Navigation */}
           <nav className="hidden md:flex items-center space-x-6">
-            {isSignedIn && hasRole && userRole === "instructor" && (
+            {/* Home link - always show when signed in */}
+            {isLoaded && isSignedIn && (
+              <Link
+                href="/"
+                className={getLinkClassName(isLinkActive("/"))}
+                aria-current={isLinkActive("/") ? "page" : undefined}
+              >
+                <Home className="h-4 w-4" />
+                <span>홈</span>
+              </Link>
+            )}
+            {isLoaded && isSignedIn && hasRole && userRole === "instructor" && (
               <>
                 <Link
                   href="/instructor"
@@ -91,7 +105,7 @@ export function Header() {
                 </Link>
               </>
             )}
-            {isSignedIn && hasRole && userRole === "student" && (
+            {isLoaded && isSignedIn && hasRole && userRole === "student" && (
               <>
                 <Link
                   href="/student"
@@ -111,7 +125,6 @@ export function Header() {
                 </Link>
               </>
             )}
-            {/* Role이 설정되지 않은 사용자에게는 네비게이션을 보여주지 않음 */}
           </nav>
         </div>
 
