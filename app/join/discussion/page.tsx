@@ -150,14 +150,34 @@ function DiscussionCodeEntryContent() {
   );
 }
 
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
+        <div className="max-w-md mx-auto">
+          <Card className="shadow-xl border-0">
+            <CardHeader className="text-center pb-6">
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <MessageSquare className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <CardTitle className="text-2xl">토론 코드 입력</CardTitle>
+              <CardDescription className="text-base">
+                로딩 중...
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DiscussionCodeEntryPage() {
   return (
-    <>
-      <Suspense fallback={null}>
-        <DiscussionErrorToastHandler />
-      </Suspense>
+    <Suspense fallback={<LoadingFallback />}>
+      <DiscussionErrorToastHandler />
       <DiscussionCodeEntryContent />
-    </>
+    </Suspense>
   );
 }
 
