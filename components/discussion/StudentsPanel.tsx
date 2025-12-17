@@ -250,9 +250,8 @@ export function StudentsPanel({
             {filteredParticipants.map((participant) => (
               <div
                 key={participant.id}
-                className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${
-                  selectedId === participant.id ? "bg-muted" : ""
-                }`}
+                className={`p-4 cursor-pointer transition-colors hover:bg-muted/50 ${selectedId === participant.id ? "bg-muted" : ""
+                  }`}
                 onClick={() => onSelect(participant.id)}
               >
                 <div className="flex items-start gap-3">
@@ -277,9 +276,13 @@ export function StudentsPanel({
                       </span>
                       {getStanceBadge(participant)}
                       {participant.needsHelp ? (
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" title="도움 요청 중" />
+                        <span title="도움 요청 중">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                        </span>
                       ) : participant.helpRequestedAt ? (
-                        <History className="w-3.5 h-3.5 text-amber-400/70" title="도움 요청 이력 있음" />
+                        <span title="도움 요청 이력 있음">
+                          <History className="w-3.5 h-3.5 text-amber-400/70" />
+                        </span>
                       ) : null}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
