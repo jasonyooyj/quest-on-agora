@@ -44,6 +44,7 @@ export function OverviewPanel({
   // Calculate activity stats
   const activeNow = participants.filter((p) => p.isOnline).length;
   const needsHelp = participants.filter((p) => p.needsHelp).length;
+  const hadRequestedHelp = participants.filter((p) => !p.needsHelp && p.helpRequestedAt).length;
   const totalMessages = participants.reduce(
     (sum, p) => sum + (p.messageCount || 0),
     0
@@ -56,6 +57,7 @@ export function OverviewPanel({
       const lastActive = new Date(p.lastActiveAt);
       return (
         p.needsHelp ||
+        p.helpRequestedAt || // Include students who have requested help at any point
         (p.isOnline && lastActive < fiveMinutesAgo) ||
         (!p.isSubmitted && p.messageCount === 0)
       );
@@ -71,6 +73,7 @@ export function OverviewPanel({
     
     const reasons: string[] = [];
     let helpCount = 0;
+    let hadHelpCount = 0;
     let inactiveCount = 0;
     let noActivityCount = 0;
     let longInactiveCount = 0;
@@ -79,6 +82,7 @@ export function OverviewPanel({
       const lastActive = new Date(p.lastActiveAt);
       
       if (p.needsHelp) helpCount++;
+      else if (p.helpRequestedAt) hadHelpCount++;
       if (!p.isSubmitted && p.messageCount === 0) noActivityCount++;
       if (p.isOnline && lastActive < fiveMinutesAgo) {
         if (lastActive < fifteenMinutesAgo) {
@@ -90,7 +94,10 @@ export function OverviewPanel({
     });
     
     if (helpCount > 0) {
-      reasons.push(`도움 요청 ${helpCount}명`);
+      reasons.push(`도움 요청 중 ${helpCount}명`);
+    }
+    if (hadHelpCount > 0) {
+      reasons.push(`도움 요청 이력 ${hadHelpCount}명`);
     }
     if (longInactiveCount > 0) {
       reasons.push(`15분 이상 활동 없음 ${longInactiveCount}명`);
@@ -223,9 +230,17 @@ export function OverviewPanel({
             <div className="space-y-2">
               {needsHelp > 0 && (
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-amber-700">도움 요청</span>
+                  <span className="text-amber-700">도움 요청 중</span>
                   <Badge variant="outline" className="bg-amber-100 text-amber-700">
                     {needsHelp}명
+                  </Badge>
+                </div>
+              )}
+              {hadRequestedHelp > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-amber-600/80">도움 요청 이력</span>
+                  <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
+                    {hadRequestedHelp}명
                   </Badge>
                 </div>
               )}
@@ -235,7 +250,8 @@ export function OverviewPanel({
                   className="text-xs text-amber-700/80 pl-2 border-l-2 border-amber-300"
                 >
                   {p.displayName || `Student ${p.id.slice(0, 4)}`}
-                  {p.needsHelp && " - 도움 요청"}
+                  {p.needsHelp && " - 도움 요청 중"}
+                  {!p.needsHelp && p.helpRequestedAt && " - 도움 요청 취소됨"}
                   {!p.isSubmitted && p.messageCount === 0 && " - 활동 없음"}
                 </div>
               ))}

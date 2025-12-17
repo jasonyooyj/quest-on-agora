@@ -1,36 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Roboto_Mono } from "next/font/google";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
-import { ConditionalHeader } from "@/components/ConditionalHeader";
 import { Toaster } from "@/components/ui/sonner";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { Analytics } from "@vercel/analytics/next";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const robotoMono = Roboto_Mono({
-  variable: "--font-roboto-mono",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
 export const metadata: Metadata = {
-  title: "Quest-On",
-  description:
-    "Connect instructors and students in an engaging, interactive learning environment",
+  title: "Agora - 대학 토론 플랫폼",
+  description: "AI 소크라테스 대화를 통한 대학 토론 플랫폼. 교수와 학생이 함께하는 깊이 있는 토론 경험.",
   icons: {
-    icon: "/qlogo_icon.png",
-    shortcut: "/qlogo_icon.png",
-    apple: "/qlogo_icon.png",
+    icon: "/favicon.ico",
   },
 };
 
@@ -41,19 +19,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" suppressHydrationWarning={true}>
-      <ClerkProvider>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} ${robotoMono.variable} antialiased`}
-          suppressHydrationWarning={true}
-        >
-          <QueryProvider>
-            <ConditionalHeader />
-            {children}
-            <Toaster />
-          </QueryProvider>
-          <Analytics />
-        </body>
-      </ClerkProvider>
+      <head>
+        {/* Pretendard Font - Modern Korean Typography */}
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </head>
+      <body
+        className="antialiased"
+        suppressHydrationWarning={true}
+      >
+        <QueryProvider>
+          {children}
+          <Toaster richColors position="top-right" />
+        </QueryProvider>
+        <Analytics />
+      </body>
     </html>
   );
 }

@@ -1,38 +1,20 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase-middleware'
 
-const isProtectedRoute = createRouteMatcher([
-  "/((?!.+\\.[\\w]+$|_next).*)",
-  "/",
-  "/(api|trpc)((?!.*upload).*)", // /api/upload 제외
-]);
-
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/join",
-  "/admin/login",
-  "/api/chat",
-  "/api/feedback",
-  "/api/admin/auth",
-  "/api/upload", // route 핸들러에서 자체 인증 체크
-  "/api/universities/search", // 학교 검색 API
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  // /api/upload는 route 핸들러에서 자체 인증 체크하므로 middleware에서 제외
-  if (req.nextUrl.pathname === "/api/upload") return;
-
-  if (isPublicRoute(req)) return;
-  if (isProtectedRoute(req)) {
-    const session = await auth();
-    if (!session) {
-      return Response.redirect(new URL("/sign-in", req.url));
-    }
-  }
-});
+export async function proxy(request: NextRequest) {
+    return await updateSession(request)
+}
 
 export const config = {
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
-};
-
+    matcher: [
+        /*
+         * Match all request paths except for the ones starting with:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico (favicon file)
+         * - public folder
+         * - api routes (handled separately)
+         */
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    ],
+}

@@ -226,15 +226,23 @@ export function StudentDetailPanel({
 
         {/* Action Buttons */}
         <div className="flex gap-2 mt-3 flex-wrap">
-          {participant.needsHelp && (
+          {participant.needsHelp ? (
             <Badge
               variant="outline"
               className="bg-amber-50 text-amber-700 border-amber-200"
             >
               <AlertTriangle className="w-3 h-3 mr-1" />
-              도움 요청
+              도움 요청 중
             </Badge>
-          )}
+          ) : participant.helpRequestedAt ? (
+            <Badge
+              variant="outline"
+              className="bg-amber-50/50 text-amber-600/80 border-amber-200/50"
+            >
+              <AlertTriangle className="w-3 h-3 mr-1 opacity-70" />
+              도움 요청 취소됨
+            </Badge>
+          ) : null}
         </div>
       </div>
 

@@ -20,6 +20,7 @@ import {
   MessageSquare,
   Search,
   Users,
+  History,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -81,9 +82,9 @@ export function StudentsPanel({
       result = result.filter((p) => p.isOnline);
     }
 
-    // Needs help only
+    // Needs help only - show both current and past help requests
     if (showNeedsHelpOnly) {
-      result = result.filter((p) => p.needsHelp);
+      result = result.filter((p) => p.needsHelp || p.helpRequestedAt);
     }
 
     // Sort
@@ -275,9 +276,11 @@ export function StudentsPanel({
                         {getDisplayName(participant)}
                       </span>
                       {getStanceBadge(participant)}
-                      {participant.needsHelp && (
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
-                      )}
+                      {participant.needsHelp ? (
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" title="도움 요청 중" />
+                      ) : participant.helpRequestedAt ? (
+                        <History className="w-3.5 h-3.5 text-amber-400/70" title="도움 요청 이력 있음" />
+                      ) : null}
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">

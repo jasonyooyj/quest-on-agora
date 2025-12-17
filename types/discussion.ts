@@ -47,6 +47,7 @@ export interface DiscussionParticipant {
   createdAt: string;
   confusionNote?: string;
   needsHelp: boolean;
+  helpRequestedAt?: string; // When help was first requested (never cleared)
   messageCount?: number;
 }
 
