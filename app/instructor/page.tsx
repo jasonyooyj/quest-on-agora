@@ -189,8 +189,8 @@ export default function InstructorDashboard() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-foreground flex items-center justify-center group-hover:bg-[hsl(var(--coral))] transition-colors">
-                <MessageCircle className="w-5 h-5 text-background" />
+              <div className="flex items-center justify-center transition-colors">
+                <MessageCircle className="w-8 h-8 text-[hsl(var(--coral))] group-hover:scale-110 transition-transform" />
               </div>
               <span className="text-xl font-semibold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
                 Agora
