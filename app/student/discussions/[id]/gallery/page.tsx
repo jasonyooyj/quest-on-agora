@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getSupabaseClient } from '@/lib/supabase-client'
-import { toast } from 'sonner'
+import { useGallery } from '@/hooks/useGallery'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     ArrowLeft, Heart, MessageCircle, Send, Loader2,
@@ -59,92 +58,30 @@ export default function GalleryPage() {
     const router = useRouter()
     const discussionId = params.id as string
 
-    const [discussion, setDiscussion] = useState<Discussion | null>(null)
-    const [submissions, setSubmissions] = useState<Submission[]>([])
-    const [loading, setLoading] = useState(true)
+    const { galleryQuery, likeMutation, commentMutation } = useGallery(discussionId)
+    const { data: galleryData, isLoading } = galleryQuery
+
     const [expandedId, setExpandedId] = useState<string | null>(null)
     const [commentText, setCommentText] = useState('')
-    const [sendingComment, setSendingComment] = useState(false)
 
-    const fetchGallery = useCallback(async () => {
-        try {
-            const response = await fetch(`/api/discussions/${discussionId}/gallery`)
-            if (!response.ok) {
-                throw new Error('Failed to fetch gallery')
-            }
-            const data = await response.json()
-            setDiscussion(data.discussion)
-            setSubmissions(data.submissions)
-        } catch (error) {
-            console.error('Error fetching gallery:', error)
-            toast.error('갤러리를 불러오는데 실패했습니다')
-        } finally {
-            setLoading(false)
-        }
-    }, [discussionId])
+    const discussion = galleryData?.discussion
+    const submissions = galleryData?.submissions || []
 
-    useEffect(() => {
-        fetchGallery()
-    }, [fetchGallery])
-
-    const handleLike = async (participantId: string, hasLiked: boolean) => {
-        try {
-            if (hasLiked) {
-                await fetch(`/api/discussions/${discussionId}/likes?participantId=${participantId}`, {
-                    method: 'DELETE'
-                })
-            } else {
-                await fetch(`/api/discussions/${discussionId}/likes`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ participantId })
-                })
-            }
-
-            // Update local state
-            setSubmissions(prev => prev.map(s =>
-                s.id === participantId
-                    ? { ...s, hasLiked: !hasLiked, likeCount: hasLiked ? s.likeCount - 1 : s.likeCount + 1 }
-                    : s
-            ))
-        } catch (error) {
-            console.error('Error toggling like:', error)
-            toast.error('좋아요 처리 중 오류가 발생했습니다')
-        }
+    const handleLike = (participantId: string, hasLiked: boolean) => {
+        likeMutation.mutate({ participantId, hasLiked })
     }
 
-    const handleComment = async (participantId: string) => {
-        if (!commentText.trim() || sendingComment) return
-
-        setSendingComment(true)
-        try {
-            const response = await fetch(`/api/discussions/${discussionId}/comments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ participantId, content: commentText.trim() })
-            })
-
-            if (!response.ok) throw new Error('Failed to add comment')
-
-            const { comment } = await response.json()
-
-            // Update local state
-            setSubmissions(prev => prev.map(s =>
-                s.id === participantId
-                    ? { ...s, comments: [...s.comments, comment], commentCount: s.commentCount + 1 }
-                    : s
-            ))
-            setCommentText('')
-            toast.success('댓글이 등록되었습니다')
-        } catch (error) {
-            console.error('Error adding comment:', error)
-            toast.error('댓글 등록에 실패했습니다')
-        } finally {
-            setSendingComment(false)
-        }
+    const handleComment = (participantId: string) => {
+        if (!commentText.trim()) return
+        commentMutation.mutate(
+            { participantId, content: commentText.trim() },
+            {
+                onSuccess: () => setCommentText('')
+            }
+        )
     }
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
@@ -243,8 +180,8 @@ export default function GalleryPage() {
                                     <button
                                         onClick={() => handleLike(submission.id, submission.hasLiked)}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 border-2 transition-all ${submission.hasLiked
-                                                ? 'border-[hsl(var(--coral))] bg-[hsl(var(--coral))]/10 text-[hsl(var(--coral))]'
-                                                : 'border-border hover:border-foreground'
+                                            ? 'border-[hsl(var(--coral))] bg-[hsl(var(--coral))]/10 text-[hsl(var(--coral))]'
+                                            : 'border-border hover:border-foreground'
                                             }`}
                                     >
                                         <Heart className={`w-4 h-4 ${submission.hasLiked ? 'fill-current' : ''}`} />
@@ -305,10 +242,10 @@ export default function GalleryPage() {
                                                     />
                                                     <button
                                                         onClick={() => handleComment(submission.id)}
-                                                        disabled={!commentText.trim() || sendingComment}
+                                                        disabled={!commentText.trim() || commentMutation.isPending}
                                                         className="btn-brutal-fill px-4 disabled:opacity-50"
                                                     >
-                                                        {sendingComment ? (
+                                                        {commentMutation.isPending ? (
                                                             <Loader2 className="w-4 h-4 animate-spin" />
                                                         ) : (
                                                             <Send className="w-4 h-4" />

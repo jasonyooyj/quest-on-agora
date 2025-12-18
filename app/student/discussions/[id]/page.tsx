@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getSupabaseClient } from '@/lib/supabase-client'
@@ -8,39 +8,10 @@ import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     Send, ArrowLeft, Clock, Loader2,
-    HelpCircle, CheckCircle, AlertCircle,
-    MessageSquare, ThumbsUp, ThumbsDown, Minus, Users
+    HelpCircle, MessageSquare, ThumbsUp, ThumbsDown, Minus, Users,
+    AlertCircle, CheckCircle
 } from 'lucide-react'
-
-interface Discussion {
-    id: string
-    title: string
-    description: string | null
-    status: 'draft' | 'active' | 'closed'
-    settings: {
-        anonymous: boolean
-        stanceOptions: string[]
-        aiMode: string
-        stanceLabels?: Record<string, string>
-        maxTurns?: number
-    }
-}
-
-interface Participant {
-    id: string
-    display_name: string | null
-    stance: string | null
-    stance_statement: string | null
-    is_submitted: boolean
-    needs_help: boolean
-}
-
-interface Message {
-    id: string
-    role: 'user' | 'ai' | 'instructor' | 'system'
-    content: string
-    created_at: string
-}
+import { useDiscussionSession, useDiscussionParticipants, useParticipantMessages } from '@/hooks/useDiscussion'
 
 const getStanceIcon = (stance: string) => {
     if (stance === 'pro') return <ThumbsUp className="w-5 h-5" />
@@ -48,260 +19,167 @@ const getStanceIcon = (stance: string) => {
     return <Minus className="w-5 h-5" />
 }
 
+const getStanceStyle = (stance: string) => {
+    if (stance === 'pro') return 'border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-300'
+    if (stance === 'con') return 'border-red-200 bg-red-50 text-red-700 hover:border-red-300'
+    return 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
+}
+
 export default function StudentDiscussionPage() {
     const params = useParams()
     const router = useRouter()
     const discussionId = params.id as string
     const messagesEndRef = useRef<HTMLDivElement>(null)
-
-    const [discussion, setDiscussion] = useState<Discussion | null>(null)
-    const [participant, setParticipant] = useState<Participant | null>(null)
-    const [messages, setMessages] = useState<Message[]>([])
-    const [loading, setLoading] = useState(true)
-    const [sending, setSending] = useState(false)
     const [message, setMessage] = useState('')
     const [showStanceSelector, setShowStanceSelector] = useState(false)
+    const [sending, setSending] = useState(false)
+
+    // Using React Query hooks
+    const {
+        data: discussion,
+        isLoading: isDiscussionLoading
+    } = useDiscussionSession(discussionId)
+
+    const {
+        data: participants,
+        isLoading: isParticipantsLoading
+    } = useDiscussionParticipants(discussionId)
+
+    const supabase = getSupabaseClient()
+    const [userId, setUserId] = useState<string | null>(null)
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) setUserId(user.id)
+            else router.push('/login?redirect=/student')
+        })
+    }, [router, supabase])
+
+    const participant = participants?.find(p => p.studentId === userId)
+
+    const {
+        data: messages = [],
+        isLoading: isMessagesLoading
+    } = useParticipantMessages(discussionId, participant?.id || null)
+
+    const isLoading = isDiscussionLoading || isParticipantsLoading || !userId
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
 
-    const fetchData = useCallback(async () => {
-        const supabase = getSupabaseClient()
-
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            router.push('/login?redirect=/student')
-            return
-        }
-
-        // Fetch discussion
-        const { data: discussionData, error: discussionError } = await supabase
-            .from('discussion_sessions')
-            .select('*')
-            .eq('id', discussionId)
-            .single()
-
-        if (discussionError) {
-            toast.error('토론을 찾을 수 없습니다')
-            router.push('/student')
-            return
-        }
-
-        setDiscussion(discussionData)
-
-        // Fetch participant data
-        const { data: participantData } = await supabase
-            .from('discussion_participants')
-            .select('*')
-            .eq('session_id', discussionId)
-            .eq('student_id', user.id)
-            .single()
-
-        if (participantData) {
-            setParticipant(participantData)
-
-            // Fetch messages for this participant
-            const { data: messagesData } = await supabase
-                .from('discussion_messages')
-                .select('id, role, content, created_at')
-                .eq('session_id', discussionId)
-                .eq('participant_id', participantData.id)
-                .order('created_at', { ascending: true })
-
-            if (messagesData) {
-                setMessages(messagesData)
-            }
-        }
-
-        setLoading(false)
-    }, [discussionId, router])
-
-    useEffect(() => {
-        fetchData()
-    }, [fetchData])
-
     useEffect(() => {
         scrollToBottom()
-    }, [messages])
+    }, [messages.length])
 
-    // Real-time message subscription
-    useEffect(() => {
+    const handleStanceSelect = async (stance: string) => {
         if (!participant) return
 
-        const supabase = getSupabaseClient()
-
-        const channel = supabase
-            .channel('student-messages')
-            .on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'discussion_messages',
-                filter: `participant_id=eq.${participant.id}`
-            }, (payload) => {
-                const newMessage = payload.new as Message
-                setMessages(prev => [...prev, newMessage])
-            })
-            .subscribe()
-
-        // Update online status
-        supabase
-            .from('discussion_participants')
-            .update({ is_online: true, last_active_at: new Date().toISOString() })
-            .eq('id', participant.id)
-            .then()
-
-        // Set offline on unmount
-        return () => {
-            supabase.removeChannel(channel)
-            supabase
-                .from('discussion_participants')
-                .update({ is_online: false })
-                .eq('id', participant.id)
-                .then()
-        }
-    }, [participant])
-
-    const sendMessage = async () => {
-        if (!message.trim() || !participant || sending) return
-
-        setSending(true)
-        const supabase = getSupabaseClient()
-        const userMessageContent = message.trim()
-        if (!userMessageContent) return
-
-        const tempId = Math.random().toString(36).substring(7)
-        const userMessage: Message = {
-            id: tempId,
-            role: 'user',
-            content: userMessageContent,
-            created_at: new Date().toISOString()
-        }
-
-        // Optimistic update
-        setMessages(prev => [...prev, userMessage])
-        setMessage('')
-
-        // Call AI chat API
         try {
-            const response = await fetch(`/api/discussions/${discussionId}/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    participantId: participant.id,
-                    userMessage: userMessageContent,
-                    discussionId
-                })
-            })
+            await supabase
+                .from('discussion_participants')
+                .update({ stance })
+                .eq('id', participant.id)
 
-            if (!response.ok) {
-                throw new Error('Failed to send message')
-            }
-
-            // AI response will be received via real-time subscription
-        } catch (aiError) {
-            console.error('AI response error:', aiError)
-            toast.error('메시지 전송 중 오류가 발생했습니다')
-            // Rollback optimistic update
-            setMessages(prev => prev.filter(m => m.id !== tempId))
-        }
-
-        setSending(false)
-    }
-
-    const selectStance = async (stance: string) => {
-        if (!participant) return
-
-        const supabase = getSupabaseClient()
-
-        const { error } = await supabase
-            .from('discussion_participants')
-            .update({ stance })
-            .eq('id', participant.id)
-
-        if (error) {
-            toast.error('입장 선택 실패')
-        } else {
-            setParticipant({ ...participant, stance })
+            // React Query will auto-refetch due to realtime subscription
             setShowStanceSelector(false)
-            const label = discussion?.settings?.stanceLabels?.[stance] || stance
-            toast.success(`${label} 입장을 선택했습니다`)
+            toast.success('입장이 선택되었습니다')
+        } catch (error) {
+            console.error('Error selecting stance:', error)
+            toast.error('입장 선택 중 오류가 발생했습니다')
         }
     }
 
     const requestHelp = async () => {
         if (!participant) return
 
-        const supabase = getSupabaseClient()
+        try {
+            const newStatus = !participant.needsHelp
+            await supabase
+                .from('discussion_participants')
+                .update({ needs_help: newStatus })
+                .eq('id', participant.id)
 
-        const { error } = await supabase
-            .from('discussion_participants')
-            .update({
-                needs_help: !participant.needs_help,
-                help_requested_at: participant.needs_help ? null : new Date().toISOString()
-            })
-            .eq('id', participant.id)
-
-        if (error) {
-            toast.error('요청 실패')
-        } else {
-            setParticipant({ ...participant, needs_help: !participant.needs_help })
-            toast.success(participant.needs_help ? '도움 요청을 취소했습니다' : '교수님께 도움을 요청했습니다')
+            toast.success(newStatus ? '도움이 요청되었습니다' : '도움 요청이 취소되었습니다')
+        } catch (error) {
+            console.error('Error toggling help:', error)
+            toast.error('오류가 발생했습니다')
         }
     }
 
-    if (loading) {
+    const handleSendMessage = async () => {
+        if (!message.trim() || !participant || sending) return
+
+        const currentMessage = message.trim()
+        setMessage('')
+        setSending(true)
+
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    participantId: participant.id,
+                    content: currentMessage
+                })
+            })
+
+            if (!response.ok) throw new Error('Failed to send message')
+
+            // The hook's realtime subscription will catch the new message
+        } catch (error) {
+            console.error('Error sending message:', error)
+            toast.error('메시지 전송에 실패했습니다')
+            setMessage(currentMessage) // Rollback
+        } finally {
+            setSending(false)
+        }
+    }
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSendMessage()
+        }
+    }
+
+    if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-foreground border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-muted-foreground">토론에 연결하는 중...</p>
+                    <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+                    <p className="text-muted-foreground">토론방 입장 중...</p>
                 </div>
             </div>
         )
     }
 
-    if (!discussion) return null
-
-    // Discussion is not active
-    if (discussion.status === 'draft') {
+    if (!discussion) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="brutal-box p-8 max-w-md text-center">
-                    <Clock className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
-                        토론 대기 중
-                    </h1>
-                    <p className="text-muted-foreground mb-4">
-                        교수님이 토론을 시작하면 참여할 수 있습니다
-                    </p>
-                    <p className="text-sm font-mono bg-muted p-2 rounded">{discussion.title}</p>
-                </div>
-            </div>
-        )
-    }
-
-    if (discussion.status === 'closed') {
-        return (
-            <div className="min-h-screen flex items-center justify-center p-4">
-                <div className="brutal-box p-8 max-w-md text-center">
-                    <CheckCircle className="w-12 h-12 mx-auto mb-4 text-green-600" />
-                    <h1 className="text-2xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
-                        토론 종료
-                    </h1>
-                    <p className="text-muted-foreground mb-4">
-                        이 토론은 종료되었습니다
-                    </p>
-                    <button
-                        onClick={() => router.push('/student')}
-                        className="btn-brutal-fill"
-                    >
-                        대시보드로 돌아가기
+                    <p>토론을 찾을 수 없습니다.</p>
+                    <button onClick={() => router.push('/student')} className="btn-brutal-fill mt-4">
+                        돌아가기
                     </button>
                 </div>
             </div>
         )
+    }
+
+    // Check if stance needs to be selected
+    const needsStanceSelection = !participant?.stance && !showStanceSelector
+
+    // Auto-show stance selector if needed
+    if (needsStanceSelection && !showStanceSelector) {
+        // Use timeout to avoid bad setState during render
+        setTimeout(() => setShowStanceSelector(true), 0)
+    }
+
+    const stanceLabels = discussion.settings?.stanceLabels || {
+        pro: '찬성',
+        con: '반대',
+        neutral: '중립'
     }
 
     return (
@@ -310,12 +188,12 @@ export default function StudentDiscussionPage() {
             <header className="sticky top-0 z-50 border-b-2 border-foreground bg-background">
                 <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => router.push('/student')}
+                        <Link
+                            href="/student"
                             className="p-2 border-2 border-border hover:border-foreground transition-colors"
                         >
                             <ArrowLeft className="w-4 h-4" />
-                        </button>
+                        </Link>
                         <div>
                             <h1 className="font-bold text-lg" style={{ fontFamily: 'var(--font-display)' }}>
                                 {discussion.title}
@@ -333,11 +211,11 @@ export default function StudentDiscussionPage() {
                         </Link>
                         <button
                             onClick={requestHelp}
-                            className={`p-2 border-2 transition-colors ${participant?.needs_help
+                            className={`p-2 border-2 transition-colors ${participant?.needsHelp
                                 ? 'border-amber-500 bg-amber-50 text-amber-700'
                                 : 'border-border hover:border-foreground'
                                 }`}
-                            title={participant?.needs_help ? '도움 요청 취소' : '도움 요청'}
+                            title={participant?.needsHelp ? '도움 요청 취소' : '도움 요청'}
                         >
                             <HelpCircle className="w-5 h-5" />
                         </button>
@@ -353,15 +231,13 @@ export default function StudentDiscussionPage() {
                         {participant?.stance ? (
                             <button
                                 onClick={() => setShowStanceSelector(true)}
-                                className={`flex items-center gap-2 px-3 py-1.5 border-2 font-medium ${participant.stance === 'pro'
-                                    ? 'border-green-500 bg-green-50 text-green-700'
-                                    : participant.stance === 'con'
-                                        ? 'border-red-500 bg-red-50 text-red-700'
-                                        : 'border-gray-400 bg-gray-50 text-gray-700'
+                                className={`flex items-center gap-2 px-3 py-1.5 border-2 font-medium ${participant.stance === 'pro' ? 'border-green-500 bg-green-50 text-green-700' :
+                                        participant.stance === 'con' ? 'border-red-500 bg-red-50 text-red-700' :
+                                            'border-gray-400 bg-gray-50 text-gray-700'
                                     }`}
                             >
                                 {getStanceIcon(participant.stance)}
-                                {discussion.settings.stanceLabels?.[participant.stance] || participant.stance}
+                                {stanceLabels[participant.stance] || participant.stance}
                             </button>
                         ) : (
                             <button
@@ -374,7 +250,7 @@ export default function StudentDiscussionPage() {
                         )}
                     </div>
 
-                    {participant?.is_submitted && (
+                    {participant?.isSubmitted && (
                         <span className="flex items-center gap-1 text-sm text-green-600">
                             <CheckCircle className="w-4 h-4" />
                             제출 완료
@@ -383,89 +259,50 @@ export default function StudentDiscussionPage() {
                 </div>
             </div>
 
-            {/* Stance Selector Modal */}
-            <AnimatePresence>
-                {showStanceSelector && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-                        onClick={() => setShowStanceSelector(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="bg-background border-2 border-foreground p-6 max-w-sm w-full"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <h2 className="text-xl font-bold mb-4" style={{ fontFamily: 'var(--font-display)' }}>
-                                입장 선택
-                            </h2>
-                            <p className="text-muted-foreground text-sm mb-6">
-                                토론 주제에 대한 당신의 입장을 선택하세요
-                            </p>
-
-                            <div className="space-y-3">
-                                {(discussion.settings.stanceOptions || ['pro', 'con', 'neutral']).map(stance => (
-                                    <button
-                                        key={stance}
-                                        onClick={() => selectStance(stance)}
-                                        className={`w-full p-4 border-2 flex items-center gap-3 transition-all ${participant?.stance === stance
-                                            ? 'border-foreground bg-foreground text-background'
-                                            : 'border-border hover:border-foreground'
-                                            }`}
-                                    >
-                                        {getStanceIcon(stance)}
-                                        <span className="font-semibold">{discussion.settings.stanceLabels?.[stance] || stance}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Chat Messages */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
-                    {/* Welcome Message */}
-                    {messages.length === 0 && (
-                        <div className="text-center py-8">
-                            <MessageSquare className="w-12 h-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-                            <h2 className="text-lg font-semibold mb-2">토론을 시작하세요</h2>
-                            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                                {discussion.description || '주제에 대한 당신의 생각을 자유롭게 나눠보세요. AI 튜터가 함께합니다.'}
-                            </p>
+            {/* Chat Area */}
+            <main className="flex-1 overflow-y-auto p-4 scroll-smooth">
+                <div className="max-w-3xl mx-auto space-y-6 pb-4">
+                    <div className="text-center py-8 text-muted-foreground space-y-2">
+                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                            <MessageSquare className="w-6 h-6" />
                         </div>
-                    )}
+                        <h3 className="font-semibold">AI 튜터와 토론을 시작하세요</h3>
+                        <p className="text-sm max-w-sm mx-auto">
+                            선택하신 입장을 바탕으로 AI 튜터가 질문을 던집니다.
+                            자신의 주장을 논리적으로 펼쳐보세요.
+                        </p>
+                        {discussion.settings?.maxTurns && (
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-muted/50 rounded-full text-xs mt-2">
+                                <Clock className="w-3 h-3" />
+                                <span>최대 {discussion.settings.maxTurns}턴 진행 예정</span>
+                            </div>
+                        )}
+                    </div>
 
-                    {/* Messages */}
-                    {messages.map((msg, index) => (
+                    {messages.map((msg) => (
                         <motion.div
                             key={msg.id}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[85%] ${msg.role === 'user' ? 'order-2' : ''
+                            <div className={`max-w-[85%] lg:max-w-[75%] rounded-2xl p-4 shadow-sm border-2 ${msg.role === 'user'
+                                    ? 'bg-primary text-primary-foreground border-primary rounded-tr-none'
+                                    : msg.role === 'instructor'
+                                        ? 'bg-amber-50 border-amber-200 text-amber-900'
+                                        : 'bg-card border-border rounded-tl-none'
                                 }`}>
-                                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
-                                    <span>
-                                        {msg.role === 'user' ? '나' : msg.role === 'ai' ? 'AI 튜터' : '교수님'}
+                                <div className="flex items-center gap-2 mb-1.5 opacity-80">
+                                    <span className="text-xs font-bold uppercase tracking-wider">
+                                        {msg.role === 'user' ? '나' :
+                                            msg.role === 'instructor' ? '교수님' : 'AI 튜터'}
                                     </span>
-                                    <Clock className="w-3 h-3" />
-                                    <span>{new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    <span className="text-[10px]">
+                                        {new Date(msg.createdAt || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
                                 </div>
-                                <div className={`p-4 border-2 ${msg.role === 'user'
-                                    ? 'border-foreground bg-foreground text-background ml-auto'
-                                    : msg.role === 'ai'
-                                        ? 'border-sage bg-sage/10'
-                                        : 'border-coral bg-coral/10'
-                                    }`}>
-                                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                                <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+                                    {msg.content}
                                 </div>
                             </div>
                         </motion.div>
@@ -474,7 +311,7 @@ export default function StudentDiscussionPage() {
                     {/* Sending indicator */}
                     {sending && (
                         <div className="flex justify-start">
-                            <div className="p-4 border-2 border-sage bg-sage/10">
+                            <div className="p-4 border-2 border-sage bg-sage/10 rounded-2xl rounded-tl-none">
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Loader2 className="w-4 h-4 animate-spin" />
                                     AI 튜터가 생각하는 중...
@@ -485,35 +322,72 @@ export default function StudentDiscussionPage() {
 
                     <div ref={messagesEndRef} />
                 </div>
-            </div>
+            </main>
 
             {/* Input Area */}
-            <div className="sticky bottom-0 border-t-2 border-foreground bg-background">
-                <div className="max-w-3xl mx-auto px-4 py-4">
-                    <div className="flex gap-3">
-                        <input
-                            type="text"
-                            value={message}
-                            onChange={e => setMessage(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                            placeholder="생각을 입력하세요..."
-                            className="input-editorial flex-1"
-                            disabled={sending}
-                        />
-                        <button
-                            onClick={sendMessage}
-                            disabled={!message.trim() || sending}
-                            className="btn-brutal-fill px-5 disabled:opacity-50"
-                        >
-                            {sending ? (
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            ) : (
-                                <Send className="w-5 h-5" />
-                            )}
-                        </button>
-                    </div>
+            <footer className="border-t-2 border-foreground bg-background p-4 sticky bottom-0">
+                <div className="max-w-3xl mx-auto flex gap-3">
+                    <textarea
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder={sending ? "AI 튜터가 답변을 작성 중입니다..." : "메시지를 입력하세요..."}
+                        className="flex-1 input-editorial resize-none h-[52px] py-3 leading-relaxed"
+                        disabled={sending}
+                    />
+                    <button
+                        onClick={handleSendMessage}
+                        disabled={!message.trim() || sending}
+                        className="btn-brutal-fill px-6 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                    >
+                        {sending ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <Send className="w-5 h-5" />
+                        )}
+                    </button>
                 </div>
-            </div>
+            </footer>
+
+            {/* Stance Selector Modal */}
+            <AnimatePresence>
+                {showStanceSelector && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            className="brutal-box bg-background max-w-lg w-full p-6 shadow-2xl"
+                        >
+                            <h2 className="text-2xl font-bold mb-2">입장을 선택하세요</h2>
+                            <p className="text-muted-foreground mb-6">
+                                이번 토론에서 취할 입장을 선택해주세요.
+                                선택한 입장에 따라 AI 튜터가 맞춤형 질문을 던집니다.
+                            </p>
+
+                            <div className="grid gap-3">
+                                {(discussion.settings.stanceOptions || ['pro', 'con', 'neutral']).map((option) => (
+                                    <button
+                                        key={option}
+                                        onClick={() => handleStanceSelect(option)}
+                                        className={`flex items-center gap-4 p-4 border-2 rounded-xl transition-all hover:translate-x-1 ${getStanceStyle(option)
+                                            }`}
+                                    >
+                                        <div className="p-2 bg-white/50 rounded-lg">
+                                            {getStanceIcon(option)}
+                                        </div>
+                                        <div className="text-left">
+                                            <div className="font-bold text-lg">
+                                                {stanceLabels[option] || option}
+                                            </div>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

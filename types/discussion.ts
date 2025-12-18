@@ -1,17 +1,19 @@
 // Discussion Session Types
 
 export type DiscussionStatus = "draft" | "active" | "closed";
-export type Stance = "pro" | "con" | "neutral";
+export type Stance = string; // Changed from union to string to support dynamic stances
 export type MessageRole = "user" | "ai" | "instructor" | "system";
 export type InterventionType = "nudge" | "evidence_request" | "counterexample" | "custom";
-export type AIMode = "socratic" | "debate";
+export type AIMode = "socratic" | "debate" | "minimal" | "balanced";
 
 export interface DiscussionSettings {
   anonymous: boolean;
-  stanceOptions: Stance[];
+  stanceOptions: string[];
   endTime?: string;
   allowStanceChange?: boolean;
-  aiMode?: AIMode; // AI 모드: "socratic" (소크라테스식 질문) 또는 "debate" (반대 논리 제시)
+  aiMode?: AIMode;
+  stanceLabels?: Record<string, string>;
+  maxTurns?: number;
 }
 
 export interface DiscussionSession {
