@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -16,19 +16,19 @@ const loginSchema = z.object({
     password: z.string().min(6, '비밀번호는 6자 이상이어야 합니다'),
 })
 
-type LoginForm = z.infer<typeof loginSchema>
+type LoginFormData = z.infer<typeof loginSchema>
 
-export default function LoginPage() {
+function LoginForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isLoading, setIsLoading] = useState(false)
     const redirect = searchParams.get('redirect') || '/instructor'
 
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
+    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     })
 
-    const onSubmit = async (data: LoginForm) => {
+    const onSubmit = async (data: LoginFormData) => {
         setIsLoading(true)
         try {
             const supabase = getSupabaseClient()
@@ -139,5 +139,17 @@ export default function LoginPage() {
                 </p>
             </div>
         </motion.div>
+    )
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            </div>
+        }>
+            <LoginForm />
+        </Suspense>
     )
 }
