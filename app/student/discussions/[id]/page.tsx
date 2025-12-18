@@ -488,18 +488,18 @@ export default function StudentDiscussionPage() {
                     {/* Quick Actions */}
                     <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
                         <button
-                            onClick={() => sendMessage('Tell me more')}
+                            onClick={() => sendMessage('더 알려줘')}
                             disabled={sending}
                             className="whitespace-nowrap px-3 py-1.5 rounded-full border border-border bg-background hover:bg-muted text-sm font-medium transition-colors disabled:opacity-50"
                         >
-                            Tell me more
+                            더 알려줘
                         </button>
                         <button
-                            onClick={() => sendMessage('Can you explain?')}
+                            onClick={() => sendMessage('설명해줘')}
                             disabled={sending}
                             className="whitespace-nowrap px-3 py-1.5 rounded-full border border-border bg-background hover:bg-muted text-sm font-medium transition-colors disabled:opacity-50"
                         >
-                            Can you explain?
+                            설명해줘
                         </button>
                     </div>
 
