@@ -166,12 +166,12 @@ export default function StudentDiscussionPage() {
         }
     }, [participant])
 
-    const sendMessage = async () => {
-        if (!message.trim() || !participant || sending) return
+    const sendMessage = async (content?: string) => {
+        const userMessageContent = typeof content === 'string' ? content : message.trim()
+        if (!userMessageContent || !participant || sending) return
 
         setSending(true)
         const supabase = getSupabaseClient()
-        const userMessageContent = message.trim()
 
         // Insert user message
         const { error } = await supabase
@@ -189,7 +189,9 @@ export default function StudentDiscussionPage() {
             return
         }
 
-        setMessage('')
+        if (typeof content !== 'string') {
+            setMessage('')
+        }
 
         // Call AI chat API
         try {
@@ -483,6 +485,24 @@ export default function StudentDiscussionPage() {
             {/* Input Area */}
             <div className="sticky bottom-0 border-t-2 border-foreground bg-background">
                 <div className="max-w-3xl mx-auto px-4 py-4">
+                    {/* Quick Actions */}
+                    <div className="flex gap-2 mb-3 overflow-x-auto pb-2">
+                        <button
+                            onClick={() => sendMessage('Tell me more')}
+                            disabled={sending}
+                            className="whitespace-nowrap px-3 py-1.5 rounded-full border border-border bg-background hover:bg-muted text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                            Tell me more
+                        </button>
+                        <button
+                            onClick={() => sendMessage('Can you explain?')}
+                            disabled={sending}
+                            className="whitespace-nowrap px-3 py-1.5 rounded-full border border-border bg-background hover:bg-muted text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                            Can you explain?
+                        </button>
+                    </div>
+
                     <div className="flex gap-3">
                         <input
                             type="text"
@@ -494,7 +514,7 @@ export default function StudentDiscussionPage() {
                             disabled={sending}
                         />
                         <button
-                            onClick={sendMessage}
+                            onClick={() => sendMessage()}
                             disabled={!message.trim() || sending}
                             className="btn-brutal-fill px-5 disabled:opacity-50"
                         >
