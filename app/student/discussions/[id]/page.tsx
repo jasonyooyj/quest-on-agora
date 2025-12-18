@@ -232,8 +232,8 @@ export default function StudentDiscussionPage() {
                             <button
                                 onClick={() => setShowStanceSelector(true)}
                                 className={`flex items-center gap-2 px-3 py-1.5 border-2 font-medium ${participant.stance === 'pro' ? 'border-green-500 bg-green-50 text-green-700' :
-                                        participant.stance === 'con' ? 'border-red-500 bg-red-50 text-red-700' :
-                                            'border-gray-400 bg-gray-50 text-gray-700'
+                                    participant.stance === 'con' ? 'border-red-500 bg-red-50 text-red-700' :
+                                        'border-gray-400 bg-gray-50 text-gray-700'
                                     }`}
                             >
                                 {getStanceIcon(participant.stance)}
@@ -287,10 +287,10 @@ export default function StudentDiscussionPage() {
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                             <div className={`max-w-[85%] lg:max-w-[75%] rounded-2xl p-4 shadow-sm border-2 ${msg.role === 'user'
-                                    ? 'bg-primary text-primary-foreground border-primary rounded-tr-none'
-                                    : msg.role === 'instructor'
-                                        ? 'bg-amber-50 border-amber-200 text-amber-900'
-                                        : 'bg-card border-border rounded-tl-none'
+                                ? 'bg-primary text-primary-foreground border-primary rounded-tr-none'
+                                : msg.role === 'instructor'
+                                    ? 'bg-amber-50 border-amber-200 text-amber-900'
+                                    : 'bg-card border-border rounded-tl-none'
                                 }`}>
                                 <div className="flex items-center gap-2 mb-1.5 opacity-80">
                                     <span className="text-xs font-bold uppercase tracking-wider">
@@ -309,16 +309,7 @@ export default function StudentDiscussionPage() {
                     ))}
 
                     {/* Sending indicator */}
-                    {sending && (
-                        <div className="flex justify-start">
-                            <div className="p-4 border-2 border-sage bg-sage/10 rounded-2xl rounded-tl-none">
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    AI 튜터가 생각하는 중...
-                                </div>
-                            </div>
-                        </div>
-                    )}
+                    {sending && <ThinkingIndicator />}
 
                     <div ref={messagesEndRef} />
                 </div>
@@ -388,6 +379,39 @@ export default function StudentDiscussionPage() {
                     </div>
                 )}
             </AnimatePresence>
+        </div>
+    )
+}
+
+function ThinkingIndicator() {
+    const [message, setMessage] = useState('AI 튜터가 답변을 작성 중입니다...')
+
+    useEffect(() => {
+        const messages = [
+            '답변을 꼼꼼히 읽고 있어요...',
+            '논리적인 답변을 구상 중입니다...',
+            '반론을 생각하고 있습니다...',
+            '적절한 질문을 고르고 있어요...',
+            '답변을 다듬는 중입니다...'
+        ]
+        let index = 0
+
+        const interval = setInterval(() => {
+            index = (index + 1) % messages.length
+            setMessage(messages[index])
+        }, 3000)
+
+        return () => clearInterval(interval)
+    }, [])
+
+    return (
+        <div className="flex justify-start">
+            <div className="p-4 border-2 border-sage bg-sage/10 rounded-2xl rounded-tl-none">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="animate-pulse">{message}</span>
+                </div>
+            </div>
         </div>
     )
 }
