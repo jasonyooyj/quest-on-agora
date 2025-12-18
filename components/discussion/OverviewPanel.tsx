@@ -67,20 +67,20 @@ export function OverviewPanel({
   // Calculate attention reasons summary
   const attentionReasons = useMemo(() => {
     if (needsAttention.length === 0) return [];
-    
+
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
-    
+
     const reasons: string[] = [];
     let helpCount = 0;
     let hadHelpCount = 0;
     let inactiveCount = 0;
     let noActivityCount = 0;
     let longInactiveCount = 0;
-    
+
     needsAttention.forEach((p) => {
       const lastActive = new Date(p.lastActiveAt);
-      
+
       if (p.needsHelp) helpCount++;
       else if (p.helpRequestedAt) hadHelpCount++;
       if (!p.isSubmitted && p.messageCount === 0) noActivityCount++;
@@ -92,7 +92,7 @@ export function OverviewPanel({
         }
       }
     });
-    
+
     if (helpCount > 0) {
       reasons.push(`도움 요청 중 ${helpCount}명`);
     }
@@ -107,7 +107,7 @@ export function OverviewPanel({
     if (noActivityCount > 0) {
       reasons.push(`대화 없음 ${noActivityCount}명`);
     }
-    
+
     return reasons;
   }, [needsAttention]);
 

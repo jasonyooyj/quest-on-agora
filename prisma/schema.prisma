@@ -65,6 +65,8 @@ model discussion_participants {
   instructor_notes discussion_instructor_notes[]
   messages         discussion_messages[]
   session          discussion_sessions           @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  likes            discussion_likes[]
+  comments         discussion_comments[]
 
   @@unique([session_id, student_id])
   @@index([session_id], map: "idx_discussion_participants_session_id")
@@ -116,6 +118,31 @@ model discussion_instructor_notes {
   participant    discussion_participants @relation(fields: [participant_id], references: [id], onDelete: Cascade)
 
   @@index([participant_id], map: "idx_discussion_instructor_notes_participant_id")
+}
+
+/// Likes on discussion participant submissions
+model discussion_likes {
+  id             String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  participant_id String                  @db.Uuid
+  user_id        String
+  created_at     DateTime                @default(now()) @db.Timestamptz(6)
+  participant    discussion_participants @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+
+  @@unique([participant_id, user_id])
+  @@index([participant_id], map: "idx_discussion_likes_participant_id")
+}
+
+/// Comments on discussion participant submissions
+model discussion_comments {
+  id             String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  participant_id String                  @db.Uuid
+  user_id        String
+  user_name      String?
+  content        String
+  created_at     DateTime                @default(now()) @db.Timestamptz(6)
+  participant    discussion_participants @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+
+  @@index([participant_id], map: "idx_discussion_comments_participant_id")
 }
 
 model exam_nodes {

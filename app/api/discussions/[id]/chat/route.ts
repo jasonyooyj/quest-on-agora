@@ -17,12 +17,20 @@ const openai = new OpenAI({
 })
 
 // System prompts for different AI modes
-const getSystemPrompt = (mode: string, discussionTitle: string, discussionDescription: string | null) => {
+const getSystemPrompt = (
+    mode: string,
+    discussionTitle: string,
+    discussionDescription: string | null,
+    stanceLabel?: string,
+    isClosing?: boolean
+) => {
     const baseContext = `
 당신은 "${discussionTitle}" 주제에 대한 토론을 안내하는 AI 튜터입니다.
 ${discussionDescription ? `토론 설명: ${discussionDescription}` : ''}
+${stanceLabel ? `현재 대화 중인 학생의 입장: "${stanceLabel}"` : ''}
 학생이 비판적 사고를 발전시키고 자신의 주장을 명확히 표현할 수 있도록 도와주세요.
 응답은 한국어로 해주세요. 응답은 간결하고 명확하게 2-4문장으로 작성하세요.
+${isClosing ? '중요: 이제 토론을 마무리할 시간입니다. 학생의 의견을 정리해주거나, 마지막으로 깊이 생각해볼 만한 질문을 던지며 대화를 정중히 종료하세요.' : ''}
 `
 
     switch (mode) {
@@ -92,11 +100,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             .select('role, content')
             .eq('participant_id', participantId)
             .order('created_at', { ascending: true })
-            .limit(20)
 
-        const settings = discussion.settings as DiscussionSettings
+        // Get student's stance to get the label
+        const { data: participant } = await supabase
+            .from('discussion_participants')
+            .select('stance')
+            .eq('id', participantId)
+            .single()
+
+        const settings = discussion.settings as any
+        const stanceLabel = participant?.stance ? settings?.stanceLabels?.[participant.stance] : undefined
+
+        // Count user turns
+        const userTurns = history?.filter(m => m.role === 'user').length || 0
+        const maxTurns = settings?.maxTurns || 10
+        const isClosing = userTurns >= maxTurns - 1 // Closing on the last turn
+
         const aiMode = settings?.aiMode || 'socratic'
-        const systemPrompt = getSystemPrompt(aiMode, discussion.title, discussion.description)
+        const systemPrompt = getSystemPrompt(aiMode, discussion.title, discussion.description, stanceLabel, isClosing)
 
         // Build messages for OpenAI
         const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -108,7 +129,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             for (const msg of history) {
                 if (msg.role === 'user') {
                     messages.push({ role: 'user', content: msg.content })
-                } else if (msg.role === 'ai') {
+                } else if (msg.role === 'ai' || msg.role === 'assistant') {
                     messages.push({ role: 'assistant', content: msg.content })
                 }
             }

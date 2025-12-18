@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     Send, ArrowLeft, Clock, Loader2,
     HelpCircle, CheckCircle, AlertCircle,
-    MessageSquare, ThumbsUp, ThumbsDown, Minus
+    MessageSquare, ThumbsUp, ThumbsDown, Minus, Users
 } from 'lucide-react'
 
 interface Discussion {
@@ -20,6 +21,8 @@ interface Discussion {
         anonymous: boolean
         stanceOptions: string[]
         aiMode: string
+        stanceLabels?: Record<string, string>
+        maxTurns?: number
     }
 }
 
@@ -39,16 +42,10 @@ interface Message {
     created_at: string
 }
 
-const stanceLabels: Record<string, string> = {
-    pro: '찬성',
-    con: '반대',
-    neutral: '중립'
-}
-
-const stanceIcons: Record<string, React.ReactNode> = {
-    pro: <ThumbsUp className="w-5 h-5" />,
-    con: <ThumbsDown className="w-5 h-5" />,
-    neutral: <Minus className="w-5 h-5" />
+const getStanceIcon = (stance: string) => {
+    if (stance === 'pro') return <ThumbsUp className="w-5 h-5" />
+    if (stance === 'con') return <ThumbsDown className="w-5 h-5" />
+    return <Minus className="w-5 h-5" />
 }
 
 export default function StudentDiscussionPage() {
@@ -172,28 +169,23 @@ export default function StudentDiscussionPage() {
         setSending(true)
         const supabase = getSupabaseClient()
         const userMessageContent = message.trim()
+        if (!userMessageContent) return
 
-        // Insert user message
-        const { error } = await supabase
-            .from('discussion_messages')
-            .insert({
-                session_id: discussionId,
-                participant_id: participant.id,
-                role: 'user',
-                content: userMessageContent
-            })
-
-        if (error) {
-            toast.error('메시지 전송 실패')
-            setSending(false)
-            return
+        const tempId = Math.random().toString(36).substring(7)
+        const userMessage: Message = {
+            id: tempId,
+            role: 'user',
+            content: userMessageContent,
+            created_at: new Date().toISOString()
         }
 
+        // Optimistic update
+        setMessages(prev => [...prev, userMessage])
         setMessage('')
 
         // Call AI chat API
         try {
-            await fetch(`/api/discussions/${discussionId}/chat`, {
+            const response = await fetch(`/api/discussions/${discussionId}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -202,10 +194,17 @@ export default function StudentDiscussionPage() {
                     discussionId
                 })
             })
+
+            if (!response.ok) {
+                throw new Error('Failed to send message')
+            }
+
             // AI response will be received via real-time subscription
         } catch (aiError) {
             console.error('AI response error:', aiError)
-            // Don't fail if AI response fails - the subscription will handle it
+            toast.error('메시지 전송 중 오류가 발생했습니다')
+            // Rollback optimistic update
+            setMessages(prev => prev.filter(m => m.id !== tempId))
         }
 
         setSending(false)
@@ -226,7 +225,8 @@ export default function StudentDiscussionPage() {
         } else {
             setParticipant({ ...participant, stance })
             setShowStanceSelector(false)
-            toast.success(`${stanceLabels[stance]} 입장을 선택했습니다`)
+            const label = discussion?.settings?.stanceLabels?.[stance] || stance
+            toast.success(`${label} 입장을 선택했습니다`)
         }
     }
 
@@ -324,6 +324,13 @@ export default function StudentDiscussionPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        <Link
+                            href={`/student/discussions/${discussionId}/gallery`}
+                            className="p-2 border-2 border-border hover:border-foreground transition-colors"
+                            title="답변 갤러리"
+                        >
+                            <Users className="w-5 h-5" />
+                        </Link>
                         <button
                             onClick={requestHelp}
                             className={`p-2 border-2 transition-colors ${participant?.needs_help
@@ -353,8 +360,8 @@ export default function StudentDiscussionPage() {
                                         : 'border-gray-400 bg-gray-50 text-gray-700'
                                     }`}
                             >
-                                {stanceIcons[participant.stance]}
-                                {stanceLabels[participant.stance]}
+                                {getStanceIcon(participant.stance)}
+                                {discussion.settings.stanceLabels?.[participant.stance] || participant.stance}
                             </button>
                         ) : (
                             <button
@@ -410,8 +417,8 @@ export default function StudentDiscussionPage() {
                                             : 'border-border hover:border-foreground'
                                             }`}
                                     >
-                                        {stanceIcons[stance]}
-                                        <span className="font-semibold">{stanceLabels[stance]}</span>
+                                        {getStanceIcon(stance)}
+                                        <span className="font-semibold">{discussion.settings.stanceLabels?.[stance] || stance}</span>
                                     </button>
                                 ))}
                             </div>
@@ -447,7 +454,7 @@ export default function StudentDiscussionPage() {
                                 }`}>
                                 <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
                                     <span>
-                                        {msg.role === 'user' ? '나' : msg.role === 'ai' ? 'AI 튜터' : '교수'}
+                                        {msg.role === 'user' ? '나' : msg.role === 'ai' ? 'AI 튜터' : '교수님'}
                                     </span>
                                     <Clock className="w-3 h-3" />
                                     <span>{new Date(msg.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
