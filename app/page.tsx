@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import Link from 'next/link'
 import {
@@ -12,8 +12,17 @@ import {
   BarChart3,
   Sparkles,
   Quote,
-  Circle
+  Circle,
+  Play
 } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import InteractiveDemo from '@/components/InteractiveDemo'
 
 const features = [
   {
@@ -49,6 +58,7 @@ const stats = [
 ]
 
 export default function Home() {
+  const [isDemoOpen, setIsDemoOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -127,10 +137,17 @@ export default function Home() {
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </Link>
-                  <button className="btn-brutal flex items-center gap-2">
+                  <button
+                    onClick={() => setIsDemoOpen(true)}
+                    className="btn-brutal flex items-center gap-2"
+                  >
                     데모 보기
                     <ArrowUpRight className="w-4 h-4" />
                   </button>
+                  <InteractiveDemo
+                    isOpen={isDemoOpen}
+                    onOpenChange={setIsDemoOpen}
+                  />
                 </div>
               </motion.div>
             </div>
