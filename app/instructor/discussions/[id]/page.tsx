@@ -284,7 +284,7 @@ export default function InstructorDiscussionPage() {
                                 </>
                             )}
                         </button>
-                        <button className="btn-brutal flex items-center gap-2 hidden md:flex">
+                        <button className="btn-brutal items-center gap-2 hidden md:flex">
                             <BarChart3 className="w-4 h-4" />
                             리포트
                         </button>
