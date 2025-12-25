@@ -96,6 +96,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@supabase/mcp-server-supabase": "^0.5.10",
     "@tailwindcss/postcss": "^4",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^20",
