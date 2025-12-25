@@ -264,10 +264,10 @@ export default function InstructorDiscussionPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <button
                             onClick={toggleDiscussionStatus}
-                            className={`btn-brutal flex items-center gap-2 ${discussion.status === 'active'
+                            className={`btn-brutal flex items-center gap-2 text-sm md:text-base ${discussion.status === 'active'
                                     ? 'bg-red-50 hover:bg-red-100'
                                     : 'bg-green-50 hover:bg-green-100'
                                 }`}
@@ -275,20 +275,20 @@ export default function InstructorDiscussionPage() {
                             {discussion.status === 'active' ? (
                                 <>
                                     <Pause className="w-4 h-4" />
-                                    토론 종료
+                                    <span className="hidden sm:inline">토론 종료</span>
                                 </>
                             ) : (
                                 <>
                                     <Play className="w-4 h-4" />
-                                    토론 시작
+                                    <span className="hidden sm:inline">토론 시작</span>
                                 </>
                             )}
                         </button>
-                        <button className="btn-brutal flex items-center gap-2">
+                        <button className="btn-brutal flex items-center gap-2 hidden md:flex">
                             <BarChart3 className="w-4 h-4" />
                             리포트
                         </button>
-                        <button className="btn-brutal flex items-center gap-2">
+                        <button className="btn-brutal flex items-center gap-2 p-2 md:p-3">
                             <Settings className="w-4 h-4" />
                         </button>
                     </div>
@@ -297,31 +297,31 @@ export default function InstructorDiscussionPage() {
 
             {/* Stats Bar */}
             <div className="border-b-2 border-border bg-muted/30">
-                <div className="max-w-[1800px] mx-auto px-6 py-4 flex items-center gap-8">
+                <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-3 md:py-4 flex flex-wrap items-center gap-3 md:gap-8">
                     <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-muted-foreground" />
+                        <Users className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
                         <span className="font-semibold">{participants.length}</span>
-                        <span className="text-muted-foreground text-sm">참여자</span>
-                        <span className="text-green-600 text-sm">({onlineCount} 온라인)</span>
+                        <span className="text-muted-foreground text-xs md:text-sm">참여자</span>
+                        <span className="text-green-600 text-xs md:text-sm">({onlineCount})</span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-muted-foreground" />
+                        <CheckCircle className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />
                         <span className="font-semibold">{submittedCount}</span>
-                        <span className="text-muted-foreground text-sm">/ {participants.length} 제출 완료</span>
+                        <span className="text-muted-foreground text-xs md:text-sm">/ {participants.length}</span>
                     </div>
 
                     {needsHelpCount > 0 && (
                         <div className="flex items-center gap-2 text-amber-600">
-                            <AlertCircle className="w-5 h-5" />
+                            <AlertCircle className="w-4 h-4 md:w-5 md:h-5" />
                             <span className="font-semibold">{needsHelpCount}</span>
-                            <span className="text-sm">도움 요청</span>
+                            <span className="text-xs md:text-sm">도움</span>
                         </div>
                     )}
 
-                    <div className="flex items-center gap-3 ml-auto">
+                    <div className="flex items-center gap-2 md:gap-3 ml-auto flex-wrap">
                         {Object.entries(stanceCounts).map(([stance, count]) => (
-                            <div key={stance} className={`px-3 py-1 border rounded-sm text-sm ${stanceColors[stance] || ''}`}>
+                            <div key={stance} className={`px-2 md:px-3 py-1 border rounded-sm text-xs md:text-sm ${stanceColors[stance] || ''}`}>
                                 {stanceLabels[stance] || stance}: {count}
                             </div>
                         ))}
@@ -330,9 +330,9 @@ export default function InstructorDiscussionPage() {
             </div>
 
             {/* Main Content */}
-            <div className="max-w-[1800px] mx-auto px-6 py-6 grid grid-cols-12 gap-6">
-                {/* Participants List */}
-                <div className="col-span-3 space-y-4">
+            <div className="max-w-[1800px] mx-auto px-4 md:px-6 py-4 md:py-6 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+                {/* Participants List - Hidden on mobile, shown on desktop */}
+                <div className="hidden lg:block lg:col-span-3 space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="font-semibold uppercase tracking-wider text-sm">참여자 목록</h2>
                         <span className="text-xs text-muted-foreground">{participants.length}명</span>
@@ -396,8 +396,8 @@ export default function InstructorDiscussionPage() {
                     </div>
                 </div>
 
-                {/* Chat/Messages Area */}
-                <div className="col-span-6 border-2 border-foreground">
+                {/* Chat/Messages Area - Full width on mobile, 6 cols on desktop */}
+                <div className="col-span-1 lg:col-span-6 border-2 border-foreground order-first lg:order-none">
                     <div className="p-4 border-b-2 border-border flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <MessageSquare className="w-5 h-5" />
@@ -420,7 +420,7 @@ export default function InstructorDiscussionPage() {
                         )}
                     </div>
 
-                    <div className="h-[calc(100vh-420px)] overflow-y-auto p-4 space-y-4">
+                    <div className="h-[60vh] lg:h-[calc(100vh-420px)] overflow-y-auto p-4 space-y-4">
                         {messages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                                 <MessageSquare className="w-12 h-12 mb-3 opacity-30" />
@@ -463,8 +463,8 @@ export default function InstructorDiscussionPage() {
                     </div>
                 </div>
 
-                {/* Quick Actions & Selected Participant Info */}
-                <div className="col-span-3 space-y-4">
+                {/* Quick Actions & Selected Participant Info - Hidden on mobile */}
+                <div className="hidden lg:block lg:col-span-3 space-y-4">
                     {selectedParticipant ? (
                         <>
                             {/* Participant Details */}

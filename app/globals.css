@@ -110,9 +110,11 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
+    overflow-x: hidden;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: var(--font-body);
@@ -447,6 +449,11 @@
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* Safe area for iOS devices */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 /* ═══════════════════════════════════════════════════════════════

@@ -280,7 +280,7 @@ export default function StudentDashboard() {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="w-10 h-10 border-2 border-foreground flex items-center justify-center hover:bg-muted transition-colors">
+                <button className="w-11 h-11 border-2 border-foreground flex items-center justify-center hover:bg-muted transition-colors">
                   <User className="w-5 h-5" />
                 </button>
               </DropdownMenuTrigger>
@@ -331,18 +331,18 @@ export default function StudentDashboard() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="mb-12"
         >
-          <div className="brutal-box bg-foreground text-background p-8">
-            <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <div className="flex-1">
-                <h2 className="text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
+          <div className="brutal-box bg-foreground text-background p-6 md:p-8">
+            <div className="flex flex-col gap-4 md:gap-6">
+              <div>
+                <h2 className="text-lg md:text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-display)' }}>
                   토론에 참여하기
                 </h2>
-                <p className="text-background/70">
+                <p className="text-background/70 text-sm md:text-base">
                   교수님이 공유한 참여 코드를 입력하세요
                 </p>
               </div>
-              <div className="flex gap-3">
-                <div className="relative">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
                   <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
@@ -350,14 +350,14 @@ export default function StudentDashboard() {
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                     onKeyDown={(e) => e.key === 'Enter' && handleJoinDiscussion()}
-                    className="input-editorial with-icon pl-12 w-56 bg-background text-foreground uppercase"
+                    className="input-editorial with-icon pl-12 w-full bg-background text-foreground uppercase"
                     maxLength={8}
                   />
                 </div>
                 <button
                   onClick={handleJoinDiscussion}
                   disabled={isJoining}
-                  className="bg-[hsl(var(--coral))] text-white font-semibold uppercase tracking-wide px-6 py-3 hover:opacity-90 transition-opacity flex items-center gap-2"
+                  className="bg-[hsl(var(--coral))] text-white font-semibold uppercase tracking-wide px-6 py-3 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 min-h-[48px]"
                 >
                   {isJoining ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

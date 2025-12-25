@@ -104,10 +104,10 @@ export default function Home() {
       >
         <div className="absolute inset-0 grid-pattern" />
 
-        {/* Decorative Elements */}
-        <div className="absolute top-32 right-12 w-24 h-24 border-2 border-foreground opacity-20" />
-        <div className="absolute bottom-32 left-12 w-16 h-16 bg-[hsl(var(--coral))] opacity-30" />
-        <div className="absolute top-1/2 right-1/4 w-4 h-4 bg-foreground" />
+        {/* Decorative Elements - Hidden on mobile */}
+        <div className="hidden md:block absolute top-32 right-12 w-24 h-24 border-2 border-foreground opacity-20" />
+        <div className="hidden md:block absolute bottom-32 left-12 w-16 h-16 bg-[hsl(var(--coral))] opacity-30" />
+        <div className="hidden md:block absolute top-1/2 right-1/4 w-4 h-4 bg-foreground" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 py-24">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
@@ -204,8 +204,8 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        {/* Scroll Indicator - Hidden on mobile */}
+        <div className="hidden md:flex absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2">
           <span className="text-xs uppercase tracking-widest text-muted-foreground">Scroll</span>
           <div className="w-px h-12 bg-foreground/30" />
         </div>
@@ -336,7 +336,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="brutal-box bg-foreground text-background p-12 lg:p-16 relative overflow-hidden">
+          <div className="brutal-box bg-foreground text-background p-6 md:p-12 lg:p-16 relative overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
               <div className="absolute top-0 right-0 w-96 h-96 border-[40px] border-background rounded-full translate-x-1/2 -translate-y-1/2" />

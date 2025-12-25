@@ -197,17 +197,17 @@ export default function InstructorDashboard() {
               </span>
             </Link>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 md:gap-4">
               <Link href="/instructor/discussions/new">
-                <button className="btn-brutal-fill text-sm flex items-center gap-2">
+                <button className="btn-brutal-fill text-sm flex items-center gap-2 min-h-[44px]">
                   <Plus className="w-4 h-4" />
-                  새 토론
+                  <span className="hidden sm:inline">새 토론</span>
                 </button>
               </Link>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-10 h-10 border-2 border-foreground flex items-center justify-center hover:bg-muted transition-colors">
+                  <button className="w-11 h-11 border-2 border-foreground flex items-center justify-center hover:bg-muted transition-colors">
                     <User className="w-5 h-5" />
                   </button>
                 </DropdownMenuTrigger>

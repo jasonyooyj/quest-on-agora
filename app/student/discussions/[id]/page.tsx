@@ -186,7 +186,7 @@ export default function StudentDiscussionPage() {
         <div className="min-h-screen flex flex-col bg-background">
             {/* Header */}
             <header className="sticky top-0 z-50 border-b-2 border-foreground bg-background">
-                <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div className="max-w-3xl mx-auto px-3 md:px-4 py-2 md:py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Link
                             href="/student"
@@ -194,8 +194,8 @@ export default function StudentDiscussionPage() {
                         >
                             <ArrowLeft className="w-4 h-4" />
                         </Link>
-                        <div>
-                            <h1 className="font-bold text-lg" style={{ fontFamily: 'var(--font-display)' }}>
+                        <div className="min-w-0 flex-1">
+                            <h1 className="font-bold text-base md:text-lg truncate" style={{ fontFamily: 'var(--font-display)' }}>
                                 {discussion.title}
                             </h1>
                         </div>
@@ -225,7 +225,7 @@ export default function StudentDiscussionPage() {
 
             {/* Stance Bar */}
             <div className="border-b-2 border-border bg-muted/30">
-                <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div className="max-w-3xl mx-auto px-3 md:px-4 py-2 md:py-3 flex items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
                         <span className="text-sm text-muted-foreground">내 입장:</span>
                         {participant?.stance ? (
@@ -316,20 +316,20 @@ export default function StudentDiscussionPage() {
             </main>
 
             {/* Input Area */}
-            <footer className="border-t-2 border-foreground bg-background p-4 sticky bottom-0">
-                <div className="max-w-3xl mx-auto flex gap-3">
+            <footer className="border-t-2 border-foreground bg-background p-3 md:p-4 sticky bottom-0 safe-area-inset-bottom">
+                <div className="max-w-3xl mx-auto flex gap-2 md:gap-3">
                     <textarea
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder={sending ? "AI 튜터가 답변을 작성 중입니다..." : "메시지를 입력하세요..."}
-                        className="flex-1 input-editorial resize-none h-[52px] py-3 leading-relaxed"
+                        className="flex-1 input-editorial resize-none h-[48px] md:h-[52px] py-3 leading-relaxed text-base"
                         disabled={sending}
                     />
                     <button
                         onClick={handleSendMessage}
                         disabled={!message.trim() || sending}
-                        className="btn-brutal-fill px-6 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                        className="btn-brutal-fill px-4 md:px-6 min-w-[48px] min-h-[48px] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
                     >
                         {sending ? (
                             <Loader2 className="w-5 h-5 animate-spin" />

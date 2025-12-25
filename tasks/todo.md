@@ -136,6 +136,12 @@
 - DOM 구조 유지, 클래스 수정 우선
 - 모든 페이지에서 horizontal scroll 방지
 
+## 모바일 UX 원칙
+1. **손가락 조작 편함**: 터치 타겟 최소 44x44px
+2. **정보 계층**: 한 화면에 과밀 금지, 적절한 여백
+3. **로딩/스켈레톤**: 로딩 상태 표시
+4. **하단 여백/고정 CTA**: 모바일에서 하단 고정 버튼 영역 고려
+
 ---
 
 ## 작업 목록
@@ -176,4 +182,55 @@
 ---
 
 ## 리뷰
-(작업 완료 후 작성)
+
+### 변경된 파일
+
+1. **app/globals.css**
+   - `html`, `body`에 `overflow-x: hidden` 추가
+   - `.safe-area-inset-bottom` 클래스 추가 (iOS safe area)
+
+2. **app/page.tsx** (Landing Page)
+   - 데코레이티브 요소들 `hidden md:block` 처리
+   - 스크롤 인디케이터 `hidden md:flex` 처리
+   - CTA 섹션 패딩 반응형 (`p-6 md:p-12 lg:p-16`)
+
+3. **app/student/page.tsx** (Student Dashboard)
+   - Join discussion 영역 세로 스택 레이아웃 (`flex-col sm:flex-row`)
+   - 입력 필드 너비 `w-full`로 변경
+   - 버튼 최소 높이 `min-h-[48px]` 추가
+   - 사용자 버튼 터치 타겟 `w-11 h-11`
+
+4. **app/instructor/page.tsx** (Instructor Dashboard)
+   - 헤더 버튼 간격 반응형 (`gap-2 md:gap-4`)
+   - "새 토론" 텍스트 `hidden sm:inline`
+   - 버튼 최소 높이 `min-h-[44px]`
+   - 사용자 버튼 터치 타겟 `w-11 h-11`
+
+5. **app/instructor/discussions/[id]/page.tsx** (Instructor Discussion)
+   - 헤더 버튼 텍스트 모바일에서 숨김
+   - Stats bar `flex-wrap` 및 반응형 간격/크기
+   - 메인 그리드 `grid-cols-1 lg:grid-cols-12`
+   - 사이드 패널 `hidden lg:block`
+   - 채팅 영역 `order-first` (모바일에서 먼저 표시)
+
+6. **app/student/discussions/[id]/page.tsx** (Student Discussion)
+   - 헤더/Stance bar 패딩 반응형
+   - 제목 `truncate` 처리
+   - 입력 영역 safe-area-inset-bottom 적용
+   - 버튼 최소 크기 `min-w-[48px] min-h-[48px]`
+
+7. **components/InteractiveDemo.tsx**
+   - 패딩 반응형 (`p-4 sm:p-6 md:p-12 lg:p-20`)
+   - 텍스트 크기 반응형 적용
+   - 버튼 최소 크기 `min-h-[48px]`
+   - 비주얼 영역 `hidden sm:flex` (작은 모바일에서 숨김)
+
+### 주요 변경 사항 요약
+
+| 원칙 | 적용 내용 |
+|------|---------|
+| Horizontal scroll 방지 | html/body에 overflow-x: hidden |
+| 손가락 조작 | 터치 타겟 최소 44-48px 보장 |
+| 정보 계층 | 모바일에서 핵심 콘텐츠만 표시, 사이드 패널 숨김 |
+| 하단 CTA | iOS safe-area-inset-bottom 지원 |
+| Mobile-first | 모든 그리드/레이아웃이 모바일 기준으로 시작 |
