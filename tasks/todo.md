@@ -126,3 +126,54 @@
 - 추가 입장 ID 형식: `stance_c`, `stance_d`, `stance_e` 등
 - UI 라벨: "입장 C", "입장 D", "입장 E" 등 (자동 계산)
 - `neutral`은 항상 포함되며, 추가 입장과 함께 표시됨
+
+---
+
+# 모바일 반응형 추가 작업 (2024-12-25)
+
+## 목표
+- Mobile-first 레이아웃으로 재작성
+- DOM 구조 유지, 클래스 수정 우선
+- 모든 페이지에서 horizontal scroll 방지
+
+---
+
+## 작업 목록
+
+### 1. Global CSS 수정
+- [ ] `app/globals.css`에 `overflow-x: hidden` 추가하여 전체 horizontal scroll 방지
+
+### 2. Landing Page (`app/page.tsx`)
+- [ ] 데코레이티브 요소들 모바일에서 숨기기 (line 108-110)
+- [ ] Scroll indicator 모바일에서 숨기기
+
+### 3. Student Dashboard (`app/student/page.tsx`)
+- [ ] Join discussion 입력 필드 너비 수정 (w-56 → 반응형)
+- [ ] 입력 영역 flex 방향 모바일에서 세로로 변경
+
+### 4. Instructor Discussion Page (`app/instructor/discussions/[id]/page.tsx`) - 핵심
+- [ ] 헤더 버튼들 모바일에서 간소화
+- [ ] Stats bar를 flex-wrap으로 변경하여 모바일에서 줄바꿈
+- [ ] 메인 그리드 `grid-cols-12` → 모바일에서 스택 레이아웃 (grid-cols-1)
+- [ ] 사이드 패널들 모바일에서 숨기거나 토글
+
+### 5. Student Discussion Page (`app/student/discussions/[id]/page.tsx`)
+- [ ] 헤더 패딩 모바일 최적화
+
+### 6. InteractiveDemo (`components/InteractiveDemo.tsx`)
+- [ ] 모바일 패딩 축소 (p-12 → p-4 sm:p-6)
+- [ ] 텍스트 크기 모바일에서 축소
+
+---
+
+## 우선순위
+1. Global CSS (horizontal scroll 방지)
+2. Instructor Discussion Page (가장 문제가 큼)
+3. Student Dashboard
+4. Landing Page
+5. InteractiveDemo
+
+---
+
+## 리뷰
+(작업 완료 후 작성)
