@@ -99,7 +99,7 @@ function LoginForm() {
                 <button
                     type="button"
                     onClick={() => handleOAuthSignIn('google')}
-                    disabled={oauthLoading !== null}
+                    disabled={isLoading || oauthLoading !== null}
                     className="btn-brutal w-full flex items-center justify-center gap-3 bg-white dark:bg-background"
                 >
                     {oauthLoading === 'google' ? (
@@ -113,7 +113,7 @@ function LoginForm() {
                 <button
                     type="button"
                     onClick={() => handleOAuthSignIn('kakao')}
-                    disabled={oauthLoading !== null}
+                    disabled={isLoading || oauthLoading !== null}
                     className="btn-brutal w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#000000] border-[#FEE500] hover:bg-[#FDD835]"
                 >
                     {oauthLoading === 'kakao' ? (
@@ -178,7 +178,7 @@ function LoginForm() {
 
                 <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || oauthLoading !== null}
                     className="btn-brutal-fill w-full flex items-center justify-center gap-2"
                 >
                     {isLoading ? (
