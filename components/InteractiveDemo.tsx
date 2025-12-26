@@ -83,9 +83,9 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-none max-w-[1600px] w-[96vw] h-[90vh] max-h-[900px] p-0 overflow-hidden border-2 md:border-4 border-foreground rounded-none bg-background shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] md:shadow-[16px_16px_0px_0px_rgba(0,0,0,1)]">
-                <div className="flex flex-col lg:flex-row h-full overflow-y-auto lg:overflow-hidden">
+                <div className="flex flex-col lg:flex-row h-full overflow-y-auto">
                     {/* Left: Content */}
-                    <div className="flex-[1.1] p-4 sm:p-6 md:p-12 lg:p-20 flex flex-col justify-between border-b-2 md:border-b-4 lg:border-b-0 lg:border-r-4 border-foreground bg-background">
+                    <div className="flex-shrink-0 lg:flex-[1.1] p-4 sm:p-6 md:p-12 lg:p-20 flex flex-col justify-between border-b-2 md:border-b-4 lg:border-b-0 lg:border-r-4 border-foreground bg-background">
                         <div>
                             <div className="flex items-center justify-between mb-4 md:mb-8">
                                 <div className="flex items-center gap-2 md:gap-4">
@@ -161,8 +161,8 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
                         </div>
                     </div>
 
-                    {/* Right: Visual - Hidden on small mobile, shown on larger screens */}
-                    <div className="hidden sm:flex flex-1 bg-[hsl(var(--sage))] p-4 md:p-8 lg:p-12 relative items-center justify-center overflow-hidden min-h-[200px]">
+                    {/* Right: Visual - Always visible, scrollable on mobile */}
+                    <div className="flex-shrink-0 lg:flex-1 bg-[hsl(var(--sage))] p-4 md:p-8 lg:p-12 flex items-center justify-center relative min-h-[300px] sm:min-h-[400px]">
                         {/* Background elements */}
                         <div className="absolute inset-0 grid-pattern opacity-10" />
                         <div className="hidden md:block absolute top-12 right-12 w-32 h-32 border-4 border-foreground/10 rotate-12" />
@@ -175,7 +175,7 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
                                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                                 exit={{ opacity: 0, scale: 1.1, rotate: 2 }}
                                 transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                                className="relative z-10 w-full max-w-md md:max-w-2xl shadow-[15px_15px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[30px_30px_0px_0px_rgba(0,0,0,0.1)] border-2 md:border-4 border-foreground bg-background"
+                                className="relative z-10 w-full max-w-[280px] sm:max-w-md md:max-w-2xl shadow-[10px_10px_0px_0px_rgba(0,0,0,0.1)] md:shadow-[30px_30px_0px_0px_rgba(0,0,0,0.1)] border-2 md:border-4 border-foreground bg-background"
                             >
                                 <div className="aspect-square relative overflow-hidden bg-card">
                                     <Image
@@ -187,7 +187,7 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
                                     />
 
                                     {/* Overlay for aesthetic */}
-                                    <div className="absolute inset-0 border-8 border-foreground/5 pointer-events-none" />
+                                    <div className="absolute inset-0 border-4 md:border-8 border-foreground/5 pointer-events-none" />
                                 </div>
                             </motion.div>
                         </AnimatePresence>
