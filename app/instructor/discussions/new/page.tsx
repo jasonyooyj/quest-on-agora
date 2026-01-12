@@ -122,7 +122,7 @@ export default function NewDiscussionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background noise-overlay">
+    <div className="min-h-screen noise-overlay">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b-2 border-foreground">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -164,7 +164,7 @@ export default function NewDiscussionPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
             {/* Title */}
-            <div className="brutal-box bg-card p-6">
+            <div className="brutal-box p-6">
               <label className="block text-sm font-semibold uppercase tracking-wider mb-3">
                 토론 주제 *
               </label>
@@ -183,7 +183,7 @@ export default function NewDiscussionPage() {
             </div>
 
             {/* Description */}
-            <div className="brutal-box bg-card p-6">
+            <div className="brutal-box p-6">
               <label className="block text-sm font-semibold uppercase tracking-wider mb-3">
                 설명 (선택)
               </label>
@@ -198,7 +198,7 @@ export default function NewDiscussionPage() {
             </div>
 
             {/* Settings */}
-            <div className="brutal-box bg-card p-6">
+            <div className="brutal-box p-6">
               <div className="flex items-center gap-3 mb-6">
                 <Settings2 className="w-5 h-5 text-[hsl(var(--coral))]" />
                 <h3 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-display)' }}>
@@ -362,7 +362,7 @@ export default function NewDiscussionPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {[
-                      { value: 'socratic', label: '소크라테스', desc: '질문으로 사고 유도' },
+                      { value: 'socratic', label: '소크라테스 (산파술)', desc: '무의식적 전제와 가치 탐구' },
                       { value: 'balanced', label: '균형', desc: '양측 관점 제시' },
                       { value: 'debate', label: '디베이트', desc: '적극적인 반론 제기' },
                       { value: 'minimal', label: '최소', desc: '필요시에만 개입' },

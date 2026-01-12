@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseRouteClient } from "@/lib/supabase-server";
 
 // 프로필 조회
 export async function GET() {
@@ -19,11 +19,23 @@ export async function GET() {
       );
     }
 
-    // Prisma를 사용하여 프로필 조회
+    // Supabase를 사용하여 프로필 조회
     console.log("[Profile API] Fetching profile for student_id:", user.id);
-    const profile = await prisma.student_profiles.findUnique({
-      where: { student_id: user.id },
-    });
+    const supabase = await createSupabaseRouteClient();
+    const { data: profile, error } = await supabase
+      .from("student_profiles")
+      .select("*")
+      .eq("student_id", user.id)
+      .single();
+
+    if (error && error.code !== "PGRST116") {
+      // PGRST116 is "Relation not found" or "No rows found" locally in standard postgres, 
+      // but in supabase .single() it returns error if no row. 
+      // We tread no row as null profile if it's the first time.
+      console.error("[Profile API] Supabase error:", error);
+      throw error;
+    }
+
     console.log("[Profile API] Profile found:", profile ? "yes" : "no");
 
     return NextResponse.json({ profile });
@@ -73,21 +85,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Upsert profile (create or update)
-    const profile = await prisma.student_profiles.upsert({
-      where: { student_id: user.id },
-      update: {
-        name,
-        student_number,
-        school,
-        updated_at: new Date(),
-      },
-      create: {
+    const supabase = await createSupabaseRouteClient();
+    const { data: profile, error } = await supabase
+      .from("student_profiles")
+      .upsert({
         student_id: user.id,
         name,
         student_number,
         school,
-      },
-    });
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({ profile, success: true });
   } catch (error) {

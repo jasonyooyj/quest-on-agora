@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentUser } from "@/lib/auth";
 import { compressData } from "@/lib/compression";
-import { prisma } from "@/lib/prisma";
+
 
 // Lazy-load Supabase client to avoid build-time errors
 function getSupabaseClient() {
@@ -193,12 +193,12 @@ async function createExam(data: {
       materialsTextCount: examData.materials_text.length,
       materialsTextPreview: Array.isArray(examData.materials_text)
         ? examData.materials_text.map((m: unknown) => {
-            const mt = m as { fileName?: string; text?: string };
-            return {
-              fileName: mt?.fileName || "unknown",
-              textLength: mt?.text?.length || 0,
-            };
-          })
+          const mt = m as { fileName?: string; text?: string };
+          return {
+            fileName: mt?.fileName || "unknown",
+            textLength: mt?.text?.length || 0,
+          };
+        })
         : "not an array",
     });
 
@@ -270,9 +270,8 @@ async function createExam(data: {
     console.error("Create exam error:", error);
     return NextResponse.json(
       {
-        error: `Failed to create exam: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        error: `Failed to create exam: ${error instanceof Error ? error.message : "Unknown error"
+          }`,
       },
       { status: 500 }
     );
@@ -702,9 +701,11 @@ async function initExamSession(data: {
     if (examError || !exam) {
       // Check if it's a discussion join code instead
       try {
-        const discussionSession = await prisma.discussion_sessions.findUnique({
-          where: { join_code: data.examCode },
-        });
+        const { data: discussionSession } = await supabase
+          .from("discussion_sessions")
+          .select("*")
+          .eq("join_code", data.examCode)
+          .single();
 
         if (discussionSession) {
           // This is a discussion code, not an exam code

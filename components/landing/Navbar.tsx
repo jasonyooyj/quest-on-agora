@@ -1,89 +1,116 @@
 "use client";
 
 import Link from "next/link";
-import { MessageCircle, Menu } from "lucide-react";
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { useScroll, useMotionValueEvent, motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { Menu, X, MessageCircle } from "lucide-react";
 
 export function Navbar() {
-    const [isOpen, setIsOpen] = useState(false);
+    const { scrollY } = useScroll();
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        setIsScrolled(latest > 20);
+    });
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-sm border-b-2 border-foreground">
-            <div className="max-w-7xl mx-auto px-6 lg:px-12">
-                <div className="flex items-center justify-between h-16">
-                    <Link href="/" className="flex items-center gap-3 group">
-                        <div className="flex items-center justify-center transition-colors">
-                            <MessageCircle className="w-8 h-8 text-[hsl(var(--coral))] group-hover:scale-110 transition-transform" />
-                        </div>
-                        <span
-                            className="text-xl font-semibold tracking-tight"
-                            style={{ fontFamily: "var(--font-display)" }}
-                        >
-                            Agora
-                        </span>
-                    </Link>
-
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:flex items-center gap-6">
-                        <Link
-                            href="/login"
-                            className="text-sm font-medium hover:text-[hsl(var(--coral))] transition-colors"
-                        >
-                            로그인
-                        </Link>
-                        <Link href="/register">
-                            <button className="btn-brutal-fill text-sm">시작하기</button>
-                        </Link>
+        <motion.header
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-spring ${isScrolled
+                ? "top-4 mx-auto max-w-4xl glass-panel rounded-full py-2 px-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/10 bg-black/40 backdrop-blur-2xl"
+                : "bg-transparent py-6"
+                }`}
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+            <div className={`flex items-center justify-between ${isScrolled ? "w-full" : "container mx-auto px-4 md:px-6"}`}>
+                {/* Logo */}
+                <Link href="/" className="flex items-center gap-2 group">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-[0_0_15px_rgba(99,102,241,0.5)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all duration-300">
+                        <MessageCircle className="w-4 h-4 text-white" />
                     </div>
+                    <span className="text-lg font-semibold tracking-tight text-white/90 group-hover:text-white transition-colors">
+                        Agora
+                    </span>
+                </Link>
 
-                    {/* Mobile Navigation */}
-                    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                        <SheetTrigger asChild className="md:hidden">
-                            <button
-                                className="p-2 hover:bg-foreground/5 transition-colors"
-                                aria-label="메뉴 열기"
-                            >
-                                <Menu className="w-6 h-6" />
-                            </button>
-                        </SheetTrigger>
-                        <SheetContent side="right" className="w-[280px] border-l-2 border-foreground">
-                            <SheetHeader>
-                                <SheetTitle className="flex items-center gap-2">
-                                    <MessageCircle className="w-6 h-6 text-[hsl(var(--coral))]" />
-                                    <span style={{ fontFamily: "var(--font-display)" }}>
-                                        Agora
-                                    </span>
-                                </SheetTitle>
-                            </SheetHeader>
-                            <nav className="flex flex-col gap-4 mt-8">
-                                <Link
-                                    href="/login"
-                                    onClick={() => setIsOpen(false)}
-                                    className="text-lg font-medium hover:text-[hsl(var(--coral))] transition-colors py-2 border-b border-foreground/10"
-                                >
-                                    로그인
-                                </Link>
-                                <Link
-                                    href="/register"
-                                    onClick={() => setIsOpen(false)}
-                                    className="w-full"
-                                >
-                                    <button className="btn-brutal-fill w-full text-center">
-                                        시작하기
-                                    </button>
-                                </Link>
-                            </nav>
-                        </SheetContent>
-                    </Sheet>
+                {/* Desktop Navigation */}
+                <nav className="hidden md:flex items-center gap-8">
+                    {["Features", "Use Cases", "Pricing", "About"].map((item) => (
+                        <Link
+                            key={item}
+                            href={`#${item.toLowerCase().replace(" ", "-")}`}
+                            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors relative group"
+                        >
+                            {item}
+                            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-indigo-400 transition-all duration-300 group-hover:w-full opacity-50" />
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* Action Buttons */}
+                <div className="hidden md:flex items-center gap-4">
+                    <Link
+                        href="/login"
+                        className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                    >
+                        Sign in
+                    </Link>
+                    <Link href="/register">
+                        <Button className="bg-white text-black hover:bg-zinc-200 border-none rounded-full px-6 font-medium shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all duration-300 transform hover:-translate-y-0.5">
+                            Get Started
+                        </Button>
+                    </Link>
                 </div>
+
+                {/* Mobile Menu Toggle */}
+                <button
+                    className="md:hidden text-white/70 hover:text-white"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                >
+                    {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
             </div>
-        </nav>
+
+            {/* Mobile Menu */}
+            <AnimatePresence>
+                {mobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="md:hidden glass-panel border-b border-white/5 overflow-hidden"
+                    >
+                        <div className="flex flex-col p-6 gap-4">
+                            {["Features", "Use Cases", "Pricing", "About"].map((item) => (
+                                <Link
+                                    key={item}
+                                    href={`#${item.toLowerCase().replace(" ", "-")}`}
+                                    className="text-lg font-medium text-zinc-400 hover:text-white"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {item}
+                                </Link>
+                            ))}
+                            <hr className="border-white/10 my-2" />
+                            <Link
+                                href="/login"
+                                className="text-lg font-medium text-zinc-400 hover:text-white"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Sign in
+                            </Link>
+                            <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
+                                <Button className="w-full bg-white text-black hover:bg-zinc-200 rounded-full mt-2">
+                                    Get Started
+                                </Button>
+                            </Link>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.header>
     );
 }

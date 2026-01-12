@@ -23,8 +23,8 @@ interface SettingsDialogProps {
 
 const aiModeDescriptions: Record<string, { label: string; description: string }> = {
   socratic: {
-    label: '소크라테스식',
-    description: '질문을 통해 학생의 사고를 유도합니다'
+    label: '소크라테스 산파술',
+    description: '무의식적 전제와 근본 가치를 탐구합니다'
   },
   balanced: {
     label: '균형 잡힌',
@@ -82,7 +82,7 @@ export function SettingsDialog({
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
-            className="brutal-box bg-background max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="brutal-box max-w-lg w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>
@@ -126,11 +126,10 @@ export function SettingsDialog({
                       key={mode}
                       type="button"
                       onClick={() => setSettings({ ...settings, aiMode: mode })}
-                      className={`p-3 border-2 text-left transition-all ${
-                        settings.aiMode === mode
-                          ? 'border-foreground bg-foreground/5'
-                          : 'border-border hover:border-foreground/50'
-                      }`}
+                      className={`p-3 border-2 text-left transition-all ${settings.aiMode === mode
+                        ? 'border-foreground bg-foreground/5'
+                        : 'border-border hover:border-foreground/50'
+                        }`}
                     >
                       <div className="font-medium text-sm">{label}</div>
                       <div className="text-xs text-muted-foreground mt-1">{description}</div>

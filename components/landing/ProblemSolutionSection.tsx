@@ -6,7 +6,7 @@ import { PROBLEMS_SOLUTIONS } from "@/lib/constants/landing-content";
 
 export function ProblemSolutionSection() {
     return (
-        <section className="py-24 lg:py-32 bg-foreground/[0.02]">
+        <section className="py-24 lg:py-32">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
                 <div className="text-center mb-16">
                     <span className="tag">왜 Agora인가요?</span>

@@ -35,7 +35,7 @@ export function FeaturesSection() {
                                 transition={{ duration: 0.6, delay: index * 0.1 }}
                                 className="group"
                             >
-                                <div className="brutal-box bg-card p-8 flex gap-6">
+                                <div className="brutal-box p-8 flex gap-6">
                                     <div className="number-badge flex-shrink-0">
                                         {feature.number}
                                     </div>

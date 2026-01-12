@@ -2,74 +2,51 @@
 @import "tw-animate-css";
 
 /* ═══════════════════════════════════════════════════════════════
-   AGORA — Academic Editorial Design System
-   Aesthetic: Neo-Brutalism + Swiss Typography + Editorial Magazine
+   AGORA — iOS 26 / macOS Reality Aesthetic
+   Aesthetic: Spatial, Deep Glass, Bioluminescent, Fluid
    ═══════════════════════════════════════════════════════════════ */
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Color Palette - Warm Academic */
-  --cream: 40 30% 96%;
-  --charcoal: 30 10% 8%;
-  --ink: 30 5% 15%;
-  --coral: 8 85% 60%;
-  --sage: 140 20% 50%;
-  --gold: 45 90% 55%;
+  /* Ultra Dark / Midnight Palette */
+  --background: 260 50% 3%;
+  /* Nearly black, slight purple tint */
+  --foreground: 0 0% 98%;
 
-  /* Base Colors */
-  --background: var(--cream);
-  --foreground: var(--charcoal);
-  --card: 40 25% 98%;
-  --card-foreground: var(--charcoal);
-  --popover: 40 25% 98%;
-  --popover-foreground: var(--charcoal);
-  --primary: var(--coral);
-  --primary-foreground: 0 0% 100%;
-  --secondary: 40 15% 92%;
-  --secondary-foreground: var(--ink);
-  --muted: 40 15% 94%;
-  --muted-foreground: 30 5% 45%;
-  --accent: var(--sage);
-  --accent-foreground: 0 0% 100%;
+  --card: 260 30% 6%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 260 30% 6%;
+  --popover-foreground: 0 0% 98%;
+
+  /* Bioluminescent Primary (Electric Violet/Blue) */
+  --primary: 250 100% 70%;
+  --primary-foreground: 0 0% 10%;
+
+  --secondary: 260 20% 12%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 260 20% 12%;
+  --muted-foreground: 260 10% 65%;
+
+  --accent: 250 100% 70%;
+  --accent-foreground: 0 0% 10%;
+
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
-  --border: 40 15% 88%;
-  --input: 40 15% 88%;
-  --ring: var(--coral);
 
-  /* Typography - Pretendard */
-  --font-display: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --border: 260 20% 15%;
+  --input: 260 20% 15%;
+  --ring: 250 100% 70%;
 
-  /* Spacing & Radius */
-  --radius: 2px;
-  --spacing: 0.25rem;
+  --radius: 1.75rem;
+  /* Large, friendly corners (28px) */
 
-  /* Shadows - Editorial depth */
-  --shadow-brutal: 4px 4px 0px hsl(var(--charcoal));
-  --shadow-soft: 0 4px 20px hsl(var(--charcoal) / 0.08);
-  --shadow-card: 0 2px 8px hsl(var(--charcoal) / 0.06);
-}
-
-.dark {
-  --background: var(--charcoal);
-  --foreground: var(--cream);
-  --card: 30 10% 12%;
-  --card-foreground: var(--cream);
-  --popover: 30 10% 12%;
-  --popover-foreground: var(--cream);
-  --secondary: 30 8% 18%;
-  --secondary-foreground: var(--cream);
-  --muted: 30 8% 16%;
-  --muted-foreground: 30 10% 60%;
-  --border: 30 8% 22%;
-  --input: 30 8% 22%;
-
-  --shadow-brutal: 4px 4px 0px hsl(var(--cream) / 0.15);
-  --shadow-soft: 0 4px 20px hsl(0 0% 0% / 0.3);
-  --shadow-card: 0 2px 8px hsl(0 0% 0% / 0.2);
+  /* Glass Effects */
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(20, 20, 30, 0.7);
+  --glass-shine: rgba(255, 255, 255, 0.03);
 }
 
 @theme inline {
@@ -92,20 +69,11 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-
-  --font-sans: var(--font-body);
-  --font-serif: var(--font-display);
-  --font-mono: var(--font-mono);
-
-  --radius-sm: calc(var(--radius));
-  --radius-md: calc(var(--radius) + 2px);
-  --radius-lg: calc(var(--radius) + 4px);
-  --radius-xl: calc(var(--radius) + 8px);
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    border-color: var(--glass-border);
   }
 
   html {
@@ -115,416 +83,179 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: var(--font-body);
-    font-feature-settings: "ss01", "ss02";
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Display Typography */
   h1,
   h2,
   h3,
-  h4 {
-    font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-  }
-
-  h1 {
-    font-size: clamp(2.5rem, 8vw, 5rem);
-  }
-
-  h2 {
-    font-size: clamp(1.75rem, 4vw, 3rem);
-  }
-
-  h3 {
-    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
-  }
-
-  ::selection {
-    background: hsl(var(--coral));
-    color: white;
+  h4,
+  h5,
+  h6 {
+    @apply tracking-tight text-white font-semibold;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   UTILITY CLASSES
+   iOS 26 COMPONENTS (Mapping from Legacy Brutal)
    ═══════════════════════════════════════════════════════════════ */
 
-/* Brutal Box - Signature element */
-.brutal-box {
-  border: 2px solid hsl(var(--foreground));
-  box-shadow: var(--shadow-brutal);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* Replaces .brutal-box */
+.brutal-box,
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 0 var(--glass-shine);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .brutal-box:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px hsl(var(--foreground));
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.2),
+    0 10px 10px -5px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 45, 0.7);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Editorial Accent Line */
-.accent-line {
-  position: relative;
-}
-
-.accent-line::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 60px;
-  height: 4px;
-  background: hsl(var(--coral));
-}
-
-/* Noise Texture Overlay */
-.noise-overlay {
-  position: relative;
-}
-
-.noise-overlay::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.03;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Geometric Decorations */
-.geo-corner {
-  position: relative;
-}
-
-.geo-corner::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 24px;
-  height: 24px;
-  border: 2px solid hsl(var(--coral));
-  background: hsl(var(--background));
-}
-
-/* Stagger Animation */
-@keyframes stagger-in {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.stagger-in {
-  animation: stagger-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  opacity: 0;
-}
-
-.stagger-in:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.stagger-in:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.stagger-in:nth-child(3) {
-  animation-delay: 0.2s;
-}
-
-.stagger-in:nth-child(4) {
-  animation-delay: 0.3s;
-}
-
-.stagger-in:nth-child(5) {
-  animation-delay: 0.4s;
-}
-
-/* Marquee Animation */
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-.marquee {
-  animation: marquee 30s linear infinite;
-}
-
-/* Diagonal Pattern */
-.diagonal-pattern {
-  background-image: repeating-linear-gradient(45deg,
-      transparent,
-      transparent 10px,
-      hsl(var(--foreground) / 0.03) 10px,
-      hsl(var(--foreground) / 0.03) 20px);
-}
-
-/* Grid Pattern */
-.grid-pattern {
-  background-size: 40px 40px;
-  background-image:
-    linear-gradient(to right, hsl(var(--foreground) / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--foreground) / 0.05) 1px, transparent 1px);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SCROLL REVEAL
-   ═══════════════════════════════════════════════════════════════ */
-
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(60px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes reveal-scale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.reveal-on-scroll {
-  opacity: 0;
-  transition: opacity 0.8s, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-  transform: translateY(40px);
-}
-
-.reveal-on-scroll.revealed {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   COMPONENT OVERRIDES
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Buttons - Brutalist style */
-.btn-brutal {
-  position: relative;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid hsl(var(--foreground));
-  background: hsl(var(--background));
-  box-shadow: 3px 3px 0px hsl(var(--foreground));
-  transition: all 0.15s ease;
-  cursor: pointer;
+/* Replaces .btn-brutal */
+.btn-brutal,
+.btn-secondary {
+  @apply inline-flex items-center justify-center px-6 py-3 text-sm font-medium transition-all duration-300;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  /* Pill shape */
+  color: white;
+  backdrop-filter: blur(10px);
 }
 
 .btn-brutal:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px hsl(var(--foreground));
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
-.btn-brutal:active {
-  transform: translate(0, 0);
-  box-shadow: 0px 0px 0px hsl(var(--foreground));
-}
-
-.btn-brutal-fill {
-  position: relative;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid hsl(var(--foreground));
-  background: hsl(var(--coral));
+/* Replaces .btn-brutal-fill */
+.btn-brutal-fill,
+.btn-primary {
+  @apply inline-flex items-center justify-center px-6 py-3 text-sm font-bold transition-all duration-300 shadow-lg;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
   color: white;
-  box-shadow: 3px 3px 0px hsl(var(--foreground));
-  transition: all 0.15s ease;
-  cursor: pointer;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .btn-brutal-fill:hover {
-  transform: translate(-2px, -2px);
-  box-shadow: 5px 5px 0px hsl(var(--foreground));
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #c026d3 100%);
 }
 
-.btn-brutal-fill:active {
-  transform: translate(0, 0);
-  box-shadow: 0px 0px 0px hsl(var(--foreground));
+.btn-brutal-fill:disabled,
+.btn-brutal:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-/* Input Fields - Editorial style */
-.input-editorial {
-  width: 100%;
+/* Replaces .input-editorial */
+.input-editorial,
+.ios-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
   padding: 0.75rem 1rem;
-  border: 2px solid hsl(var(--foreground));
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: var(--font-body);
-  transition: box-shadow 0.15s ease;
-}
-
-/* Input with icon - left padding for icon space */
-.input-editorial.with-icon {
-  padding-left: 3rem;
-}
-
-.input-editorial::placeholder {
-  color: hsl(var(--muted-foreground));
-}
-
-.input-editorial:focus {
-  outline: none;
-  box-shadow: 3px 3px 0px hsl(var(--foreground));
-}
-
-/* Cards - Magazine style */
-.card-magazine {
-  position: relative;
-  padding: 1.5rem;
-  background: hsl(var(--card));
-  border: 2px solid hsl(var(--foreground));
-  box-shadow: var(--shadow-brutal);
-}
-
-.card-magazine::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: 16px;
-  right: 16px;
-  height: 4px;
-  background: hsl(var(--coral));
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SCROLLBAR
-   ═══════════════════════════════════════════════════════════════ */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--foreground) / 0.3);
-  border-radius: 0;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--foreground) / 0.5);
-}
-
-/* Hide scrollbar utility */
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   INTERACTIVE STATES
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Hover Reveal */
-.hover-reveal {
-  overflow: hidden;
-}
-
-.hover-reveal .reveal-content {
-  transform: translateY(100%);
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.hover-reveal:hover .reveal-content {
-  transform: translateY(0);
-}
-
-/* Magnetic Effect Placeholder (JS required) */
-.magnetic {
-  transition: transform 0.3s ease;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SPECIAL ELEMENTS
-   ═══════════════════════════════════════════════════════════════ */
-
-/* Quote Mark */
-.quote-mark {
-  font-family: var(--font-display);
-  font-size: 8rem;
-  line-height: 1;
-  color: hsl(var(--coral) / 0.2);
-  position: absolute;
-  top: -20px;
-  left: -20px;
-}
-
-/* Section Divider */
-.section-divider {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 4rem 0;
-}
-
-.section-divider::before,
-.section-divider::after {
-  content: '';
-  flex: 1;
-  height: 2px;
-  background: hsl(var(--foreground));
-}
-
-/* Number Badge */
-.number-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  font-size: 0.875rem;
-  font-weight: 700;
-  font-family: var(--font-display);
-  background: hsl(var(--coral));
   color: white;
+  transition: all 0.2s ease;
+  width: 100%;
 }
 
-/* Tag */
+.input-editorial:focus,
+.ios-input:focus {
+  outline: none;
+  background: rgba(0, 0, 0, 0.4);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+}
+
+/* Replaces .tag */
 .tag {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  background: hsl(var(--foreground));
-  color: hsl(var(--background));
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4;
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+}
+
+.noise-overlay {
+  /* No-op or keep empty as we have noise in layout.tsx now */
+}
+
+/* Animations */
+@keyframes blob {
+  0% {
+    transform: translate(0px, 0px) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+
+  100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+}
+
+.animate-blob {
+  animation: blob 10s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-200 to-gray-400;
+}
+
+.text-gradient-brand {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400;
+  animation: pulseSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseSlow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

@@ -29,12 +29,19 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="antialiased"
+        className="antialiased min-h-screen relative overflow-x-hidden selection:bg-purple-500/30"
         suppressHydrationWarning={true}
       >
+        <div className="fixed inset-0 z-[-1]">
+          <div className="absolute inset-0 bg-[#000000]" />
+          <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-900/20 blur-[120px] animate-blob" />
+          <div className="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-900/20 blur-[120px] animate-blob animation-delay-2000" />
+          <div className="absolute bottom-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-blue-900/20 blur-[120px] animate-blob animation-delay-4000" />
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay" />
+        </div>
         <QueryProvider>
           {children}
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="top-right" theme="dark" />
         </QueryProvider>
         <Analytics />
       </body>

@@ -43,7 +43,7 @@ export function AiModesSection() {
     const [selectedMode, setSelectedMode] = useState<string | null>(null);
 
     return (
-        <section className="py-24 lg:py-32 bg-foreground/[0.02]">
+        <section className="py-24 lg:py-32">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -83,11 +83,10 @@ export function AiModesSection() {
                                 }}
                             >
                                 <div
-                                    className={`brutal-box p-6 lg:p-8 cursor-pointer transition-all ${
-                                        isSelected
+                                    className={`brutal-box p-6 lg:p-8 cursor-pointer transition-all ${isSelected
                                             ? `${colors.border} border-2 shadow-[6px_6px_0px_hsl(var(--foreground))]`
                                             : "hover:-translate-y-1"
-                                    }`}
+                                        }`}
                                     onClick={() =>
                                         setSelectedMode(isSelected ? null : mode.id)
                                     }

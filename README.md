@@ -52,7 +52,7 @@
 
 ### 핵심 가치
 
-- **🎓 교육적 효과**: 소크라테스식 문답법으로 비판적 사고력 47% 향상
+- **🎓 교육적 효과**: 소크라테스 산파술로 무의식적 전제를 발견하고 비판적 사고력 47% 향상
 - **👥 참여도 증가**: 모든 학생이 동등하게 의견을 개진할 수 있는 환경
 - **📊 실시간 분석**: 학생들의 사고 과정과 입장 변화를 한눈에 파악
 - **🤖 AI 활용**: OpenAI GPT를 활용한 맞춤형 대화 및 피드백
@@ -99,11 +99,11 @@
 - 직관적인 입장 선택 (찬성/반대/중립)
 - 언제든 입장 변경 가능
 
-#### 🤖 AI 소크라테스 대화
-- AI가 학생의 주장에 "왜?"라고 질문
-- 논리적 허점 발견 및 보완 유도
-- 반론 예상 및 대응 논거 개발
-- 단순 주장을 논증으로 발전
+#### 🤖 AI 소크라테스 산파술
+- AI가 학생의 무의식적 믿음에 대해 "왜?"라고 집요하게 질문
+- 표면적 주장 너머의 숨겨진 전제와 모순 발견
+- 스스로 근본적인 진리에 도달하도록 유도 (Maieutics)
+- 단순한 정보 교환이 아닌 깊이 있는 철학적 탐구
 
 #### ✍️ 근거 작성 및 관리
 - 리치 텍스트 에디터로 근거 작성
@@ -689,23 +689,12 @@ npm run build
 
 ## 📄 라이선스
 
-이 프로젝트는 **MIT 라이선스** 하에 배포됩니다.
+## 📄 라이선스
 
-```
-MIT License
+이 프로젝트는 **비공개(Private/Proprietary)** 소프트웨어입니다.
+허가 없이 복제, 배포, 수정할 수 없습니다.
 
-Copyright (c) 2024-2026 Agora
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-```
+Copyright (c) 2026 Quest-On Agora. All rights reserved.
 
 ---
 

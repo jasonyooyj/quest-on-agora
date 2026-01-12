@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { createSupabaseRouteClient } from "@/lib/supabase-server";
 
 // GET /api/discussion/participant/[participantId]/note - Get instructor note
 export async function GET(
@@ -18,33 +18,42 @@ export async function GET(
     }
 
     const { participantId } = await params;
+    const supabase = await createSupabaseRouteClient();
 
     // Verify participant's session belongs to instructor
-    const participant = await prisma.discussion_participants.findUnique({
-      where: { id: participantId },
-      include: {
-        session: {
-          select: { instructor_id: true },
-        },
-      },
-    });
+    const { data: participant, error: participantError } = await supabase
+      .from("discussion_participants")
+      .select(`
+        *,
+        session:discussion_sessions (
+          instructor_id
+        )
+      `)
+      .eq("id", participantId)
+      .single();
 
-    if (!participant) {
+    if (participantError || !participant) {
       return NextResponse.json(
         { error: "Participant not found" },
         { status: 404 }
       );
     }
 
-    if (participant.session.instructor_id !== user.id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const session = participant.session as any;
+
+    if (session?.instructor_id !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Get the note
-    const note = await prisma.discussion_instructor_notes.findFirst({
-      where: { participant_id: participantId },
-      orderBy: { updated_at: "desc" },
-    });
+    const { data: note } = await supabase
+      .from("discussion_instructor_notes")
+      .select("*")
+      .eq("participant_id", participantId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     if (!note) {
       return NextResponse.json({ note: null });
@@ -55,8 +64,8 @@ export async function GET(
         id: note.id,
         participantId: note.participant_id,
         note: note.note,
-        createdAt: note.created_at.toISOString(),
-        updatedAt: note.updated_at.toISOString(),
+        createdAt: note.created_at,
+        updatedAt: note.updated_at,
       },
     });
   } catch (error) {
@@ -94,48 +103,81 @@ export async function POST(
       );
     }
 
-    // Verify participant's session belongs to instructor
-    const participant = await prisma.discussion_participants.findUnique({
-      where: { id: participantId },
-      include: {
-        session: {
-          select: { instructor_id: true },
-        },
-      },
-    });
+    const supabase = await createSupabaseRouteClient();
 
-    if (!participant) {
+    // Verify participant's session belongs to instructor
+    const { data: participant, error: participantError } = await supabase
+      .from("discussion_participants")
+      .select(`
+        *,
+        session:discussion_sessions (
+          instructor_id
+        )
+      `)
+      .eq("id", participantId)
+      .single();
+
+    if (participantError || !participant) {
       return NextResponse.json(
         { error: "Participant not found" },
         { status: 404 }
       );
     }
 
-    if (participant.session.instructor_id !== user.id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const session = participant.session as any;
+
+    if (session?.instructor_id !== user.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Upsert the note
-    const existingNote = await prisma.discussion_instructor_notes.findFirst({
-      where: { participant_id: participantId },
-    });
+    // Upsert the note logic handled by checking existence first? 
+    // Actually in Supabase UPSERT is easier.
+    // However, we need to know the ID to update OR we can try to find existing one first.
+    // The previous logic was: findFirst, if exists update, else create.
+    // Since there's no unique constraint on (participant_id) enforced by schema (it's not unique in schema def, just index),
+    // we should replicate logic: Find most recent note, update it. OR create new if none.
+    // Actually, looking at schema: discussion_instructor_notes has ID PK. participant_id is FK.
+    // It seems one participant CAN have multiple notes? The Previous FindFirst logic used "orderBy updated_at desc".
+    // This implies there might be multiple notes but we only edit the latest one?
+    // BUT the previous implementation's POST logic said: `findFirst ... if (existingNote) update`.
+    // This implies purely "Single Note per Participant" logic is intended at application level.
+    // So I will find existing note first to get its ID, then update it. If not found, create.
+
+    const { data: existingNote } = await supabase
+      .from("discussion_instructor_notes")
+      .select("id")
+      .eq("participant_id", participantId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     let note;
     if (existingNote) {
-      note = await prisma.discussion_instructor_notes.update({
-        where: { id: existingNote.id },
-        data: {
+      const { data: updated, error } = await supabase
+        .from("discussion_instructor_notes")
+        .update({
           note: noteContent,
-          updated_at: new Date(),
-        },
-      });
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", existingNote.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      note = updated;
     } else {
-      note = await prisma.discussion_instructor_notes.create({
-        data: {
+      const { data: created, error } = await supabase
+        .from("discussion_instructor_notes")
+        .insert({
           participant_id: participantId,
-          note: noteContent,
-        },
-      });
+          note: noteContent
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      note = created;
     }
 
     return NextResponse.json({
@@ -143,8 +185,8 @@ export async function POST(
         id: note.id,
         participantId: note.participant_id,
         note: note.note,
-        createdAt: note.created_at.toISOString(),
-        updatedAt: note.updated_at.toISOString(),
+        createdAt: note.created_at,
+        updatedAt: note.updated_at,
       },
     });
   } catch (error) {
