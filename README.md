@@ -9,7 +9,7 @@
 
 **AI 소크라테스 대화로 학생의 비판적 사고를 이끌어내는 현대적인 토론 플랫폼**
 
-[데모 보기](https://your-demo-url.vercel.app) • [문서](./SETUP.md) • [이슈 보고](https://github.com/your-repo/issues)
+[데모 보기](https://your-demo-url.vercel.app) • [이슈 보고](https://github.com/your-repo/issues)
 
 </div>
 

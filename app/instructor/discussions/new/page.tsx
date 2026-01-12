@@ -24,7 +24,7 @@ import { Switch } from '@/components/ui/switch'
 const discussionSchema = z.object({
   title: z.string().min(2, '제목을 2자 이상 입력해주세요').max(100, '제목은 100자 이하로 입력해주세요'),
   description: z.string().max(500, '설명은 500자 이하로 입력해주세요').optional(),
-  aiMode: z.enum(['socratic', 'balanced', 'minimal']),
+  aiMode: z.enum(['socratic', 'balanced', 'minimal', 'debate']),
 })
 
 type DiscussionFormInput = z.input<typeof discussionSchema>
@@ -364,6 +364,7 @@ export default function NewDiscussionPage() {
                     {[
                       { value: 'socratic', label: '소크라테스', desc: '질문으로 사고 유도' },
                       { value: 'balanced', label: '균형', desc: '양측 관점 제시' },
+                      { value: 'debate', label: '디베이트', desc: '적극적인 반론 제기' },
                       { value: 'minimal', label: '최소', desc: '필요시에만 개입' },
                     ].map((mode) => (
                       <label
