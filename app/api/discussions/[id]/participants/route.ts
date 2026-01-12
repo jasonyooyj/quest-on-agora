@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
+import { updateParticipantSchema } from '@/lib/validations/discussion'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -152,7 +153,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
         }
 
         const body = await request.json()
-        const { stance, stance_statement, is_submitted, needs_help, is_online } = body
+        const validation = updateParticipantSchema.safeParse(body)
+
+        if (!validation.success) {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: validation.error.flatten().fieldErrors
+            }, { status: 400 })
+        }
+
+        const { stance, stance_statement, is_submitted, needs_help, is_online } = validation.data
 
         // Get participant record
         const { data: participant } = await supabase

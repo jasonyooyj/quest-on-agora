@@ -1,6 +1,6 @@
 {
   "name": "quest-on-yeongjun-agora",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -9,7 +9,10 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "perf": "./scripts/check-performance.sh",
-    "perf:prod": "./scripts/check-performance.sh https://your-production-url.com"
+    "perf:prod": "./scripts/check-performance.sh https://your-production-url.com",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -83,6 +86,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.57.0",
     "@supabase/mcp-server-supabase": "^0.5.10",
     "@tailwindcss/postcss": "^4",
     "@types/adm-zip": "^0.5.7",

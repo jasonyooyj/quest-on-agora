@@ -8,8 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Users, MessageSquare, Play, Pause, Clock,
     Copy, ArrowLeft, Settings, BarChart3,
-    AlertCircle, CheckCircle, User, Quote
+    AlertCircle, CheckCircle, User, Quote, X
 } from 'lucide-react'
+import { SettingsDialog } from '@/components/instructor/SettingsDialog'
 
 interface Discussion {
     id: string
@@ -47,6 +48,17 @@ interface Message {
     }
 }
 
+interface PinnedQuote {
+    id: string
+    quote: string
+    context: string | null
+    pinned_at: string
+    participant: {
+        display_name: string | null
+        stance: string | null
+    } | null
+}
+
 const stanceLabels: Record<string, string> = {
     pro: '찬성',
     con: '반대',
@@ -67,8 +79,12 @@ export default function InstructorDiscussionPage() {
     const [discussion, setDiscussion] = useState<Discussion | null>(null)
     const [participants, setParticipants] = useState<Participant[]>([])
     const [messages, setMessages] = useState<Message[]>([])
+    const [pinnedQuotes, setPinnedQuotes] = useState<PinnedQuote[]>([])
     const [loading, setLoading] = useState(true)
     const [selectedParticipant, setSelectedParticipant] = useState<string | null>(null)
+    const [showSettings, setShowSettings] = useState(false)
+    const [generatingReport, setGeneratingReport] = useState(false)
+    const [pinningQuote, setPinningQuote] = useState(false)
 
     const fetchDiscussion = useCallback(async () => {
         const supabase = getSupabaseClient()
@@ -132,16 +148,29 @@ export default function InstructorDiscussionPage() {
         }
     }, [discussionId])
 
+    const fetchPins = useCallback(async () => {
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/pins`)
+            if (response.ok) {
+                const { pins } = await response.json()
+                setPinnedQuotes(pins || [])
+            }
+        } catch (error) {
+            console.error('Error fetching pins:', error)
+        }
+    }, [discussionId])
+
     useEffect(() => {
         const loadData = async () => {
             setLoading(true)
             await fetchDiscussion()
             await fetchParticipants()
             await fetchMessages()
+            await fetchPins()
             setLoading(false)
         }
         loadData()
-    }, [fetchDiscussion, fetchParticipants, fetchMessages])
+    }, [fetchDiscussion, fetchParticipants, fetchMessages, fetchPins])
 
     // Real-time subscriptions
     useEffect(() => {
@@ -205,6 +234,109 @@ export default function InstructorDiscussionPage() {
         if (discussion) {
             navigator.clipboard.writeText(discussion.join_code)
             toast.success('참여 코드가 복사되었습니다!')
+        }
+    }
+
+    const generateReport = async () => {
+        setGeneratingReport(true)
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/report`)
+            if (!response.ok) throw new Error('리포트 생성 실패')
+
+            const { report } = await response.json()
+
+            // Format report as text and copy to clipboard
+            const reportText = formatReportText(report)
+            await navigator.clipboard.writeText(reportText)
+
+            toast.success('리포트가 클립보드에 복사되었습니다!', {
+                description: 'Ctrl+V로 붙여넣기 하세요'
+            })
+        } catch (error) {
+            console.error('Error generating report:', error)
+            toast.error('리포트 생성에 실패했습니다')
+        } finally {
+            setGeneratingReport(false)
+        }
+    }
+
+    const formatReportText = (report: {
+        discussion: { title: string; description?: string; status: string; createdAt: string };
+        statistics: {
+            totalParticipants: number;
+            submittedCount: number;
+            submissionRate: string;
+            stanceDistribution: Record<string, number>;
+            totalMessages: number;
+            avgMessagesPerParticipant: string;
+        };
+        aiSummary?: string;
+        generatedAt: string;
+    }) => {
+        const stanceLabelsMap: Record<string, string> = { pro: '찬성', con: '반대', neutral: '중립' }
+        const stanceDistStr = Object.entries(report.statistics.stanceDistribution)
+            .map(([k, v]) => `${stanceLabelsMap[k] || k}: ${v}명`)
+            .join(', ')
+
+        return `📊 토론 리포트: ${report.discussion.title}
+========================================
+
+📅 생성일: ${new Date(report.generatedAt).toLocaleDateString('ko-KR')}
+📝 상태: ${report.discussion.status === 'active' ? '진행 중' : report.discussion.status === 'closed' ? '종료' : '대기'}
+
+📈 통계
+- 총 참가자: ${report.statistics.totalParticipants}명
+- 제출 완료: ${report.statistics.submittedCount}명 (${report.statistics.submissionRate}%)
+- 입장 분포: ${stanceDistStr || '없음'}
+- 총 메시지: ${report.statistics.totalMessages}개
+- 참가자당 평균 메시지: ${report.statistics.avgMessagesPerParticipant}개
+
+${report.aiSummary ? `🤖 AI 분석
+${report.aiSummary}` : ''}
+
+========================================
+Agora 토론 플랫폼에서 생성됨`
+    }
+
+    const pinQuote = async (messageContent: string, participantId: string) => {
+        if (!selectedParticipant) return
+        setPinningQuote(true)
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/pins`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    participantId,
+                    quote: messageContent,
+                    context: discussion?.title
+                })
+            })
+
+            if (!response.ok) throw new Error('핀 실패')
+
+            await fetchPins()
+            toast.success('발언이 핀되었습니다!')
+        } catch (error) {
+            console.error('Error pinning quote:', error)
+            toast.error('발언 핀에 실패했습니다')
+        } finally {
+            setPinningQuote(false)
+        }
+    }
+
+    const unpinQuote = async (pinId: string) => {
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/pins?pinId=${pinId}`, {
+                method: 'DELETE'
+            })
+
+            if (!response.ok) throw new Error('핀 해제 실패')
+
+            await fetchPins()
+            toast.success('핀이 해제되었습니다')
+        } catch (error) {
+            console.error('Error unpinning quote:', error)
+            toast.error('핀 해제에 실패했습니다')
         }
     }
 
@@ -284,11 +416,27 @@ export default function InstructorDiscussionPage() {
                                 </>
                             )}
                         </button>
-                        <button className="btn-brutal flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4" />
-                            리포트
+                        <button
+                            onClick={generateReport}
+                            disabled={generatingReport}
+                            className="btn-brutal flex items-center gap-2"
+                        >
+                            {generatingReport ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+                                    생성 중...
+                                </>
+                            ) : (
+                                <>
+                                    <BarChart3 className="w-4 h-4" />
+                                    리포트
+                                </>
+                            )}
                         </button>
-                        <button className="btn-brutal flex items-center gap-2">
+                        <button
+                            onClick={() => setShowSettings(true)}
+                            className="btn-brutal flex items-center gap-2"
+                        >
                             <Settings className="w-4 h-4" />
                         </button>
                     </div>
@@ -448,13 +596,23 @@ export default function InstructorDiscussionPage() {
                                             <Clock className="w-3 h-3" />
                                             <span>{new Date(message.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
                                         </div>
-                                        <div className={`p-3 border-2 ${message.role === 'ai'
+                                        <div className={`p-3 border-2 group relative ${message.role === 'ai'
                                                 ? 'border-sage bg-sage/10'
                                                 : message.role === 'instructor'
                                                     ? 'border-coral bg-coral/10'
                                                     : 'border-border'
                                             }`}>
                                             <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                            {message.role === 'user' && selectedParticipant && (
+                                                <button
+                                                    onClick={() => pinQuote(message.content, selectedParticipant)}
+                                                    disabled={pinningQuote}
+                                                    className="absolute top-1 right-1 p-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background border border-border hover:border-foreground rounded"
+                                                    title="발언 핀"
+                                                >
+                                                    <Quote className="w-3 h-3" />
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -535,18 +693,61 @@ export default function InstructorDiscussionPage() {
                         </div>
                     )}
 
-                    {/* Pinned Quotes Placeholder */}
-                    <div className="border-2 border-dashed border-border p-4">
-                        <div className="flex items-center gap-2 text-muted-foreground">
+                    {/* Pinned Quotes */}
+                    <div className="border-2 border-foreground p-4">
+                        <div className="flex items-center gap-2 mb-3">
                             <Quote className="w-5 h-5" />
-                            <span className="text-sm font-medium">핀한 발언</span>
+                            <span className="text-sm font-medium uppercase tracking-wider">핀한 발언</span>
+                            {pinnedQuotes.length > 0 && (
+                                <span className="text-xs bg-foreground text-background px-1.5 py-0.5">
+                                    {pinnedQuotes.length}
+                                </span>
+                            )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2">
-                            학생의 발언을 핀하여 프레젠테이션에 사용하세요
-                        </p>
+                        {pinnedQuotes.length === 0 ? (
+                            <p className="text-xs text-muted-foreground">
+                                학생의 발언을 핀하여 프레젠테이션에 사용하세요
+                            </p>
+                        ) : (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {pinnedQuotes.map((pin) => (
+                                    <div key={pin.id} className="p-2 border border-border bg-muted/30 relative group">
+                                        <p className="text-xs line-clamp-2 pr-6">{pin.quote}</p>
+                                        <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                                            <span className={`px-1 ${
+                                                pin.participant?.stance === 'pro' ? 'bg-green-100 text-green-700' :
+                                                pin.participant?.stance === 'con' ? 'bg-red-100 text-red-700' :
+                                                'bg-gray-100 text-gray-700'
+                                            }`}>
+                                                {stanceLabels[pin.participant?.stance || ''] || '미정'}
+                                            </span>
+                                            <span>{pin.participant?.display_name || '익명'}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => unpinQuote(pin.id)}
+                                            className="absolute top-1 right-1 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 rounded"
+                                            title="핀 해제"
+                                        >
+                                            <X className="w-3 h-3 text-red-600" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* Settings Dialog */}
+            <SettingsDialog
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+                discussionId={discussionId}
+                currentSettings={discussion.settings}
+                onSettingsUpdated={(newSettings) => {
+                    setDiscussion({ ...discussion, settings: newSettings })
+                }}
+            />
         </div>
     )
 }

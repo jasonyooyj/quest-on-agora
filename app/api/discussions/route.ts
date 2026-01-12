@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
+import { createDiscussionSchema } from '@/lib/validations/discussion'
 
 // Types for Supabase responses
 interface DiscussionSession {
@@ -60,8 +61,15 @@ export async function GET() {
 
             if (error) throw error
             discussions = (data as DiscussionSession[])?.map((d) => ({
-                ...d,
-                participant_count: d.discussion_participants?.[0]?.count || 0
+                id: d.id,
+                title: d.title,
+                description: d.description,
+                status: d.status,
+                joinCode: d.join_code,
+                settings: d.settings,
+                createdAt: d.created_at,
+                updatedAt: d.updated_at,
+                participantCount: d.discussion_participants?.[0]?.count || 0
             })) || []
         } else {
             // Get discussions student is participating in
@@ -115,11 +123,16 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { title, description, settings } = body
+        const validation = createDiscussionSchema.safeParse(body)
 
-        if (!title) {
-            return NextResponse.json({ error: 'Title is required' }, { status: 400 })
+        if (!validation.success) {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: validation.error.flatten().fieldErrors
+            }, { status: 400 })
         }
+
+        const { title, description, settings } = validation.data
 
         // Generate unique join code
         const joinCode = generateJoinCode()

@@ -6,6 +6,8 @@ import { StringOutputParser } from "@langchain/core/output_parsers"
 import { RunnableSequence } from "@langchain/core/runnables"
 import { HumanMessage, SystemMessage, AIMessage } from "@langchain/core/messages"
 import { AI_MODEL } from '@/lib/openai'
+import { sendMessageSchema } from '@/lib/validations/discussion'
+import { IterableReadableStream } from "@langchain/core/utils/stream"
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -67,11 +69,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const supabase = await createSupabaseRouteClient()
 
         const body = await request.json()
-        const { participantId, userMessage, discussionId } = body
+        const validation = sendMessageSchema.safeParse(body)
 
-        if (!participantId || !userMessage) {
-            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+        if (!validation.success) {
+            return NextResponse.json({
+                error: 'Validation failed',
+                details: validation.error.flatten().fieldErrors
+            }, { status: 400 })
         }
+
+        const { participantId, userMessage, discussionId } = validation.data
+        const stream = body.stream === true
 
         // Get discussion info
         const { data: discussion } = await supabase
@@ -110,18 +118,120 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const maxTurns = settings?.maxTurns || 10
         const isClosing = userTurns >= maxTurns - 1
 
-        // Initialize ChatOpenAI
+        // Initialize ChatOpenAI with streaming if requested
         const chat = new ChatOpenAI({
-            modelName: AI_MODEL, // Updated to global setting
-            temperature: aiMode === 'debate' ? 0.7 : 0.5, // Higher temp for debate creativity
+            modelName: AI_MODEL,
+            temperature: aiMode === 'debate' ? 0.7 : 0.5,
             openAIApiKey: process.env.OPENAI_API_KEY,
+            streaming: stream,
         })
 
+        // Handle streaming response
+        if (stream) {
+            const encoder = new TextEncoder()
+            let fullResponse = ''
+            const sessionId = discussionId || id
+
+            const readableStream = new ReadableStream({
+                async start(controller) {
+                    try {
+                        let aiStream: IterableReadableStream<string>
+
+                        if (aiMode === 'debate') {
+                            const debatePrompt = PromptTemplate.fromTemplate(`
+당신은 "{discussionTitle}" 주제에 대해 학생과 치열하게 논쟁하는 '악마의 변호인(Devil's Advocate)'입니다.
+학생의 입장: "{studentStance}" (만약 학생의 입장이 불분명하다면, 그들의 발언을 통해 추론하고 반대 입장을 취하십시오)
+
+현재 대화 내역:
+{history}
+
+학생의 마지막 발언: "{input}"
+
+다음 단계에 따라 논리적으로 사고한 후 답변하십시오 (Chain of Thought):
+1. [주장 분석]: 학생의 핵심 주장과 논거가 무엇인지 파악하십시오.
+2. [약점 포착]: 논리적 비약, 근거 부족, 편향된 시각 등 공격할 지점을 찾으십시오.
+3. [반론 구성]: 학생의 입장과 정반대되는 강력한 반론을 구성하십시오.
+4. [답변 생성]: 예의를 갖추되 절대 물러서지 말고, 날카로운 질문이나 반박으로 응수하십시오.
+   - 학생의 말에 쉽게 동의하거나 "좋은 의견입니다"라고 하지 마십시오.
+   - "하지만", "그렇다면", "간과하고 있는 점은" 등의 표현을 사용하십시오.
+
+최종 답변만 한국어로 출력하십시오. (사고 과정은 내부적으로만 수행하고 출력하지 마십시오)
+`)
+                            const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
+
+                            const chain = RunnableSequence.from([
+                                debatePrompt,
+                                chat,
+                                new StringOutputParser()
+                            ])
+
+                            aiStream = await chain.stream({
+                                discussionTitle: discussion.title,
+                                studentStance: stanceLabel || 'Unknown',
+                                history: historyText,
+                                input: userMessage
+                            })
+                        } else {
+                            const systemPrompt = getSystemPrompt(aiMode, discussion.title, discussion.description, stanceLabel, isClosing)
+                            const messages = [
+                                new SystemMessage(systemPrompt),
+                                ...(history?.map(m =>
+                                    m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
+                                ) || []),
+                                new HumanMessage(userMessage)
+                            ]
+
+                            const messageStream = await chat.stream(messages)
+                            // Convert AIMessageChunk stream to string stream
+                            aiStream = {
+                                [Symbol.asyncIterator]: async function* () {
+                                    for await (const chunk of messageStream) {
+                                        yield chunk.content as string
+                                    }
+                                }
+                            } as IterableReadableStream<string>
+                        }
+
+                        for await (const chunk of aiStream) {
+                            fullResponse += chunk
+                            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`))
+                        }
+
+                        // Save to database after streaming completes
+                        const supabaseForSave = await createSupabaseRouteClient()
+                        await supabaseForSave
+                            .from('discussion_messages')
+                            .insert({
+                                session_id: sessionId,
+                                participant_id: participantId,
+                                role: 'ai',
+                                content: fullResponse,
+                                response_id: 'langchain-streamed'
+                            })
+
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`))
+                        controller.close()
+                    } catch (error) {
+                        console.error('Streaming error:', error)
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Streaming failed' })}\n\n`))
+                        controller.close()
+                    }
+                }
+            })
+
+            return new Response(readableStream, {
+                headers: {
+                    'Content-Type': 'text/event-stream',
+                    'Cache-Control': 'no-cache',
+                    'Connection': 'keep-alive',
+                },
+            })
+        }
+
+        // Non-streaming response (original behavior)
         let aiResponse = ''
 
         if (aiMode === 'debate') {
-            // --- LangChain Chain of Thought for Debate Mode ---
-            // 1. Define the CoT Prompt Template in Korean
             const debatePrompt = PromptTemplate.fromTemplate(`
 당신은 "{discussionTitle}" 주제에 대해 학생과 치열하게 논쟁하는 '악마의 변호인(Devil's Advocate)'입니다.
 학생의 입장: "{studentStance}" (만약 학생의 입장이 불분명하다면, 그들의 발언을 통해 추론하고 반대 입장을 취하십시오)
@@ -140,28 +250,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
    - "하지만", "그렇다면", "간과하고 있는 점은" 등의 표현을 사용하십시오.
 
 최종 답변만 한국어로 출력하십시오. (사고 과정은 내부적으로만 수행하고 출력하지 마십시오)
-`);
+`)
 
-            // 2. Format history for template
-            const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || '';
+            const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
 
-            // 3. Create Chain
             const chain = RunnableSequence.from([
                 debatePrompt,
                 chat,
                 new StringOutputParser()
-            ]);
+            ])
 
-            // 4. Run Chain
             aiResponse = await chain.invoke({
                 discussionTitle: discussion.title,
                 studentStance: stanceLabel || 'Unknown',
                 history: historyText,
                 input: userMessage
-            });
+            })
 
         } else {
-            // --- Standard Mode (Socratic, Balanced, Minimal) ---
             const systemPrompt = getSystemPrompt(aiMode, discussion.title, discussion.description, stanceLabel, isClosing)
 
             const messages = [

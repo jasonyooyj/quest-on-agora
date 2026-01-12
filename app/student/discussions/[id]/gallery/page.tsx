@@ -7,7 +7,8 @@ import { useGallery } from '@/hooks/useGallery'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
     ArrowLeft, Heart, MessageCircle, Send, Loader2,
-    ThumbsUp, ThumbsDown, Minus, Users, Clock
+    ThumbsUp, ThumbsDown, Minus, Users, Clock,
+    Filter, ArrowUpDown
 } from 'lucide-react'
 
 interface Submission {
@@ -63,9 +64,20 @@ export default function GalleryPage() {
 
     const [expandedId, setExpandedId] = useState<string | null>(null)
     const [commentText, setCommentText] = useState('')
+    const [stanceFilter, setStanceFilter] = useState<string>('all')
+    const [sortBy, setSortBy] = useState<'latest' | 'likes' | 'comments'>('latest')
 
     const discussion = galleryData?.discussion
-    const submissions = galleryData?.submissions || []
+    const rawSubmissions = galleryData?.submissions || []
+
+    // Filter and sort submissions
+    const submissions = rawSubmissions
+        .filter(s => stanceFilter === 'all' || s.stance === stanceFilter)
+        .sort((a, b) => {
+            if (sortBy === 'likes') return b.likeCount - a.likeCount
+            if (sortBy === 'comments') return b.commentCount - a.commentCount
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        })
 
     const handleLike = (participantId: string, hasLiked: boolean) => {
         likeMutation.mutate({ participantId, hasLiked })
@@ -131,9 +143,67 @@ export default function GalleryPage() {
                 </div>
             </header>
 
+            {/* Filters */}
+            <div className="border-b-2 border-border bg-muted/30">
+                <div className="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center gap-4">
+                    {/* Stance Filter */}
+                    <div className="flex items-center gap-2">
+                        <Filter className="w-4 h-4 text-muted-foreground" />
+                        <div className="flex gap-1">
+                            {['all', 'pro', 'con', 'neutral'].map((stance) => (
+                                <button
+                                    key={stance}
+                                    onClick={() => setStanceFilter(stance)}
+                                    className={`px-3 py-1 text-sm border-2 transition-all ${
+                                        stanceFilter === stance
+                                            ? 'border-foreground bg-foreground text-background'
+                                            : 'border-border hover:border-foreground'
+                                    }`}
+                                >
+                                    {stance === 'all' ? '전체' :
+                                     stance === 'pro' ? '찬성' :
+                                     stance === 'con' ? '반대' : '중립'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Sort */}
+                    <div className="flex items-center gap-2 ml-auto">
+                        <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value as 'latest' | 'likes' | 'comments')}
+                            className="px-3 py-1 text-sm border-2 border-border bg-background"
+                        >
+                            <option value="latest">최신순</option>
+                            <option value="likes">좋아요순</option>
+                            <option value="comments">댓글순</option>
+                        </select>
+                    </div>
+
+                    {/* Results count */}
+                    <span className="text-sm text-muted-foreground">
+                        {submissions.length}개 결과
+                    </span>
+                </div>
+            </div>
+
             {/* Gallery Grid */}
             <main className="max-w-4xl mx-auto px-4 py-8">
-                {submissions.length === 0 ? (
+                {submissions.length === 0 && rawSubmissions.length > 0 ? (
+                    <div className="text-center py-16">
+                        <Filter className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                        <h2 className="text-xl font-semibold mb-2">필터 결과가 없습니다</h2>
+                        <p className="text-muted-foreground">다른 필터를 선택해보세요</p>
+                        <button
+                            onClick={() => setStanceFilter('all')}
+                            className="btn-brutal mt-4"
+                        >
+                            전체 보기
+                        </button>
+                    </div>
+                ) : submissions.length === 0 ? (
                     <div className="text-center py-16">
                         <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
                         <h2 className="text-xl font-semibold mb-2">아직 제출된 답변이 없습니다</h2>

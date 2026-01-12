@@ -82,7 +82,7 @@ export default function DiscussionsPage() {
   const { data: discussions = [], isLoading: loading } = useQuery({
     queryKey: ["instructor-discussions", user?.id],
     queryFn: async () => {
-      const response = await fetch("/api/discussion");
+      const response = await fetch("/api/discussions");
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -90,7 +90,7 @@ export default function DiscussionsPage() {
       }
 
       const result = await response.json();
-      return (result.sessions || []) as Discussion[];
+      return (result.discussions || []) as Discussion[];
     },
     enabled: !!(user && user.role === "instructor"),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
@@ -99,7 +99,7 @@ export default function DiscussionsPage() {
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      const response = await fetch(`/api/discussion/${sessionId}`, {
+      const response = await fetch(`/api/discussions/${sessionId}`, {
         method: "DELETE",
       });
 

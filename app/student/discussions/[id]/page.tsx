@@ -33,6 +33,7 @@ export default function StudentDiscussionPage() {
     const [message, setMessage] = useState('')
     const [showStanceSelector, setShowStanceSelector] = useState(false)
     const [sending, setSending] = useState(false)
+    const [streamingContent, setStreamingContent] = useState('')
 
     // Using React Query hooks
     const {
@@ -70,7 +71,7 @@ export default function StudentDiscussionPage() {
 
     useEffect(() => {
         scrollToBottom()
-    }, [messages.length])
+    }, [messages.length, streamingContent])
 
     const handleStanceSelect = async (stance: string) => {
         if (!participant) return
@@ -83,7 +84,10 @@ export default function StudentDiscussionPage() {
 
             // React Query will auto-refetch due to realtime subscription
             setShowStanceSelector(false)
-            toast.success('입장이 선택되었습니다')
+            const stanceLabel = stanceLabels[stance] || stance
+            toast.success(`"${stanceLabel}" 입장이 선택되었습니다`, {
+                description: 'AI 튜터와 토론을 시작해보세요'
+            })
         } catch (error) {
             console.error('Error selecting stance:', error)
             toast.error('입장 선택 중 오류가 발생했습니다')
@@ -97,10 +101,19 @@ export default function StudentDiscussionPage() {
             const newStatus = !participant.needsHelp
             await supabase
                 .from('discussion_participants')
-                .update({ needs_help: newStatus })
+                .update({
+                    needs_help: newStatus,
+                    help_requested_at: newStatus ? new Date().toISOString() : null
+                })
                 .eq('id', participant.id)
 
-            toast.success(newStatus ? '도움이 요청되었습니다' : '도움 요청이 취소되었습니다')
+            if (newStatus) {
+                toast.success('강사에게 도움 요청이 전달되었습니다', {
+                    description: '강사가 확인 후 도움을 드릴 예정입니다'
+                })
+            } else {
+                toast.info('도움 요청이 취소되었습니다')
+            }
         } catch (error) {
             console.error('Error toggling help:', error)
             toast.error('오류가 발생했습니다')
@@ -113,6 +126,7 @@ export default function StudentDiscussionPage() {
         const currentMessage = message.trim()
         setMessage('')
         setSending(true)
+        setStreamingContent('')
 
         try {
             const response = await fetch(`/api/discussions/${discussionId}/chat`, {
@@ -120,17 +134,51 @@ export default function StudentDiscussionPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     participantId: participant.id,
-                    content: currentMessage
+                    userMessage: currentMessage,
+                    stream: true
                 })
             })
 
             if (!response.ok) throw new Error('Failed to send message')
 
-            // The hook's realtime subscription will catch the new message
+            // Handle streaming response
+            const reader = response.body?.getReader()
+            const decoder = new TextDecoder()
+
+            if (!reader) throw new Error('No reader available')
+
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+
+                const text = decoder.decode(value)
+                const lines = text.split('\n')
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6))
+                            if (data.chunk) {
+                                setStreamingContent(prev => prev + data.chunk)
+                            }
+                            if (data.done) {
+                                // Streaming complete, realtime subscription will update messages
+                                setStreamingContent('')
+                            }
+                            if (data.error) {
+                                throw new Error(data.error)
+                            }
+                        } catch (parseError) {
+                            // Skip invalid JSON lines
+                        }
+                    }
+                }
+            }
         } catch (error) {
             console.error('Error sending message:', error)
             toast.error('메시지 전송에 실패했습니다')
             setMessage(currentMessage) // Rollback
+            setStreamingContent('')
         } finally {
             setSending(false)
         }
@@ -308,8 +356,29 @@ export default function StudentDiscussionPage() {
                         </motion.div>
                     ))}
 
-                    {/* Sending indicator */}
-                    {sending && <ThinkingIndicator />}
+                    {/* Streaming AI response or thinking indicator */}
+                    {sending && (
+                        streamingContent ? (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex justify-start"
+                            >
+                                <div className="max-w-[85%] lg:max-w-[75%] rounded-2xl p-4 shadow-sm border-2 bg-card border-border rounded-tl-none">
+                                    <div className="flex items-center gap-2 mb-1.5 opacity-80">
+                                        <span className="text-xs font-bold uppercase tracking-wider">AI 튜터</span>
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                    </div>
+                                    <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+                                        {streamingContent}
+                                        <span className="inline-block w-1.5 h-4 bg-foreground/80 animate-pulse ml-0.5" />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <ThinkingIndicator />
+                        )
+                    )}
 
                     <div ref={messagesEndRef} />
                 </div>
@@ -385,6 +454,7 @@ export default function StudentDiscussionPage() {
 
 function ThinkingIndicator() {
     const [message, setMessage] = useState('AI 튜터가 답변을 작성 중입니다...')
+    const [elapsedSeconds, setElapsedSeconds] = useState(0)
 
     useEffect(() => {
         const messages = [
@@ -396,20 +466,35 @@ function ThinkingIndicator() {
         ]
         let index = 0
 
-        const interval = setInterval(() => {
+        const messageInterval = setInterval(() => {
             index = (index + 1) % messages.length
             setMessage(messages[index])
         }, 3000)
 
-        return () => clearInterval(interval)
+        const timerInterval = setInterval(() => {
+            setElapsedSeconds(prev => prev + 1)
+        }, 1000)
+
+        return () => {
+            clearInterval(messageInterval)
+            clearInterval(timerInterval)
+        }
     }, [])
 
     return (
         <div className="flex justify-start">
             <div className="p-4 border-2 border-sage bg-sage/10 rounded-2xl rounded-tl-none">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="animate-pulse">{message}</span>
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="animate-pulse">{message}</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground/70 pl-6">
+                        {elapsedSeconds < 5
+                            ? `잠시만 기다려주세요... (약 3-5초 소요)`
+                            : `${elapsedSeconds}초 경과 - 조금만 더 기다려주세요`
+                        }
+                    </div>
                 </div>
             </div>
         </div>

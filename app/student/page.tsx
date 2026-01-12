@@ -351,7 +351,7 @@ export default function StudentDashboard() {
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                     onKeyDown={(e) => e.key === 'Enter' && handleJoinDiscussion()}
                     className="input-editorial with-icon pl-12 w-56 bg-background text-foreground uppercase"
-                    maxLength={8}
+                    maxLength={6}
                   />
                 </div>
                 <button
