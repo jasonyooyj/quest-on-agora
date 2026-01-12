@@ -15,8 +15,8 @@ export function HeroSection() {
         offset: ["start start", "end start"],
     });
 
-    const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-    const heroScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+    const heroOpacity = useTransform(scrollYProgress, [0, 0.9], [1, 0]);
+    const heroScale = useTransform(scrollYProgress, [0, 0.9], [1, 0.95]);
 
     return (
         <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -122,7 +122,7 @@ export function HeroSection() {
                             <div className="flex-1 text-center">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/20 border border-white/5 shadow-inner">
                                     <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                    <span className="text-xs text-white/70 font-medium tracking-wide">agora.spatial</span>
+                                    <span className="text-xs text-white/70 font-medium tracking-wide">아고라 스페셜</span>
                                 </div>
                             </div>
                             <div className="w-16" /> {/* Spacer for centering */}
@@ -144,8 +144,14 @@ export function HeroSection() {
                                     <div className="text-sm text-zinc-400 mb-3 group-hover:text-zinc-200 transition-colors">활성 토론 세션</div>
                                     <div className="text-5xl font-bold text-white mb-6 tracking-tight">12<span className="text-2xl text-zinc-500 font-normal">개</span></div>
                                     <div className="flex -space-x-4 pl-2">
-                                        {[1, 2, 3, 4].map(i => (
-                                            <div key={i} className={`w-12 h-12 rounded-full border-4 border-[#121216] bg-gradient-to-br from-zinc-700 to-zinc-800 z-${i * 10} shadow-xl transform group-hover:translate-x-2 transition-transform duration-300`} />
+                                        {HERO_CONTENT.avatars.map((src, i) => (
+                                            <div key={i} className={`w-12 h-12 rounded-full border-2 border-[#121216] relative overflow-hidden z-${(i + 1) * 10} shadow-xl transform group-hover:translate-x-2 transition-transform duration-300 bg-zinc-800`}>
+                                                <img
+                                                    src={src}
+                                                    alt={`학생 ${i + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -159,7 +165,7 @@ export function HeroSection() {
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                                             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                                         </span>
-                                        <span className="text-xs text-primary-foreground font-bold tracking-wide">Live Analysis</span>
+                                        <span className="text-xs text-primary-foreground font-bold tracking-wide">실시간 분석중</span>
                                     </div>
                                 </div>
                                 <div className="space-y-4">

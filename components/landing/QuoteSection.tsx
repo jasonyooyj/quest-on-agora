@@ -45,12 +45,16 @@ export function QuoteSection() {
     const currentTestimonial = TESTIMONIALS[currentIndex];
 
     return (
-        <section className="py-24 lg:py-32">
+        <section className="py-24 lg:py-40 relative">
             <div className="max-w-4xl mx-auto px-6 lg:px-12">
-                <div className="relative">
-                    <Quote className="absolute -top-8 -left-4 w-24 h-24 text-[hsl(var(--coral))] opacity-20" />
+                <div className="relative glass-panel p-12 md:p-20 rounded-[3rem] border-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden">
+                    {/* Spatial Background Elements */}
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
+                    <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
 
-                    <div className="min-h-[280px] relative overflow-hidden">
+                    <Quote className="absolute top-10 right-10 w-24 h-24 text-primary opacity-10" />
+
+                    <div className="min-h-[320px] relative">
                         <AnimatePresence mode="wait" custom={direction}>
                             <motion.div
                                 key={currentIndex}
@@ -59,42 +63,35 @@ export function QuoteSection() {
                                 initial="enter"
                                 animate="center"
                                 exit="exit"
-                                transition={{ duration: 0.4, ease: "easeInOut" }}
+                                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                             >
-                                <blockquote
-                                    className="text-2xl lg:text-3xl font-medium leading-relaxed pl-8 border-l-4 border-[hsl(var(--coral))]"
-                                    style={{ fontFamily: "var(--font-display)" }}
-                                >
-                                    {currentTestimonial.text}
+                                <blockquote className="text-2xl md:text-3xl font-bold leading-relaxed text-zinc-100 tracking-tight">
+                                    "{currentTestimonial.text}"
                                 </blockquote>
-                                <div className="mt-8 pl-8 flex items-center gap-4">
-                                    <div
-                                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                            currentTestimonial.role === "instructor"
-                                                ? "bg-[hsl(var(--sage))]"
-                                                : "bg-[hsl(var(--coral))]"
+                                <div className="mt-12 flex items-center gap-5">
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border transition-all duration-300 shadow-xl ${currentTestimonial.role === "instructor"
+                                            ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
+                                            : "bg-primary/20 border-primary/30 text-primary"
                                         }`}
                                     >
                                         {currentTestimonial.role === "instructor" ? (
-                                            <GraduationCap className="w-5 h-5 text-white" />
+                                            <GraduationCap className="w-8 h-8" />
                                         ) : (
-                                            <User className="w-5 h-5 text-white" />
+                                            <User className="w-8 h-8" />
                                         )}
                                     </div>
                                     <div>
-                                        <div className="font-semibold flex items-center gap-2">
+                                        <div className="font-bold text-lg flex items-center gap-3 text-white">
                                             {currentTestimonial.author}
-                                            <span
-                                                className={`text-xs px-2 py-0.5 rounded-full ${
-                                                    currentTestimonial.role === "instructor"
-                                                        ? "bg-[hsl(var(--sage)/0.2)] text-[hsl(var(--sage))]"
-                                                        : "bg-[hsl(var(--coral)/0.2)] text-[hsl(var(--coral))]"
+                                            <span className={`text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-full border ${currentTestimonial.role === "instructor"
+                                                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                                    : "bg-primary/10 border-primary/20 text-primary"
                                                 }`}
                                             >
-                                                {currentTestimonial.role === "instructor" ? "교수" : "학생"}
+                                                {currentTestimonial.role === "instructor" ? "PROFESSOR" : "STUDENT"}
                                             </span>
                                         </div>
-                                        <div className="text-muted-foreground">
+                                        <div className="text-zinc-500 font-medium mt-1">
                                             {currentTestimonial.affiliation}
                                         </div>
                                     </div>
@@ -104,8 +101,8 @@ export function QuoteSection() {
                     </div>
 
                     {/* Navigation */}
-                    <div className="flex items-center justify-between mt-8 pl-8">
-                        <div className="flex gap-2">
+                    <div className="flex flex-col md:flex-row items-center justify-between mt-12 gap-8 pt-10 border-t border-white/5">
+                        <div className="flex gap-3">
                             {TESTIMONIALS.map((_, index) => (
                                 <button
                                     key={index}
@@ -113,29 +110,28 @@ export function QuoteSection() {
                                         setDirection(index > currentIndex ? 1 : -1);
                                         setCurrentIndex(index);
                                     }}
-                                    className={`w-3 h-3 rounded-full transition-all ${
-                                        index === currentIndex
-                                            ? "bg-[hsl(var(--coral))] w-8"
-                                            : "bg-foreground/20 hover:bg-foreground/40"
-                                    }`}
-                                    aria-label={`후기 ${index + 1}번으로 이동`}
+                                    className={`h-1.5 rounded-full transition-all duration-500 ${index === currentIndex
+                                            ? "bg-primary w-10 shadow-[0_0_10px_rgba(139,92,246,0.5)]"
+                                            : "bg-white/10 hover:bg-white/30 w-1.5"
+                                        }`}
+                                    aria-label={`Go to testimonial ${index + 1}`}
                                 />
                             ))}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-4">
                             <button
                                 onClick={handlePrev}
-                                className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
-                                aria-label="이전 후기"
+                                className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                                aria-label="Previous testimonial"
                             >
-                                <ChevronLeft className="w-5 h-5" />
+                                <ChevronLeft className="w-6 h-6" />
                             </button>
                             <button
                                 onClick={handleNext}
-                                className="p-2 border-2 border-foreground hover:bg-foreground hover:text-background transition-colors"
-                                aria-label="다음 후기"
+                                className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                                aria-label="Next testimonial"
                             >
-                                <ChevronRight className="w-5 h-5" />
+                                <ChevronRight className="w-6 h-6" />
                             </button>
                         </div>
                     </div>

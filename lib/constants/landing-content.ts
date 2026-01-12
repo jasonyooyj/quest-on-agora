@@ -8,13 +8,21 @@ export const HERO_CONTENT = {
         "AI 소크라테스 대화로 학생의 비판적 사고를 이끌어내고, 실시간으로 토론을 모니터링하세요.",
     ctaPrimary: "무료로 시작",
     ctaSecondary: "데모 보기",
+    avatars: [
+        "/avatars/avatar1.png",
+        "/avatars/avatar2.png",
+        "/avatars/avatar3.png",
+        "/avatars/avatar4.png",
+    ],
 };
 
 export const MARQUEE_ITEMS = [
-    "비판적 사고",
-    "논리적 근거",
-    "실시간 피드백",
-    "AI 대화",
+    "AI 소크라테스 대화",
+    "비판적 사고의 확장",
+    "실시간 논리 분석",
+    "실전 토론 데이터",
+    "맞춤형 교수 피드백",
+    "논증력 향상",
 ];
 
 export const FEATURES_CONTENT = {

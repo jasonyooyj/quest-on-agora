@@ -2,11 +2,11 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-0.2.0-brightgreen?style=for-the-badge)
-![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=for-the-badge&logo=typescript)
+![Version](https://img.shields.io/badge/Version-0.2.1-brightgreen?style=for-the-badge)
+![Next.js](https://img.shields.io/badge/Next.js-16.0.7-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT-412991?style=for-the-badge&logo=openai)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5-412991?style=for-the-badge&logo=openai)
 ![Playwright](https://img.shields.io/badge/Playwright-E2E-45ba4b?style=for-the-badge&logo=playwright)
 
 **AI 소크라테스 대화로 학생의 비판적 사고를 이끌어내는 현대적인 토론 플랫폼**
@@ -55,7 +55,8 @@
 - **🎓 교육적 효과**: 소크라테스 산파술로 무의식적 전제를 발견하고 비판적 사고력 47% 향상
 - **👥 참여도 증가**: 모든 학생이 동등하게 의견을 개진할 수 있는 환경
 - **📊 실시간 분석**: 학생들의 사고 과정과 입장 변화를 한눈에 파악
-- **🤖 AI 활용**: OpenAI GPT를 활용한 맞춤형 대화 및 피드백
+- **🤖 AI 활용**: OpenAI GPT-5(gpt-5-chat-latest)를 활용한 맞춤형 대화 및 피드백
+- **🎨 Premium UI**: iOS 26 / macOS Reality Aesthetic 기반의 Spatial 디자인 시스템
 
 ---
 
@@ -99,11 +100,11 @@
 - 직관적인 입장 선택 (찬성/반대/중립)
 - 언제든 입장 변경 가능
 
-#### 🤖 AI 소크라테스 산파술
-- AI가 학생의 무의식적 믿음에 대해 "왜?"라고 집요하게 질문
-- 표면적 주장 너머의 숨겨진 전제와 모순 발견
-- 스스로 근본적인 진리에 도달하도록 유도 (Maieutics)
-- 단순한 정보 교환이 아닌 깊이 있는 철학적 탐구
+#### 🤖 AI 맞춤형 토론 모드
+- **소크라테스 산파술 (Socratic)**: AI가 학생의 무의식적 믿음에 대해 "왜?"라고 질문하며 스스로 모순을 발견하도록 유도
+- **악마의 변호인 (Debate)**: LangChain 기반의 **Chain of Thought (CoT)** 알고리즘을 사용하여 학생과 논리적으로 치열하게 논쟁
+- **균형 지원 (Balanced)**: 학생의 의견에 공감하며 부드럽게 다른 관점을 제시하여 사고의 확장을 유도
+- **최소 개입 (Minimal)**: 학생의 발언을 요약하고 확인하며 토론의 흐름을 방해하지 않고 촉진
 
 #### ✍️ 근거 작성 및 관리
 - 리치 텍스트 에디터로 근거 작성
@@ -142,16 +143,16 @@
 | 기술 | 버전 | 용도 |
 |------|------|------|
 | **Supabase** | 2.56.0 | PostgreSQL 기반 BaaS |
-| **Prisma** | 5.22.0 | 타입 안전 ORM |
+| **Supabase Auth** | - | 사용자 인증 및 보안 (RLS 적용) |
 | **Next.js API Routes** | - | 서버리스 API |
 
 ### AI & 인증
 
 | 기술 | 버전 | 용도 |
 |------|------|------|
-| **OpenAI API** | 6.16.0 | GPT 모델 활용 AI 대화 |
-| **LangChain** | 1.2.7 | AI 대화 체인 및 프롬프트 관리 |
-| **Supabase Auth** | - | 인증 및 사용자 관리 |
+| **OpenAI API** | 6.16.0 | GPT-5 (gpt-5-chat-latest) 활용 |
+| **LangChain** | 1.2.7 | Chain of Thought (CoT) 및 프롬프트 관리 |
+| **Supabase Client** | - | 데이터베이스 쿼리 및 상태 연동 |
 
 ### 테스트
 
@@ -250,11 +251,10 @@ agora/
 │
 ├── 📂 lib/                          # 유틸리티 및 설정
 │   ├── auth.ts                      # 인증 유틸리티
-│   ├── prisma.ts                    # Prisma 클라이언트
-│   ├── openai.ts                    # OpenAI 클라이언트
-│   ├── supabase-client.ts           # 클라이언트용 Supabase
-│   ├── supabase-server.ts           # 서버용 Supabase
-│   ├── supabase-middleware.ts       # 미들웨어용 Supabase
+│   ├── openai.ts                    # OpenAI 클라이언트 및 모델 상수
+│   ├── supabase-client.ts           # 클라이언트용 Supabase 설정
+│   ├── supabase-server.ts           # 서버용 Supabase 설정
+│   ├── supabase-middleware.ts       # 미들웨어용 Supabase 설정
 │   ├── compression.ts               # 데이터 압축 유틸
 │   ├── utils.ts                     # 공통 유틸리티
 │   ├── 📂 middleware/               # API 미들웨어
@@ -267,8 +267,6 @@ agora/
 │   ├── grant_permissions.sql        # 권한 부여 스크립트
 │   └── *.sql                        # 기타 마이그레이션
 │
-├── 📂 prisma/                       # Prisma 스키마 및 마이그레이션
-│   └── schema.prisma                # 데이터베이스 스키마
 │
 ├── 📂 public/                       # 정적 파일
 │   ├── favicon.ico
@@ -321,15 +319,8 @@ pnpm install
 
 `.env.local` 파일을 생성하고 [환경 변수 설정](#-환경-변수-설정) 섹션을 참고하여 설정합니다.
 
-### 5. 데이터베이스 설정
-
-```bash
-# Prisma 클라이언트 생성
-npx prisma generate
-
-# (선택) 데이터베이스 마이그레이션
-npx prisma db push
-```
+# (선택) 데이터베이스 설정
+# Supabase SQL Editor에서 database/*.sql 파일을 실행하여 스키마 및 RLS 적용
 
 ### 6. 개발 서버 실행
 
@@ -375,12 +366,10 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxx
 SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx
 
-# ============================================
-# 📊 Prisma 데이터베이스 연결
-# ============================================
-# Supabase > Settings > Database > Connection string 에서 확인
-# ⚠️ Connection pooling (포트 6543) 사용 권장
-DATABASE_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
+# Supabase > Settings > API 에서 확인
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxx
+SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx
 
 # ============================================
 # 🤖 OpenAI (https://platform.openai.com)

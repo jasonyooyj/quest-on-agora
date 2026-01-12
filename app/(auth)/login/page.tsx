@@ -75,138 +75,128 @@ function LoginForm() {
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        >
-            {/* Header */}
-            <div className="mb-10">
-                <div className="tag mb-4">환영합니다</div>
-                <h2
-                    className="text-3xl font-bold mb-2"
-                    style={{ fontFamily: 'var(--font-display)' }}
-                >
-                    로그인
-                </h2>
-                <p className="text-muted-foreground">
-                    계정에 로그인하여 토론을 시작하세요
-                </p>
+        <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
+            {/* Background Blobs */}
+            <div className="absolute inset-0 z-0 bg-background pointer-events-none">
+                <div className="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-primary/20 rounded-full mix-blend-screen filter blur-[120px] animate-blob" />
+                <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-purple-500/10 rounded-full mix-blend-screen filter blur-[120px] animate-blob animation-delay-2000" />
             </div>
 
-            {/* OAuth Buttons */}
-            <div className="space-y-3 mb-8">
-                <button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('google')}
-                    disabled={isLoading || oauthLoading !== null}
-                    className="btn-brutal w-full flex items-center justify-center gap-3 bg-white dark:bg-background"
-                >
-                    {oauthLoading === 'google' ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                        <Chrome className="w-5 h-5" />
-                    )}
-                    <span>Google로 계속하기</span>
-                </button>
-
-{/* 카카오 로그인 - 사업자등록증 제출 후 활성화 예정
-                <button
-                    type="button"
-                    onClick={() => handleOAuthSignIn('kakao')}
-                    disabled={isLoading || oauthLoading !== null}
-                    className="btn-brutal w-full flex items-center justify-center gap-3 bg-[#FEE500] text-[#000000] border-[#FEE500] hover:bg-[#FDD835]"
-                >
-                    {oauthLoading === 'kakao' ? (
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 3C6.486 3 2 6.262 2 10.29c0 2.548 1.623 4.771 4.067 6.093l-.985 3.589c-.073.266.194.489.428.36l4.282-2.354C10.517 17.983 11.246 18 12 18c5.514 0 10-3.262 10-7.29S17.514 3 12 3z"/>
-                        </svg>
-                    )}
-                    <span>카카오로 계속하기</span>
-                </button>
-                */}
-            </div>
-
-            <div className="relative mb-8">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t-2 border-border"></div>
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-4 text-muted-foreground font-semibold">
-                        또는 이메일로 로그인
-                    </span>
-                </div>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div>
-                    <label className="block text-sm font-semibold uppercase tracking-wider mb-2">
-                        이메일
-                    </label>
-                    <div className="relative">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input
-                            type="email"
-                            placeholder="you@university.edu"
-                            className="input-editorial with-icon"
-                            {...register('email')}
-                        />
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                className="relative z-10 w-full max-w-lg glass-panel p-10 md:p-12 shadow-2xl bg-black/40 border-white/5"
+            >
+                {/* Header */}
+                <div className="mb-10 text-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase">아고라 로그인</span>
                     </div>
-                    {errors.email && (
-                        <p className="mt-2 text-sm text-[hsl(var(--coral))]">{errors.email.message}</p>
-                    )}
+                    <h2 className="text-4xl font-bold tracking-tight text-white mb-3">다시 오셨군요!</h2>
+                    <p className="text-zinc-400">
+                        계정에 로그인하여 토론을 시작하세요
+                    </p>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-semibold uppercase tracking-wider mb-2">
-                        비밀번호
-                    </label>
-                    <div className="relative">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <input
-                            type="password"
-                            placeholder="••••••••"
-                            className="input-editorial with-icon"
-                            {...register('password')}
-                        />
-                    </div>
-                    {errors.password && (
-                        <p className="mt-2 text-sm text-[hsl(var(--coral))]">{errors.password.message}</p>
-                    )}
-                </div>
-
-                <button
-                    type="submit"
-                    disabled={isLoading || oauthLoading !== null}
-                    className="btn-brutal-fill w-full flex items-center justify-center gap-2"
-                >
-                    {isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                        <>
-                            로그인
-                            <ArrowRight className="w-4 h-4" />
-                        </>
-                    )}
-                </button>
-            </form>
-
-            {/* Footer */}
-            <div className="mt-8 pt-8 border-t-2 border-border text-center">
-                <p className="text-muted-foreground">
-                    계정이 없으신가요?{' '}
-                    <Link
-                        href="/register"
-                        className="text-foreground font-semibold hover:text-[hsl(var(--coral))] transition-colors"
+                {/* OAuth Buttons */}
+                <div className="grid grid-cols-1 gap-4 mb-10">
+                    <button
+                        type="button"
+                        onClick={() => handleOAuthSignIn('google')}
+                        disabled={isLoading || oauthLoading !== null}
+                        className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-full bg-white/5 border border-white/10 text-white font-medium transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-xl hover:-translate-y-0.5"
                     >
-                        회원가입
-                    </Link>
-                </p>
-            </div>
-        </motion.div>
+                        {oauthLoading === 'google' ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <Chrome className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+                        )}
+                        <span>Google로 계속하기</span>
+                    </button>
+                </div>
+
+                <div className="relative mb-10">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-white/5"></div>
+                    </div>
+                    <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                        <span className="bg-[#09090b] px-4 text-zinc-500">또는</span>
+                    </div>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                            이메일
+                        </label>
+                        <div className="relative group">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                            <input
+                                type="email"
+                                placeholder="you@university.edu"
+                                className="ios-input pl-12 h-14 bg-white/[0.03] focus:bg-white/[0.05]"
+                                {...register('email')}
+                            />
+                        </div>
+                        {errors.email && (
+                            <p className="mt-1.5 text-xs text-red-400 font-medium ml-1">{errors.email.message}</p>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest ml-1">
+                            비밀번호
+                        </label>
+                        <div className="relative group">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                            <input
+                                type="password"
+                                placeholder="••••••••"
+                                className="ios-input pl-12 h-14 bg-white/[0.03] focus:bg-white/[0.05]"
+                                {...register('password')}
+                            />
+                        </div>
+                        {errors.password && (
+                            <p className="mt-1.5 text-xs text-red-400 font-medium ml-1">{errors.password.message}</p>
+                        )}
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={isLoading || oauthLoading !== null}
+                        className="group relative w-full h-14 bg-white text-black font-bold rounded-full overflow-hidden shadow-lg transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <span className="relative z-10 flex items-center justify-center gap-2">
+                            {isLoading ? (
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                            ) : (
+                                <>
+                                    로그인하기
+                                    <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                </>
+                            )}
+                        </span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-zinc-200 to-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                </form>
+
+                {/* Footer */}
+                <div className="mt-12 text-center">
+                    <p className="text-zinc-500 text-sm">
+                        계정이 없으신가요?{' '}
+                        <Link
+                            href="/register"
+                            className="text-white font-bold hover:text-primary underline-offset-4 hover:underline transition-colors"
+                        >
+                            회원가입
+                        </Link>
+                    </p>
+                </div>
+            </motion.div>
+        </div>
     )
 }
 

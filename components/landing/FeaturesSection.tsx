@@ -11,14 +11,11 @@ export function FeaturesSection() {
                     {/* Section Header */}
                     <div className="lg:col-span-4">
                         <div className="sticky top-24">
-                            <div className="tag mb-4">{FEATURES_CONTENT.tag}</div>
-                            <h2
-                                className="mb-6"
-                                style={{ fontFamily: "var(--font-display)" }}
-                            >
+                            <span className="tag mb-4">{FEATURES_CONTENT.tag}</span>
+                            <h2 className="mt-6 text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
                                 {FEATURES_CONTENT.title}
                             </h2>
-                            <p className="text-muted-foreground text-lg leading-relaxed">
+                            <p className="mt-4 text-zinc-400 text-lg leading-relaxed">
                                 {FEATURES_CONTENT.description}
                             </p>
                         </div>
@@ -29,27 +26,24 @@ export function FeaturesSection() {
                         {FEATURES_CONTENT.items.map((feature, index) => (
                             <motion.div
                                 key={feature.number}
-                                initial={{ opacity: 0, y: 40 }}
+                                initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true, margin: "-100px" }}
-                                transition={{ duration: 0.6, delay: index * 0.1 }}
+                                transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
                                 className="group"
                             >
-                                <div className="brutal-box p-8 flex gap-6">
-                                    <div className="number-badge flex-shrink-0">
+                                <div className="glass-panel p-8 flex gap-8 hover:bg-white/5 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5">
+                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-xl font-bold shadow-[0_0_15px_rgba(139,92,246,0.1)] group-hover:shadow-[0_0_25px_rgba(139,92,246,0.3)] transition-shadow">
                                         {feature.number}
                                     </div>
                                     <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <feature.icon className="w-5 h-5 text-[hsl(var(--coral))]" />
-                                            <h3
-                                                className="text-xl font-semibold"
-                                                style={{ fontFamily: "var(--font-display)" }}
-                                            >
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <feature.icon className="w-5 h-5 text-primary" />
+                                            <h3 className="text-xl font-bold text-zinc-100">
                                                 {feature.title}
                                             </h3>
                                         </div>
-                                        <p className="text-muted-foreground leading-relaxed">
+                                        <p className="text-zinc-400 leading-relaxed">
                                             {feature.description}
                                         </p>
                                     </div>

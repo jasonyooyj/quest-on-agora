@@ -66,9 +66,9 @@ const stanceLabels: Record<string, string> = {
 }
 
 const stanceColors: Record<string, string> = {
-    pro: 'bg-green-100 text-green-800 border-green-300',
-    con: 'bg-red-100 text-red-800 border-red-300',
-    neutral: 'bg-gray-100 text-gray-800 border-gray-300'
+    pro: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400',
+    con: 'border-rose-500/20 bg-rose-500/10 text-rose-400',
+    neutral: 'border-zinc-700 bg-zinc-800 text-zinc-300'
 }
 
 export default function InstructorDiscussionPage() {
@@ -85,6 +85,7 @@ export default function InstructorDiscussionPage() {
     const [showSettings, setShowSettings] = useState(false)
     const [generatingReport, setGeneratingReport] = useState(false)
     const [pinningQuote, setPinningQuote] = useState(false)
+    const [sendingInstruction, setSendingInstruction] = useState(false)
 
     const fetchDiscussion = useCallback(async () => {
         const supabase = getSupabaseClient()
@@ -340,12 +341,70 @@ Agora 토론 플랫폼에서 생성됨`
         }
     }
 
+    const sendInstruction = async (participantId: string) => {
+        const content = window.prompt('학생에게 보낼 개별 지시 내용을 입력하세요:')
+        if (!content || !content.trim()) return
+
+        setSendingInstruction(true)
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    participantId,
+                    content,
+                    role: 'instructor'
+                })
+            })
+
+            if (!response.ok) throw new Error('발송 실패')
+
+            toast.success('지시가 성공적으로 전송되었습니다')
+            fetchMessages(selectedParticipant || undefined)
+        } catch (error) {
+            console.error('Error sending instruction:', error)
+            toast.error('지시 전송에 실패했습니다')
+        } finally {
+            setSendingInstruction(false)
+        }
+    }
+
+    const sendWarning = async (participantId: string) => {
+        setSendingInstruction(true)
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/messages`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    participantId,
+                    content: '⚠️ 주의: 현재 토론 태도가 불성실하거나 부적절한 언행이 감지되었습니다. 원활한 토론을 위해 협조 부탁드립니다.',
+                    role: 'system'
+                })
+            })
+
+            if (!response.ok) throw new Error('발송 실패')
+
+            toast.success('경고가 전송되었습니다')
+            fetchMessages(selectedParticipant || undefined)
+        } catch (error) {
+            console.error('Error sending warning:', error)
+            toast.error('경고 전송에 실패했습니다')
+        } finally {
+            setSendingInstruction(false)
+        }
+    }
+
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="w-12 h-12 border-4 border-foreground border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-muted-foreground">토론 정보를 불러오는 중...</p>
+            <div className="min-h-screen bg-[#09090b] flex items-center justify-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none" />
+                <div className="text-center relative z-10">
+                    <div className="relative mb-6">
+                        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+                        <Loader2 className="w-16 h-16 animate-spin mx-auto text-primary relative" />
+                    </div>
+                    <p className="text-zinc-400 text-lg font-bold tracking-tight animate-pulse">관리자 대시보드 로딩 중...</p>
                 </div>
             </div>
         )
@@ -363,55 +422,59 @@ Agora 토론 플랫폼에서 생성됨`
     }, {} as Record<string, number>)
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-[#09090b] text-white selection:bg-primary/30 relative overflow-hidden flex flex-col">
+            {/* Bioluminescent background blobs */}
+            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none" />
+
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b-2 border-foreground bg-background">
-                <div className="max-w-[1800px] mx-auto px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+            <header className="sticky top-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/5 h-24 flex items-center">
+                <div className="max-w-[1920px] w-full mx-auto px-8 flex items-center justify-between">
+                    <div className="flex items-center gap-6">
                         <button
                             onClick={() => router.push('/instructor')}
-                            className="p-2 border-2 border-border hover:border-foreground transition-colors"
+                            className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-white transition-all active:scale-90"
                         >
-                            <ArrowLeft className="w-5 h-5" />
+                            <ArrowLeft className="w-6 h-6" />
                         </button>
                         <div>
-                            <h1 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>
+                            <h1 className="text-2xl font-bold tracking-tight text-white mb-1">
                                 {discussion.title}
                             </h1>
-                            <div className="flex items-center gap-3 mt-1">
-                                <span className={`tag ${discussion.status === 'active' ? 'bg-green-600' :
-                                        discussion.status === 'closed' ? 'bg-gray-600' : 'bg-yellow-600'
+                            <div className="flex items-center gap-4">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest ${discussion.status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                                    discussion.status === 'closed' ? 'bg-zinc-800 text-zinc-400 border border-zinc-700' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                                     }`}>
-                                    {discussion.status === 'active' ? '진행 중' :
-                                        discussion.status === 'closed' ? '종료됨' : '대기 중'}
+                                    {discussion.status === 'active' ? '토론 진행중' :
+                                        discussion.status === 'closed' ? '토론 종료됨' : '토론 대기중'}
                                 </span>
                                 <button
                                     onClick={copyJoinCode}
-                                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                                    className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[xs] font-bold text-zinc-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
                                 >
-                                    <Copy className="w-3 h-3" />
+                                    <span className="opacity-60"><Copy className="w-3 h-3" /></span>
                                     {discussion.join_code}
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                         <button
                             onClick={toggleDiscussionStatus}
-                            className={`btn-brutal flex items-center gap-2 ${discussion.status === 'active'
-                                    ? 'bg-red-50 hover:bg-red-100'
-                                    : 'bg-green-50 hover:bg-green-100'
+                            className={`h-12 px-6 rounded-full font-bold flex items-center gap-3 transition-all active:scale-95 shadow-lg ${discussion.status === 'active'
+                                ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-rose-500/20'
+                                : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/20'
                                 }`}
                         >
                             {discussion.status === 'active' ? (
                                 <>
-                                    <Pause className="w-4 h-4" />
+                                    <Pause className="w-5 h-5 fill-current" />
                                     토론 종료
                                 </>
                             ) : (
                                 <>
-                                    <Play className="w-4 h-4" />
+                                    <Play className="w-5 h-5 fill-current" />
                                     토론 시작
                                 </>
                             )}
@@ -419,57 +482,80 @@ Agora 토론 플랫폼에서 생성됨`
                         <button
                             onClick={generateReport}
                             disabled={generatingReport}
-                            className="btn-brutal flex items-center gap-2"
+                            className="h-12 px-6 rounded-full bg-white text-black font-bold flex items-center gap-3 transition-all hover:bg-zinc-200 active:scale-95 shadow-xl disabled:opacity-50"
                         >
                             {generatingReport ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+                                    <Loader2 className="w-5 h-5 animate-spin" />
                                     생성 중...
                                 </>
                             ) : (
                                 <>
-                                    <BarChart3 className="w-4 h-4" />
-                                    리포트
+                                    <BarChart3 className="w-5 h-5" />
+                                    AI 리포트
                                 </>
                             )}
                         </button>
                         <button
                             onClick={() => setShowSettings(true)}
-                            className="btn-brutal flex items-center gap-2"
+                            className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 text-white transition-all active:scale-90"
                         >
-                            <Settings className="w-4 h-4" />
+                            <Settings className="w-6 h-6" />
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* Stats Bar */}
-            <div className="border-b-2 border-border bg-muted/30">
-                <div className="max-w-[1800px] mx-auto px-6 py-4 flex items-center gap-8">
-                    <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-semibold">{participants.length}</span>
-                        <span className="text-muted-foreground text-sm">참여자</span>
-                        <span className="text-green-600 text-sm">({onlineCount} 온라인)</span>
+            <div className="bg-white/[0.02] border-b border-white/5 backdrop-blur-sm relative z-40">
+                <div className="max-w-[1920px] w-full mx-auto px-8 py-5 flex items-center gap-10">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                            <Users className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">참여자</p>
+                            <p className="font-bold flex items-center gap-2">
+                                {participants.length} <span className="text-xs text-emerald-400">({onlineCount} 온라인)</span>
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5 text-muted-foreground" />
-                        <span className="font-semibold">{submittedCount}</span>
-                        <span className="text-muted-foreground text-sm">/ {participants.length} 제출 완료</span>
+                    <div className="h-8 w-px bg-white/10" />
+
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center text-zinc-400">
+                            <CheckCircle className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">제출 현황</p>
+                            <p className="font-bold mb-0 leading-tight">
+                                {submittedCount} <span className="text-xs text-zinc-500 font-medium">/ {participants.length}</span>
+                            </p>
+                        </div>
                     </div>
 
                     {needsHelpCount > 0 && (
-                        <div className="flex items-center gap-2 text-amber-600">
-                            <AlertCircle className="w-5 h-5" />
-                            <span className="font-semibold">{needsHelpCount}</span>
-                            <span className="text-sm">도움 요청</span>
-                        </div>
+                        <>
+                            <div className="h-8 w-px bg-white/10" />
+                            <div className="flex items-center gap-3 animate-pulse">
+                                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400">
+                                    <AlertCircle className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-extrabold text-amber-500 uppercase tracking-widest">도움 요청</p>
+                                    <p className="font-bold text-amber-400">{needsHelpCount}명</p>
+                                </div>
+                            </div>
+                        </>
                     )}
 
-                    <div className="flex items-center gap-3 ml-auto">
+                    <div className="ml-auto flex items-center gap-3">
                         {Object.entries(stanceCounts).map(([stance, count]) => (
-                            <div key={stance} className={`px-3 py-1 border rounded-sm text-sm ${stanceColors[stance] || ''}`}>
+                            <div key={stance} className={`px-4 py-2 rounded-2xl border font-bold text-xs flex items-center gap-2 transition-all hover:bg-white/5 ${stanceColors[stance] || ''}`}>
+                                <div className={`w-1.5 h-1.5 rounded-full ${stance === 'pro' ? 'bg-emerald-400' :
+                                    stance === 'con' ? 'bg-rose-400' : 'bg-zinc-400'
+                                    }`} />
                                 {stanceLabels[stance] || stance}: {count}
                             </div>
                         ))}
@@ -478,82 +564,112 @@ Agora 토론 플랫폼에서 생성됨`
             </div>
 
             {/* Main Content */}
-            <div className="max-w-[1800px] mx-auto px-6 py-6 grid grid-cols-12 gap-6">
+            <div className="flex-1 max-w-[1920px] w-full mx-auto px-8 py-8 grid grid-cols-12 gap-8 relative z-10 overflow-hidden">
                 {/* Participants List */}
-                <div className="col-span-3 space-y-4">
-                    <div className="flex items-center justify-between">
-                        <h2 className="font-semibold uppercase tracking-wider text-sm">참여자 목록</h2>
-                        <span className="text-xs text-muted-foreground">{participants.length}명</span>
+                <div className="col-span-3 h-full flex flex-col min-h-0">
+                    <div className="mb-6 flex items-center justify-between">
+                        <h2 className="text-[11px] font-black uppercase tracking-widest text-zinc-500">참여자 리스트</h2>
+                        <div className="px-2 py-0.5 bg-white/5 rounded-md text-[10px] font-bold text-zinc-400">{participants.length}명</div>
                     </div>
 
-                    <div className="space-y-2 max-h-[calc(100vh-320px)] overflow-y-auto">
-                        <AnimatePresence>
+                    <div className="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                        <AnimatePresence mode="popLayout">
                             {participants.map((participant, index) => (
                                 <motion.button
                                     key={participant.id}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.05 }}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: index * 0.02 }}
                                     onClick={() => {
                                         setSelectedParticipant(
                                             selectedParticipant === participant.id ? null : participant.id
                                         )
                                         fetchMessages(selectedParticipant === participant.id ? undefined : participant.id)
                                     }}
-                                    className={`w-full p-3 border-2 text-left transition-all ${selectedParticipant === participant.id
-                                            ? 'border-foreground bg-foreground text-background'
-                                            : 'border-border hover:border-foreground'
+                                    className={`w-full p-4 rounded-[1.5rem] border transition-all relative group overflow-hidden ${selectedParticipant === participant.id
+                                        ? 'bg-primary text-white border-primary shadow-[0_10px_30px_rgba(var(--primary-rgb),0.35)]'
+                                        : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/10 text-white shadow-xl'
                                         }`}
                                 >
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full ${participant.is_online ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                            <span className="font-medium">
-                                                {participant.display_name || `학생 ${index + 1}`}
-                                            </span>
+                                    <div className="flex items-center justify-between relative z-10">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative">
+                                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm">
+                                                    {(participant.display_name || '').charAt(0) || index + 1}
+                                                </div>
+                                                <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-[#09090b] ${participant.is_online ? 'bg-emerald-500' : 'bg-zinc-600'}`} />
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-sm leading-tight">
+                                                    {participant.display_name || `학생 ${index + 1}`}
+                                                </div>
+                                                <div className="text-[10px] opacity-60 font-medium mt-0.5 uppercase tracking-widest">
+                                                    {participant.is_online ? '온라인' : '오프라인'}
+                                                </div>
+                                            </div>
                                         </div>
                                         {participant.needs_help && (
-                                            <AlertCircle className="w-4 h-4 text-amber-500" />
+                                            <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 animate-pulse">
+                                                <AlertCircle className="w-4 h-4" />
+                                            </div>
                                         )}
                                     </div>
 
-                                    <div className="mt-2 flex items-center gap-2 text-xs">
-                                        {participant.stance ? (
-                                            <span className={`px-2 py-0.5 rounded-sm border ${stanceColors[participant.stance] || ''
-                                                } ${selectedParticipant === participant.id ? 'border-current' : ''}`}>
-                                                {stanceLabels[participant.stance] || participant.stance}
-                                            </span>
-                                        ) : (
-                                            <span className="text-muted-foreground">미정</span>
-                                        )}
+                                    <div className="mt-4 flex items-center justify-between relative z-10">
+                                        <div className="flex items-center gap-2">
+                                            {participant.stance ? (
+                                                <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border transition-colors ${selectedParticipant === participant.id
+                                                    ? 'bg-white/20 border-white/20 text-white'
+                                                    : (stanceColors[participant.stance] || '')
+                                                    }`}>
+                                                    {stanceLabels[participant.stance] || participant.stance}
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">입장 미정</span>
+                                            )}
+                                        </div>
                                         {participant.is_submitted && (
-                                            <CheckCircle className="w-3 h-3 text-green-500" />
+                                            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${selectedParticipant === participant.id ? 'bg-white/20' : 'bg-emerald-500/20 text-emerald-500'}`}>
+                                                <CheckCircle className="w-3.5 h-3.5" />
+                                            </div>
                                         )}
                                     </div>
+
+                                    {/* Selected highlight effect */}
+                                    {selectedParticipant === participant.id && (
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl translate-x-16 -translate-y-16 pointer-events-none" />
+                                    )}
                                 </motion.button>
                             ))}
                         </AnimatePresence>
 
                         {participants.length === 0 && (
-                            <div className="text-center py-8 text-muted-foreground">
-                                <User className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p className="text-sm">아직 참여자가 없습니다</p>
-                                <p className="text-xs mt-1">참여 코드를 공유하세요</p>
+                            <div className="flex flex-col items-center justify-center py-20 text-center glass-panel border-white/5 bg-white/[0.02]">
+                                <Users className="w-12 h-12 text-zinc-700 mb-4" />
+                                <p className="text-zinc-500 font-bold">아직 참여자가 없습니다</p>
+                                <p className="text-zinc-600 text-xs mt-2 font-medium">참여 코드를 공유하여 학생들을 초대하세요</p>
                             </div>
                         )}
                     </div>
                 </div>
 
                 {/* Chat/Messages Area */}
-                <div className="col-span-6 border-2 border-foreground">
-                    <div className="p-4 border-b-2 border-border flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <MessageSquare className="w-5 h-5" />
-                            <h2 className="font-semibold">
-                                {selectedParticipant
-                                    ? `${participants.find(p => p.id === selectedParticipant)?.display_name || '학생'} 대화`
-                                    : '전체 대화'}
-                            </h2>
+                <div className="col-span-6 h-full flex flex-col glass-panel bg-white/[0.02] border-white/5 shadow-2xl overflow-hidden relative">
+                    <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                                <MessageSquare className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold tracking-tight">
+                                    {selectedParticipant
+                                        ? `${participants.find(p => p.id === selectedParticipant)?.display_name || '학생'} 실시간 대화`
+                                        : '전체 참여자 대화 (모니터링)'}
+                                </h2>
+                                <p className="text-xs text-zinc-500 font-medium">
+                                    {selectedParticipant ? '선택한 학생의 개별 채팅 내용을 확인합니다.' : '모든 학생과 AI의 대화 내용을 실시간으로 확인합니다.'}
+                                </p>
+                            </div>
                         </div>
                         {selectedParticipant && (
                             <button
@@ -561,179 +677,237 @@ Agora 토론 플랫폼에서 생성됨`
                                     setSelectedParticipant(null)
                                     fetchMessages()
                                 }}
-                                className="text-xs text-muted-foreground hover:text-foreground"
+                                className="px-4 py-2 rounded-xl bg-white/5 text-xs font-bold text-zinc-400 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
                             >
+                                <X className="w-4 h-4" />
                                 전체 보기
                             </button>
                         )}
                     </div>
 
-                    <div className="h-[calc(100vh-420px)] overflow-y-auto p-4 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar relative">
                         {messages.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                                <MessageSquare className="w-12 h-12 mb-3 opacity-30" />
-                                <p>아직 대화가 없습니다</p>
+                            <div className="flex flex-col items-center justify-center h-full text-center">
+                                <div className="w-20 h-20 rounded-[2rem] bg-white/[0.03] border border-white/5 flex items-center justify-center mb-6">
+                                    <MessageSquare className="w-10 h-10 text-zinc-700" />
+                                </div>
+                                <p className="text-zinc-500 text-lg font-bold">아직 감지된 대화가 없습니다</p>
+                                <p className="text-zinc-600 text-sm mt-2 max-w-xs mx-auto">학생들이 입장을 선택하고 AI 튜터와 토론을 시작하면 이곳에 실시간으로 표시됩니다.</p>
                             </div>
                         ) : (
-                            messages.map((message) => (
-                                <div
+                            messages.map((message, idx) => (
+                                <motion.div
                                     key={message.id}
-                                    className={`flex gap-3 ${message.role === 'ai' ? 'flex-row-reverse' : ''
-                                        }`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: Math.min(idx * 0.05, 1) }}
+                                    className={`flex items-start gap-4 ${message.role === 'ai' ? 'flex-row-reverse' : ''}`}
                                 >
-                                    <div className={`flex-1 max-w-[80%] ${message.role === 'ai' ? 'ml-auto' : ''
+                                    <div className={`w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center font-bold text-xs ${message.role === 'user' ? 'bg-primary/20 text-primary border border-primary/20 shadow-[0_0_15px_rgba(var(--primary-rgb),0.1)]' :
+                                        message.role === 'ai' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' :
+                                            message.role === 'instructor' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/20' : 'bg-zinc-800 text-zinc-500'
                                         }`}>
-                                        <div className="text-xs text-muted-foreground mb-1 flex items-center gap-2">
-                                            <span>
+                                        {message.role === 'user' ? (message.participant?.display_name || '나')[0] :
+                                            message.role === 'ai' ? 'AI' :
+                                                message.role === 'instructor' ? '교' : 'S'}
+                                    </div>
+                                    <div className={`flex-1 max-w-[85%] ${message.role === 'ai' ? 'text-right' : ''}`}>
+                                        <div className={`flex items-center gap-3 mb-2 px-1 ${message.role === 'ai' ? 'flex-row-reverse' : ''}`}>
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
                                                 {message.role === 'user'
                                                     ? message.participant?.display_name || '학생'
                                                     : message.role === 'ai'
                                                         ? 'AI 튜터'
                                                         : message.role === 'instructor'
-                                                            ? '교수'
+                                                            ? '교수 (나)'
                                                             : '시스템'}
                                             </span>
-                                            <Clock className="w-3 h-3" />
-                                            <span>{new Date(message.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+                                            <div className="flex items-center gap-1.5 text-[9px] font-bold text-zinc-600">
+                                                <Clock className="w-3 h-3" />
+                                                {new Date(message.created_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
                                         </div>
-                                        <div className={`p-3 border-2 group relative ${message.role === 'ai'
-                                                ? 'border-sage bg-sage/10'
-                                                : message.role === 'instructor'
-                                                    ? 'border-coral bg-coral/10'
-                                                    : 'border-border'
+                                        <div className={`p-5 rounded-[1.75rem] border transition-all group relative ${message.role === 'ai'
+                                            ? 'bg-white/[0.04] border-white/5 text-zinc-300 rounded-tr-none'
+                                            : message.role === 'instructor'
+                                                ? 'bg-amber-500/5 border-amber-500/20 text-white rounded-tl-none shadow-xl'
+                                                : 'bg-primary/10 border-primary/20 text-white rounded-tl-none shadow-lg'
                                             }`}>
-                                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                            <p className="text-[15px] leading-relaxed font-medium whitespace-pre-wrap">{message.content}</p>
+
                                             {message.role === 'user' && selectedParticipant && (
                                                 <button
                                                     onClick={() => pinQuote(message.content, selectedParticipant)}
                                                     disabled={pinningQuote}
-                                                    className="absolute top-1 right-1 p-1 opacity-0 group-hover:opacity-100 transition-opacity bg-background border border-border hover:border-foreground rounded"
-                                                    title="발언 핀"
+                                                    className="absolute -right-3 top-2 w-10 h-10 rounded-full bg-white text-black shadow-xl scale-0 group-hover:scale-100 transition-all border border-white/10 flex items-center justify-center hover:bg-zinc-200 active:scale-90"
+                                                    title="이 발언을 핀하기"
                                                 >
-                                                    <Quote className="w-3 h-3" />
+                                                    <Quote className="w-4 h-4 fill-current" />
                                                 </button>
                                             )}
                                         </div>
                                     </div>
-                                </div>
+                                </motion.div>
                             ))
                         )}
                     </div>
                 </div>
 
-                {/* Quick Actions & Selected Participant Info */}
-                <div className="col-span-3 space-y-4">
+                {/* Right Side - Info & Actions */}
+                <div className="col-span-3 h-full flex flex-col gap-6 overflow-hidden">
                     {selectedParticipant ? (
                         <>
-                            {/* Participant Details */}
-                            <div className="border-2 border-foreground p-4">
-                                <h3 className="font-semibold uppercase tracking-wider text-sm mb-4">학생 정보</h3>
-                                {(() => {
-                                    const p = participants.find(p => p.id === selectedParticipant)
-                                    if (!p) return null
-                                    return (
-                                        <div className="space-y-3">
-                                            <div>
-                                                <span className="text-xs text-muted-foreground">이름</span>
-                                                <p className="font-medium">{p.display_name || '익명'}</p>
-                                            </div>
-                                            <div>
-                                                <span className="text-xs text-muted-foreground">입장</span>
-                                                <p className={`inline-block px-2 py-1 border mt-1 ${stanceColors[p.stance || ''] || 'border-border'}`}>
-                                                    {stanceLabels[p.stance || ''] || '미정'}
-                                                </p>
-                                            </div>
-                                            {p.stance_statement && (
-                                                <div>
-                                                    <span className="text-xs text-muted-foreground">최종 의견</span>
-                                                    <p className="text-sm mt-1">{p.stance_statement}</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )
-                                })()}
-                            </div>
+                            {/* Participant Detail Card */}
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="glass-panel border-white/10 bg-white/[0.03] p-6 shadow-2xl"
+                            >
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="w-16 h-16 rounded-[1.5rem] bg-primary/20 border border-primary/20 flex items-center justify-center text-primary text-2xl font-bold">
+                                        {(participants.find(p => p.id === selectedParticipant)?.display_name || 'H')[0]}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-xl font-bold tracking-tight">{participants.find(p => p.id === selectedParticipant)?.display_name || '학생 정보'}</h3>
+                                        <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest mt-0.5">SELECTED PARTICIPANT</p>
+                                    </div>
+                                </div>
 
-                            {/* Quick Actions for Selected */}
-                            <div className="border-2 border-border p-4 space-y-2">
-                                <h3 className="font-semibold uppercase tracking-wider text-sm mb-3">빠른 작업</h3>
-                                <button className="btn-brutal w-full flex items-center justify-center gap-2 text-sm">
-                                    <Quote className="w-4 h-4" />
-                                    발언 핀
+                                <div className="space-y-6">
+                                    <div className="bg-white/[0.02] rounded-2xl p-4 border border-white/5">
+                                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">현재 선택 입장</span>
+                                        {(() => {
+                                            const p = participants.find(p => p.id === selectedParticipant)
+                                            if (!p) return null
+                                            return (
+                                                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border font-bold text-sm ${stanceColors[p.stance || ''] || 'border-zinc-700 text-zinc-500'}`}>
+                                                    <div className={`w-2 h-2 rounded-full ${p.stance === 'pro' ? 'bg-emerald-400' : p.stance === 'con' ? 'bg-rose-400' : 'bg-zinc-500'}`} />
+                                                    {stanceLabels[p.stance || ''] || '미선택'}
+                                                </div>
+                                            )
+                                        })()}
+                                    </div>
+
+                                    {participants.find(p => p.id === selectedParticipant)?.stance_statement && (
+                                        <div className="bg-white/[0.02] rounded-2xl p-4 border border-white/5">
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">최종 입장문</span>
+                                            <p className="text-sm font-medium leading-relaxed text-zinc-300 italic">
+                                                "{participants.find(p => p.id === selectedParticipant)?.stance_statement}"
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </motion.div>
+
+                            {/* Participant Actions */}
+                            <div className="flex flex-col gap-3">
+                                <button
+                                    onClick={() => selectedParticipant && sendInstruction(selectedParticipant)}
+                                    disabled={sendingInstruction}
+                                    className="h-14 w-full rounded-2xl bg-white text-black font-bold flex items-center justify-center gap-3 transition-all hover:bg-zinc-200 active:scale-95 shadow-xl disabled:opacity-50"
+                                >
+                                    {sendingInstruction ? <Loader2 className="w-5 h-5 animate-spin" /> : <MessageSquare className="w-5 h-5" />}
+                                    개별 지시 보내기
                                 </button>
-                                <button className="btn-brutal w-full flex items-center justify-center gap-2 text-sm">
-                                    <MessageSquare className="w-4 h-4" />
-                                    메시지 전송
+                                <button
+                                    onClick={() => selectedParticipant && sendWarning(selectedParticipant)}
+                                    disabled={sendingInstruction}
+                                    className="h-14 w-full rounded-2xl bg-white/5 border border-white/10 text-white font-bold flex items-center justify-center gap-3 transition-all hover:bg-white/10 active:scale-95 disabled:opacity-50"
+                                >
+                                    <AlertCircle className="w-5 h-5" />
+                                    경고/알람 발송
                                 </button>
                             </div>
                         </>
                     ) : (
-                        /* Class Overview */
-                        <div className="border-2 border-foreground p-4">
-                            <h3 className="font-semibold uppercase tracking-wider text-sm mb-4">토론 개요</h3>
-                            <div className="space-y-4">
-                                <div>
-                                    <span className="text-xs text-muted-foreground">설명</span>
-                                    <p className="text-sm mt-1">{discussion.description || '설명 없음'}</p>
+                        /* Session Overview Card */
+                        <div className="glass-panel border-white/10 bg-white/[0.03] p-6 shadow-2xl">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                                    <BarChart3 className="w-7 h-7" />
                                 </div>
                                 <div>
-                                    <span className="text-xs text-muted-foreground">AI 모드</span>
-                                    <p className="font-medium mt-1">
-                                        {discussion.settings.aiMode === 'socratic' ? '소크라테스식' :
-                                            discussion.settings.aiMode === 'balanced' ? '균형 잡힌' : '최소'}
+                                    <h3 className="text-xl font-bold tracking-tight">세션 개요</h3>
+                                    <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest mt-0.5">SESSION OVERVIEW</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="bg-white/[0.02] rounded-2xl p-5 border border-white/5">
+                                    <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-3">토론 주제 및 설명</span>
+                                    <p className="text-[15px] font-medium leading-relaxed text-zinc-400 line-clamp-4">
+                                        {discussion.description || '설명이 작성되지 않은 토론 세션입니다.'}
                                     </p>
                                 </div>
-                                <div>
-                                    <span className="text-xs text-muted-foreground">익명 모드</span>
-                                    <p className="font-medium mt-1">
-                                        {discussion.settings.anonymous ? '활성화' : '비활성화'}
-                                    </p>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="bg-white/[0.02] rounded-2xl p-4 border border-white/5">
+                                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1">AI 튜터링</span>
+                                        <p className="font-bold text-white uppercase text-xs">
+                                            {discussion.settings.aiMode === 'socratic' ? '소크라테스' :
+                                                discussion.settings.aiMode === 'debate' ? '디베이트' : '균형잡힌'}
+                                        </p>
+                                    </div>
+                                    <div className="bg-white/[0.02] rounded-2xl p-4 border border-white/5">
+                                        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-1">참여자 익명</span>
+                                        <p className="font-bold text-white uppercase text-xs">
+                                            {discussion.settings.anonymous ? 'ACTIVE' : 'OFF'}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {/* Pinned Quotes */}
-                    <div className="border-2 border-foreground p-4">
-                        <div className="flex items-center gap-2 mb-3">
-                            <Quote className="w-5 h-5" />
-                            <span className="text-sm font-medium uppercase tracking-wider">핀한 발언</span>
+                    {/* Pinned Quotes Card - Always visible but styled better */}
+                    <div className="flex-1 flex flex-col min-h-0 glass-panel border-white/10 bg-white/[0.03] overflow-hidden shadow-2xl">
+                        <div className="p-5 border-b border-white/5 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Quote className="w-5 h-5 text-primary" />
+                                <h3 className="text-sm font-black uppercase tracking-widest">핀한 주요 발언</h3>
+                            </div>
                             {pinnedQuotes.length > 0 && (
-                                <span className="text-xs bg-foreground text-background px-1.5 py-0.5">
+                                <div className="w-6 h-6 rounded-full bg-primary text-white text-[10px] font-black flex items-center justify-center shadow-lg">
                                     {pinnedQuotes.length}
-                                </span>
+                                </div>
                             )}
                         </div>
-                        {pinnedQuotes.length === 0 ? (
-                            <p className="text-xs text-muted-foreground">
-                                학생의 발언을 핀하여 프레젠테이션에 사용하세요
-                            </p>
-                        ) : (
-                            <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {pinnedQuotes.map((pin) => (
-                                    <div key={pin.id} className="p-2 border border-border bg-muted/30 relative group">
-                                        <p className="text-xs line-clamp-2 pr-6">{pin.quote}</p>
-                                        <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                                            <span className={`px-1 ${
-                                                pin.participant?.stance === 'pro' ? 'bg-green-100 text-green-700' :
-                                                pin.participant?.stance === 'con' ? 'bg-red-100 text-red-700' :
-                                                'bg-gray-100 text-gray-700'
-                                            }`}>
-                                                {stanceLabels[pin.participant?.stance || ''] || '미정'}
-                                            </span>
-                                            <span>{pin.participant?.display_name || '익명'}</span>
+
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+                            {pinnedQuotes.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center text-center p-6 opacity-40">
+                                    <Quote className="w-10 h-10 mb-4" />
+                                    <p className="text-xs font-bold leading-relaxed">공유하고 싶은 학생의 발언을<br />실시간 채팅창에서 핀하세요.</p>
+                                </div>
+                            ) : (
+                                pinnedQuotes.map((pin) => (
+                                    <motion.div
+                                        key={pin.id}
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="p-4 rounded-2xl border border-white/5 bg-white/[0.03] relative group shadow-lg"
+                                    >
+                                        <p className="text-sm font-medium leading-relaxed italic pr-6 text-zinc-300">"{pin.quote}"</p>
+                                        <div className="mt-3 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-1.5 h-1.5 rounded-full ${pin.participant?.stance === 'pro' ? 'bg-emerald-400' :
+                                                    pin.participant?.stance === 'con' ? 'bg-rose-400' : 'bg-zinc-500'
+                                                    }`} />
+                                                <span className="text-[10px] font-bold text-zinc-500">
+                                                    {pin.participant?.display_name || '익명'}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => unpinQuote(pin.id)}
+                                                className="w-7 h-7 rounded-full bg-rose-500/20 text-rose-500 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center hover:bg-rose-500 hover:text-white"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => unpinQuote(pin.id)}
-                                            className="absolute top-1 right-1 p-0.5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 rounded"
-                                            title="핀 해제"
-                                        >
-                                            <X className="w-3 h-3 text-red-600" />
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                                    </motion.div>
+                                ))
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

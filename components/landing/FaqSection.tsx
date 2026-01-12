@@ -20,11 +20,10 @@ export function FaqSection() {
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     className="text-center mb-12"
                 >
-                    <span className="tag">{FAQ_CONTENT.tag}</span>
-                    <h2
-                        className="mt-6"
-                        style={{ fontFamily: "var(--font-display)" }}
-                    >
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+                        {FAQ_CONTENT.tag}
+                    </span>
+                    <h2 className="mt-6 text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
                         {FAQ_CONTENT.title}
                     </h2>
                 </motion.div>
@@ -35,17 +34,17 @@ export function FaqSection() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                 >
-                    <Accordion type="single" collapsible className="w-full">
+                    <Accordion type="single" collapsible className="w-full space-y-4">
                         {FAQ_CONTENT.items.map((item, index) => (
                             <AccordionItem
                                 key={index}
                                 value={`item-${index}`}
-                                className="border-2 border-foreground mb-4 last:mb-0 px-6 data-[state=open]:shadow-[4px_4px_0px_hsl(var(--foreground))] transition-shadow"
+                                className="border-none rounded-2xl glass-panel px-6 data-[state=open]:bg-white/5 transition-all duration-300"
                             >
-                                <AccordionTrigger className="text-base font-semibold hover:no-underline py-5">
+                                <AccordionTrigger className="text-base font-semibold hover:no-underline py-5 text-zinc-100">
                                     {item.question}
                                 </AccordionTrigger>
-                                <AccordionContent className="text-muted-foreground leading-relaxed pb-5">
+                                <AccordionContent className="text-zinc-400 leading-relaxed pb-5">
                                     {item.answer}
                                 </AccordionContent>
                             </AccordionItem>
@@ -60,11 +59,11 @@ export function FaqSection() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="text-center mt-12"
                 >
-                    <p className="text-muted-foreground">
+                    <p className="text-zinc-500">
                         더 궁금한 점이 있으신가요?{" "}
                         <a
                             href="mailto:questonkr@gmail.com"
-                            className="text-[hsl(var(--coral))] hover:underline font-medium"
+                            className="text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
                         >
                             문의하기
                         </a>

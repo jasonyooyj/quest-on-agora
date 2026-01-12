@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Copy, Calendar, Eye, Users, MessageSquare, Trash2 } from "lucide-react";
+import { Copy, Calendar, Eye, Users, MessageSquare, Trash2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,26 +36,28 @@ export function DiscussionCard({
   onCopyCode,
   onDelete,
 }: DiscussionCardProps) {
-  const getStatusBadgeProps = (status: string) => {
-    if (status === "active") {
-      return {
-        variant: "default" as const,
-        className: "text-xs bg-green-100 text-green-700",
-        text: "진행중",
-      };
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return (
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-400">
+            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+            LIVE
+          </div>
+        );
+      case 'closed':
+        return (
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-500/10 border border-zinc-500/20 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+            CLOSED
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-500">
+            DRAFT
+          </div>
+        );
     }
-    if (status === "closed") {
-      return {
-        variant: "secondary" as const,
-        className: "text-xs bg-slate-200 text-slate-700",
-        text: "종료됨",
-      };
-    }
-    return {
-      variant: "secondary" as const,
-      className: "text-xs",
-      text: "초안",
-    };
   };
 
   const formatDate = (dateString: string) => {
@@ -62,15 +65,12 @@ export function DiscussionCard({
       year: "numeric",
       month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
   };
 
-  const badgeProps = getStatusBadgeProps(discussion.status);
-  const iconSize = "w-3 h-3";
-
-  const handleCopyCode = () => {
+  const handleCopyCode = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onCopyCode) {
       onCopyCode(discussion.joinCode);
     } else {
@@ -80,87 +80,92 @@ export function DiscussionCard({
   };
 
   return (
-    <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center space-x-3 mb-2">
-          <MessageSquare className="w-4 h-4 text-primary shrink-0" />
-          <h4 className="font-semibold text-foreground truncate">
-            {discussion.title}
-          </h4>
-          <Badge variant={badgeProps.variant} className={badgeProps.className}>
-            {badgeProps.text}
-          </Badge>
-        </div>
-        {discussion.description && (
-          <p className="text-sm text-muted-foreground mb-2 line-clamp-1">
-            {discussion.description}
-          </p>
-        )}
-        <div className="flex items-center space-x-4 text-sm text-muted-foreground flex-wrap gap-2">
-          <div className="flex items-center space-x-1">
-            <Copy className={iconSize} />
-            <span className="font-mono text-xs">{discussion.joinCode}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Users className={iconSize} />
-            <span>{discussion.participantCount}명 참여</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <Calendar className={iconSize} />
-            <span>{formatDate(discussion.createdAt)}</span>
-          </div>
-        </div>
-      </div>
-      <div className="flex items-center space-x-2 shrink-0 ml-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleCopyCode}
-          className="min-h-[44px] min-w-[44px]"
-        >
-          <Copy className={`${iconSize} mr-1`} />
-          코드
-        </Button>
-        <Link href={`/instructor/discussions/${discussion.id}`}>
-          <Button variant="outline" size="sm" className="min-h-[44px]">
-            <Eye className={`${iconSize} mr-1`} />
-            보기
-          </Button>
-        </Link>
-        {onDelete && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="min-h-[44px] min-w-[44px] text-destructive hover:text-destructive hover:bg-destructive/10"
+    <motion.div
+      whileHover={{ y: -2 }}
+      className="group"
+    >
+      <div className="glass-panel bg-white/[0.02] border-white/5 p-6 hover:bg-white/[0.04] hover:border-white/10 transition-all relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-4 mb-3">
+              <h4 className="text-xl font-bold text-white truncate group-hover:text-primary transition-colors">
+                {discussion.title}
+              </h4>
+              {getStatusBadge(discussion.status)}
+            </div>
+
+            {discussion.description && (
+              <p className="text-zinc-500 text-sm mb-6 line-clamp-1 max-w-3xl">
+                {discussion.description}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center gap-6">
+              <div
+                className="flex items-center gap-2 text-[10px] font-black text-zinc-500 uppercase tracking-widest border border-white/5 bg-white/5 px-3 py-1.5 rounded-lg transition-all hover:bg-white/10 hover:text-white hover:border-white/20 cursor-pointer"
+                onClick={handleCopyCode}
               >
-                <Trash2 className={iconSize} />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>토론 삭제 확인</AlertDialogTitle>
-                <AlertDialogDescription>
-                  정말로 "{discussion.title}" 토론을 삭제하시겠습니까?
-                  <br />
-                  이 작업은 되돌릴 수 없으며, 모든 토론 데이터가 영구적으로 삭제됩니다.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>취소</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => onDelete(discussion.id)}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  삭제
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
+                <span>CODE: {discussion.joinCode}</span>
+                <Copy className="w-3 h-3" />
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                <Users className="w-3.5 h-3.5" />
+                <span>{discussion.participantCount} STUDENTS</span>
+              </div>
+              <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>{formatDate(discussion.createdAt)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <Link href={`/instructor/discussions/${discussion.id}`} className="flex-1 md:flex-none">
+              <button className="h-12 px-6 rounded-full bg-white/5 border border-white/10 text-zinc-400 font-bold text-sm flex items-center justify-center gap-2 hover:bg-white/10 hover:text-white transition-all group/btn">
+                입장하기
+                <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+              </button>
+            </Link>
+
+            {onDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-500 hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/20 transition-all"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="glass-panel bg-[#121214]/90 border-white/5 p-8 shadow-2xl backdrop-blur-xl max-w-md">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-2xl font-black tracking-tight text-white mb-2">토론 삭제 확인</AlertDialogTitle>
+                    <AlertDialogDescription className="text-zinc-400 font-medium leading-relaxed">
+                      정말로 <span className="text-white">"{discussion.title}"</span> 토론을 삭제하시겠습니까?
+                      <br />
+                      이 작업은 되돌릴 수 없으며, 모든 토론 데이터가 영구적으로 삭제됩니다.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="mt-8 gap-3">
+                    <AlertDialogCancel className="h-12 rounded-full border-white/5 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white font-bold transition-all px-6">
+                      취소
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => onDelete(discussion.id)}
+                      className="h-12 rounded-full bg-rose-500 text-white font-black hover:bg-rose-600 transition-all px-8 border-0"
+                    >
+                      삭제하기
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

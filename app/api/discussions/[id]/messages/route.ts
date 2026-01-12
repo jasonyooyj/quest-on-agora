@@ -113,10 +113,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         }
 
         const isInstructor = discussion.instructor_id === user.id
-        let participantId = null
+        let participantId = body.participantId || null
 
         if (!isInstructor) {
-            // Get participant record
+            // Get participant record for the student
             const { data: participant } = await supabase
                 .from('discussion_participants')
                 .select('id')
@@ -129,15 +129,27 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             }
 
             participantId = participant.id
+        } else if (participantId) {
+            // If instructor is sending to a specific participant, verify participant exists in this session
+            const { data: participantExists } = await supabase
+                .from('discussion_participants')
+                .select('id')
+                .eq('id', participantId)
+                .eq('session_id', id)
+                .single()
+
+            if (!participantExists) {
+                return NextResponse.json({ error: 'Participant not found in this session' }, { status: 404 })
+            }
         }
 
-        // Insert user message
+        // Insert message
         const { data: message, error } = await supabase
             .from('discussion_messages')
             .insert({
                 session_id: id,
                 participant_id: participantId,
-                role: isInstructor ? 'instructor' : role,
+                role: isInstructor ? (body.role || 'instructor') : role,
                 content
             })
             .select()

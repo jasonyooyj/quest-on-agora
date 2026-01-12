@@ -38,13 +38,18 @@ export function Navbar() {
 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-8">
-                    {["Features", "Use Cases", "Pricing", "About"].map((item) => (
+                    {[
+                        { name: "주요 기능", href: "#features" },
+                        { name: "활용 사례", href: "#use-cases" },
+                        { name: "요금제", href: "#pricing" },
+                        { name: "소개", href: "#about" },
+                    ].map((item) => (
                         <Link
-                            key={item}
-                            href={`#${item.toLowerCase().replace(" ", "-")}`}
+                            key={item.name}
+                            href={item.href}
                             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors relative group"
                         >
-                            {item}
+                            {item.name}
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-indigo-400 transition-all duration-300 group-hover:w-full opacity-50" />
                         </Link>
                     ))}
@@ -56,11 +61,11 @@ export function Navbar() {
                         href="/login"
                         className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
                     >
-                        Sign in
+                        로그인
                     </Link>
                     <Link href="/register">
                         <Button className="bg-white text-black hover:bg-zinc-200 border-none rounded-full px-6 font-medium shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all duration-300 transform hover:-translate-y-0.5">
-                            Get Started
+                            무료로 시작하기
                         </Button>
                     </Link>
                 </div>
@@ -84,14 +89,19 @@ export function Navbar() {
                         className="md:hidden glass-panel border-b border-white/5 overflow-hidden"
                     >
                         <div className="flex flex-col p-6 gap-4">
-                            {["Features", "Use Cases", "Pricing", "About"].map((item) => (
+                            {[
+                                { name: "주요 기능", href: "#features" },
+                                { name: "활용 사례", href: "#use-cases" },
+                                { name: "요금제", href: "#pricing" },
+                                { name: "소개", href: "#about" },
+                            ].map((item) => (
                                 <Link
-                                    key={item}
-                                    href={`#${item.toLowerCase().replace(" ", "-")}`}
+                                    key={item.name}
+                                    href={item.href}
                                     className="text-lg font-medium text-zinc-400 hover:text-white"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
-                                    {item}
+                                    {item.name}
                                 </Link>
                             ))}
                             <hr className="border-white/10 my-2" />
@@ -100,11 +110,11 @@ export function Navbar() {
                                 className="text-lg font-medium text-zinc-400 hover:text-white"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Sign in
+                                로그인
                             </Link>
                             <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
                                 <Button className="w-full bg-white text-black hover:bg-zinc-200 rounded-full mt-2">
-                                    Get Started
+                                    무료로 시작하기
                                 </Button>
                             </Link>
                         </div>

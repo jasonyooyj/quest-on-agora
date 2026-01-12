@@ -20,9 +20,9 @@ const getStanceIcon = (stance: string) => {
 }
 
 const getStanceStyle = (stance: string) => {
-    if (stance === 'pro') return 'border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-300'
-    if (stance === 'con') return 'border-red-200 bg-red-50 text-red-700 hover:border-red-300'
-    return 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
+    if (stance === 'pro') return 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10'
+    if (stance === 'con') return 'border-rose-500/20 bg-rose-500/5 text-rose-400 hover:bg-rose-500/10'
+    return 'border-zinc-700/50 bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800/80'
 }
 
 export default function StudentDiscussionPage() {
@@ -193,10 +193,15 @@ export default function StudentDiscussionPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
-                    <p className="text-muted-foreground">토론방 입장 중...</p>
+            <div className="min-h-screen bg-[#09090b] flex items-center justify-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none" />
+                <div className="text-center relative z-10">
+                    <div className="relative mb-6">
+                        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+                        <Loader2 className="w-16 h-16 animate-spin mx-auto text-primary relative" />
+                    </div>
+                    <p className="text-zinc-400 text-lg font-bold tracking-tight animate-pulse">토론방 입장 중...</p>
                 </div>
             </div>
         )
@@ -231,37 +236,41 @@ export default function StudentDiscussionPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-background">
+        <div className="min-h-screen flex flex-col bg-[#09090b] text-white selection:bg-primary/30 relative overflow-hidden">
+            {/* Bioluminescent background blobs */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none" />
+
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b-2 border-foreground bg-background">
-                <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+            <header className="sticky top-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/5">
+                <div className="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
+                    <div className="flex items-center gap-5">
                         <Link
                             href="/student"
-                            className="p-2 border-2 border-border hover:border-foreground transition-colors"
+                            className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-white transition-all active:scale-90"
                         >
-                            <ArrowLeft className="w-4 h-4" />
+                            <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <div>
-                            <h1 className="font-bold text-lg" style={{ fontFamily: 'var(--font-display)' }}>
+                            <h1 className="font-bold text-xl tracking-tight text-white line-clamp-1">
                                 {discussion.title}
                             </h1>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <Link
                             href={`/student/discussions/${discussionId}/gallery`}
-                            className="p-2 border-2 border-border hover:border-foreground transition-colors"
+                            className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
                             title="답변 갤러리"
                         >
                             <Users className="w-5 h-5" />
                         </Link>
                         <button
                             onClick={requestHelp}
-                            className={`p-2 border-2 transition-colors ${participant?.needsHelp
-                                ? 'border-amber-500 bg-amber-50 text-amber-700'
-                                : 'border-border hover:border-foreground'
+                            className={`w-11 h-11 rounded-full border transition-all active:scale-95 flex items-center justify-center ${participant?.needsHelp
+                                ? 'border-amber-500/50 bg-amber-500/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                                : 'border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white shadow-none'
                                 }`}
                             title={participant?.needsHelp ? '도움 요청 취소' : '도움 요청'}
                         >
@@ -272,25 +281,25 @@ export default function StudentDiscussionPage() {
             </header>
 
             {/* Stance Bar */}
-            <div className="border-b-2 border-border bg-muted/30">
-                <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <span className="text-sm text-muted-foreground">내 입장:</span>
+            <div className="bg-white/[0.02] border-b border-white/5 backdrop-blur-sm relative z-40">
+                <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">내 입장</span>
                         {participant?.stance ? (
                             <button
                                 onClick={() => setShowStanceSelector(true)}
-                                className={`flex items-center gap-2 px-3 py-1.5 border-2 font-medium ${participant.stance === 'pro' ? 'border-green-500 bg-green-50 text-green-700' :
-                                    participant.stance === 'con' ? 'border-red-500 bg-red-50 text-red-700' :
-                                        'border-gray-400 bg-gray-50 text-gray-700'
+                                className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl border font-bold text-sm transition-all hover:translate-y-[-2px] hover:shadow-lg active:scale-95 ${participant.stance === 'pro' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400' :
+                                    participant.stance === 'con' ? 'border-rose-500/20 bg-rose-500/10 text-rose-400' :
+                                        'border-zinc-700 bg-zinc-800 text-zinc-300'
                                     }`}
                             >
-                                {getStanceIcon(participant.stance)}
+                                <span className="opacity-70">{getStanceIcon(participant.stance)}</span>
                                 {stanceLabels[participant.stance] || participant.stance}
                             </button>
                         ) : (
                             <button
                                 onClick={() => setShowStanceSelector(true)}
-                                className="flex items-center gap-2 px-3 py-1.5 border-2 border-dashed border-foreground text-sm"
+                                className="flex items-center gap-3 px-4 py-2.5 rounded-2xl border border-dashed border-primary/40 bg-primary/5 text-primary text-sm font-bold animate-pulse active:scale-95 transition-all"
                             >
                                 <AlertCircle className="w-4 h-4" />
                                 입장 선택하기
@@ -299,30 +308,30 @@ export default function StudentDiscussionPage() {
                     </div>
 
                     {participant?.isSubmitted && (
-                        <span className="flex items-center gap-1 text-sm text-green-600">
-                            <CheckCircle className="w-4 h-4" />
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest">
+                            <CheckCircle className="w-3.5 h-3.5" />
                             제출 완료
-                        </span>
+                        </div>
                     )}
                 </div>
             </div>
 
             {/* Chat Area */}
-            <main className="flex-1 overflow-y-auto p-4 scroll-smooth">
-                <div className="max-w-3xl mx-auto space-y-6 pb-4">
-                    <div className="text-center py-8 text-muted-foreground space-y-2">
-                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                            <MessageSquare className="w-6 h-6" />
+            <main className="flex-1 overflow-y-auto p-6 scroll-smooth relative z-10 custom-scrollbar">
+                <div className="max-w-3xl mx-auto space-y-8 pb-10">
+                    <div className="text-center py-12 px-6">
+                        <div className="w-20 h-20 bg-white/[0.03] border border-white/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                            <MessageSquare className="w-10 h-10 text-primary" />
                         </div>
-                        <h3 className="font-semibold">AI 튜터와 토론을 시작하세요</h3>
-                        <p className="text-sm max-w-sm mx-auto">
-                            선택하신 입장을 바탕으로 AI 튜터가 질문을 던집니다.
+                        <h3 className="text-2xl font-bold text-white mb-3">AI 튜터와 토론을 시작하세요</h3>
+                        <p className="text-zinc-500 font-medium max-w-sm mx-auto leading-relaxed">
+                            선택하신 입장을 바탕으로 AI 튜터가 비판적 질문을 던집니다.
                             자신의 주장을 논리적으로 펼쳐보세요.
                         </p>
                         {discussion.settings?.maxTurns && (
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-muted/50 rounded-full text-xs mt-2">
-                                <Clock className="w-3 h-3" />
-                                <span>최대 {discussion.settings.maxTurns}턴 진행 예정</span>
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-extrabold text-primary uppercase tracking-widest mt-8">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span>최대 {discussion.settings.maxTurns}턴 진행</span>
                             </div>
                         )}
                     </div>
@@ -330,26 +339,27 @@ export default function StudentDiscussionPage() {
                     {messages.map((msg) => (
                         <motion.div
                             key={msg.id}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 15 }}
                             animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[85%] lg:max-w-[75%] rounded-2xl p-4 shadow-sm border-2 ${msg.role === 'user'
-                                ? 'bg-primary text-primary-foreground border-primary rounded-tr-none'
+                            <div className={`max-w-[85%] lg:max-w-[75%] rounded-[2rem] p-6 transition-all ${msg.role === 'user'
+                                ? 'bg-primary text-white shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] rounded-tr-none'
                                 : msg.role === 'instructor'
-                                    ? 'bg-amber-50 border-amber-200 text-amber-900'
-                                    : 'bg-card border-border rounded-tl-none'
+                                    ? 'glass-panel bg-amber-500/5 border-amber-500/20 text-white rounded-tl-none shadow-xl'
+                                    : 'glass-panel bg-white/[0.03] border-white/5 text-white rounded-tl-none shadow-2xl backdrop-blur-xl'
                                 }`}>
-                                <div className="flex items-center gap-2 mb-1.5 opacity-80">
-                                    <span className="text-xs font-bold uppercase tracking-wider">
+                                <div className="flex items-center gap-3 mb-3 opacity-60">
+                                    <span className="text-[10px] font-extrabold uppercase tracking-widest">
                                         {msg.role === 'user' ? '나' :
                                             msg.role === 'instructor' ? '교수님' : 'AI 튜터'}
                                     </span>
-                                    <span className="text-[10px]">
+                                    <span className="text-[9px] font-bold">
                                         {new Date(msg.createdAt || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
-                                <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+                                <div className="whitespace-pre-wrap leading-relaxed text-[16px] font-medium selection:bg-white/20">
                                     {msg.content}
                                 </div>
                             </div>
@@ -360,18 +370,18 @@ export default function StudentDiscussionPage() {
                     {sending && (
                         streamingContent ? (
                             <motion.div
-                                initial={{ opacity: 0, y: 10 }}
+                                initial={{ opacity: 0, y: 15 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="flex justify-start"
                             >
-                                <div className="max-w-[85%] lg:max-w-[75%] rounded-2xl p-4 shadow-sm border-2 bg-card border-border rounded-tl-none">
-                                    <div className="flex items-center gap-2 mb-1.5 opacity-80">
-                                        <span className="text-xs font-bold uppercase tracking-wider">AI 튜터</span>
-                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                <div className="max-w-[85%] lg:max-w-[75%] rounded-[2rem] p-6 glass-panel bg-white/[0.03] border-white/5 text-white rounded-tl-none shadow-2xl backdrop-blur-xl">
+                                    <div className="flex items-center gap-3 mb-3 opacity-60">
+                                        <span className="text-[10px] font-extrabold uppercase tracking-widest">AI 튜터</span>
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                     </div>
-                                    <div className="whitespace-pre-wrap leading-relaxed text-[15px]">
+                                    <div className="whitespace-pre-wrap leading-relaxed text-[16px] font-medium">
                                         {streamingContent}
-                                        <span className="inline-block w-1.5 h-4 bg-foreground/80 animate-pulse ml-0.5" />
+                                        <span className="inline-block w-2 h-5 bg-primary/80 animate-pulse ml-1 rounded-sm align-middle" />
                                     </div>
                                 </div>
                             </motion.div>
@@ -385,25 +395,30 @@ export default function StudentDiscussionPage() {
             </main>
 
             {/* Input Area */}
-            <footer className="border-t-2 border-foreground bg-background p-4 sticky bottom-0">
-                <div className="max-w-3xl mx-auto flex gap-3">
-                    <textarea
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={sending ? "AI 튜터가 답변을 작성 중입니다..." : "메시지를 입력하세요..."}
-                        className="flex-1 input-editorial resize-none h-[52px] py-3 leading-relaxed"
-                        disabled={sending}
-                    />
+            <footer className="border-t border-white/5 bg-black/40 backdrop-blur-xl p-6 sticky bottom-0 z-50">
+                <div className="max-w-3xl mx-auto flex gap-4">
+                    <div className="relative flex-1 group">
+                        <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            placeholder={sending ? "AI 튜터가 고찰 중입니다..." : "자신의 논리를 입력하세요..."}
+                            className="w-full ios-input resize-none h-[64px] py-4.5 pl-6 pr-6 leading-relaxed bg-white/[0.03] focus:bg-white/[0.05] border-white/5 focus:border-primary/30 transition-all font-medium scrollbar-hide"
+                            disabled={sending}
+                        />
+                        <div className="absolute top-0 right-0 h-full flex items-center pr-2">
+                            {/* Optional secondary actions here */}
+                        </div>
+                    </div>
                     <button
                         onClick={handleSendMessage}
                         disabled={!message.trim() || sending}
-                        className="btn-brutal-fill px-6 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                        className="group relative w-16 h-16 bg-white text-black rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:scale-100 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] shadow-xl"
                     >
                         {sending ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <Loader2 className="w-6 h-6 animate-spin" />
                         ) : (
-                            <Send className="w-5 h-5" />
+                            <Send className="w-6 h-6 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         )}
                     </button>
                 </div>
@@ -412,35 +427,50 @@ export default function StudentDiscussionPage() {
             {/* Stance Selector Modal */}
             <AnimatePresence>
                 {showStanceSelector && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 sm:p-10">
                         <motion.div
-                            initial={{ scale: 0.9, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.9, opacity: 0 }}
-                            className="brutal-box bg-background max-w-lg w-full p-6 shadow-2xl"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+                            onClick={() => setShowStanceSelector(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="glass-panel bg-[#121214]/90 border-white/10 max-w-xl w-full p-10 shadow-[0_0_100px_rgba(0,0,0,0.5)] relative z-10"
                         >
-                            <h2 className="text-2xl font-bold mb-2">입장을 선택하세요</h2>
-                            <p className="text-muted-foreground mb-6">
-                                이번 토론에서 취할 입장을 선택해주세요.
-                                선택한 입장에 따라 AI 튜터가 맞춤형 질문을 던집니다.
-                            </p>
+                            <div className="mb-10 text-center">
+                                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
+                                    <AlertCircle className="w-8 h-8 text-primary" />
+                                </div>
+                                <h2 className="text-3xl font-bold text-white mb-3">입장을 선택하세요</h2>
+                                <p className="text-zinc-500 font-medium leading-relaxed">
+                                    이번 토론에서 취할 입장을 선택해주세요. <br />
+                                    선택한 한 입장에 따라 AI 튜터와 심도 있는 논술을 나눕니다.
+                                </p>
+                            </div>
 
-                            <div className="grid gap-3">
+                            <div className="grid gap-4">
                                 {(discussion.settings.stanceOptions || ['pro', 'con', 'neutral']).map((option) => (
                                     <button
                                         key={option}
                                         onClick={() => handleStanceSelect(option)}
-                                        className={`flex items-center gap-4 p-4 border-2 rounded-xl transition-all hover:translate-x-1 ${getStanceStyle(option)
+                                        className={`group flex items-center gap-6 p-6 border rounded-[2rem] transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-[0.98] ${getStanceStyle(option)
                                             }`}
                                     >
-                                        <div className="p-2 bg-white/50 rounded-lg">
+                                        <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 transition-colors group-hover:bg-white/10">
                                             {getStanceIcon(option)}
                                         </div>
                                         <div className="text-left">
-                                            <div className="font-bold text-lg">
+                                            <div className="font-bold text-xl tracking-tight">
                                                 {stanceLabels[option] || option}
                                             </div>
+                                            <div className="text-[10px] font-extrabold uppercase tracking-widest opacity-40 mt-1">Select this stance</div>
                                         </div>
+                                        <ArrowRight className="w-6 h-6 ml-auto opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0" />
                                     </button>
                                 ))}
                             </div>
@@ -483,16 +513,16 @@ function ThinkingIndicator() {
 
     return (
         <div className="flex justify-start">
-            <div className="p-4 border-2 border-sage bg-sage/10 rounded-2xl rounded-tl-none">
-                <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="animate-pulse">{message}</span>
+            <div className="p-6 glass-panel bg-primary/10 border-primary/20 rounded-[2rem] rounded-tl-none shadow-xl">
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-3 text-sm font-bold text-primary">
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span className="animate-pulse tracking-tight">{message}</span>
                     </div>
-                    <div className="text-xs text-muted-foreground/70 pl-6">
+                    <div className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest pl-8">
                         {elapsedSeconds < 5
                             ? `잠시만 기다려주세요... (약 3-5초 소요)`
-                            : `${elapsedSeconds}초 경과 - 조금만 더 기다려주세요`
+                            : `${elapsedSeconds}초 경과 - 심층 분석 중...`
                         }
                     </div>
                 </div>
