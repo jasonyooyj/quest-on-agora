@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { decompressData } from "@/lib/compression";
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth";
 import { openai, AI_MODEL } from "@/lib/openai";
 
 const supabase = createClient(
@@ -11,13 +11,12 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = user.unsafeMetadata?.role as string;
-    if (userRole !== "instructor") {
+    if (user.role !== "instructor") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

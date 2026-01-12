@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth";
 import { compressData } from "@/lib/compression";
 import { prisma } from "@/lib/prisma";
 
@@ -150,13 +150,13 @@ async function createExam(data: {
 }) {
   try {
     // Get current user
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if user is instructor
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     console.log("Create exam - User role:", userRole, "User ID:", user.id);
 
     if (userRole !== "instructor") {
@@ -183,7 +183,7 @@ async function createExam(data: {
       rubric: data.rubric || [],
       rubric_public: data.rubric_public || false,
       status: data.status,
-      instructor_id: user.id, // Clerk user ID (e.g., "user_31ihNg56wMaE27ft10H4eApjc1J")
+      instructor_id: user.id, // Supabase Auth user ID
       created_at: data.created_at,
       updated_at: data.updated_at,
     };
@@ -430,7 +430,7 @@ async function getExamById(data: { id: string }) {
     }
 
     // Get current user
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       console.error("API: No user found - unauthorized");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -439,7 +439,7 @@ async function getExamById(data: { id: string }) {
     console.log("API: User found:", user.id);
 
     // Check if user is instructor
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     console.log("API: User role:", userRole);
 
     if (userRole !== "instructor") {
@@ -533,13 +533,13 @@ async function getInstructorExams() {
   try {
     const supabase = getSupabaseClient();
     // Get current user
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if user is instructor
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     if (userRole !== "instructor") {
       return NextResponse.json(
         { error: "Instructor access required" },
@@ -552,7 +552,7 @@ async function getInstructorExams() {
       .select(
         "id, title, code, description, duration, questions, materials, status, instructor_id, created_at, updated_at"
       )
-      .eq("instructor_id", user.id) // Clerk user ID
+      .eq("instructor_id", user.id) // Supabase Auth user ID
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -1182,12 +1182,12 @@ async function getSessionMessages(data: { sessionId: string }) {
 async function createFolder(data: { name: string; parent_id?: string | null }) {
   try {
     const supabase = getSupabaseClient();
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     if (userRole !== "instructor") {
       return NextResponse.json(
         { error: "Instructor access required" },
@@ -1247,12 +1247,12 @@ async function createFolder(data: { name: string; parent_id?: string | null }) {
 async function getFolderContents(data: { folder_id?: string | null }) {
   try {
     const supabase = getSupabaseClient();
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     if (userRole !== "instructor") {
       return NextResponse.json(
         { error: "Instructor access required" },
@@ -1387,7 +1387,7 @@ async function getFolderContents(data: { folder_id?: string | null }) {
 async function getBreadcrumb(data: { folder_id: string }) {
   try {
     const supabase = getSupabaseClient();
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -1436,12 +1436,12 @@ async function moveNode(data: {
 }) {
   try {
     const supabase = getSupabaseClient();
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     if (userRole !== "instructor") {
       return NextResponse.json(
         { error: "Instructor access required" },
@@ -1477,12 +1477,12 @@ async function moveNode(data: {
 async function updateNode(data: { node_id: string; name?: string }) {
   try {
     const supabase = getSupabaseClient();
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     if (userRole !== "instructor") {
       return NextResponse.json(
         { error: "Instructor access required" },
@@ -1527,12 +1527,12 @@ async function updateNode(data: { node_id: string; name?: string }) {
 async function deleteNode(data: { node_id: string }) {
   try {
     const supabase = getSupabaseClient();
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     if (userRole !== "instructor") {
       return NextResponse.json(
         { error: "Instructor access required" },
@@ -1675,12 +1675,12 @@ async function deactivateSession(data: {
 
 async function getInstructorDrive() {
   try {
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userRole = user.unsafeMetadata?.role as string;
+    const userRole = user.role;
     if (userRole !== "instructor") {
       return NextResponse.json(
         { error: "Instructor access required" },

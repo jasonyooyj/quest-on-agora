@@ -135,7 +135,7 @@
 | 기술 | 버전 | 용도 |
 |------|------|------|
 | **OpenAI API** | 5.15.0 | GPT 모델 활용 AI 대화 |
-| **Clerk** | 6.36.3 | 인증 및 사용자 관리 |
+| **Supabase Auth** | - | 인증 및 사용자 관리 |
 
 ### 추가 라이브러리
 
@@ -171,10 +171,10 @@
 └─────────────────────────────────────────────────────────────────┘
          │                    │                    │
          ▼                    ▼                    ▼
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│    Clerk     │    │   Supabase   │    │   OpenAI     │
-│   (인증)      │    │  (데이터베이스) │    │   (AI)       │
-└──────────────┘    └──────────────┘    └──────────────┘
+┌──────────────┐    ┌──────────────┐
+│   Supabase   │    │   OpenAI     │
+│ (인증+DB)    │    │   (AI)       │
+└──────────────┘    └──────────────┘
 ```
 
 ---
@@ -329,18 +329,6 @@ npm run lint
 
 ```env
 # ============================================
-# 🔑 Clerk 인증 (https://clerk.com)
-# ============================================
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
-CLERK_SECRET_KEY=sk_test_xxxxx
-
-# Clerk URL 설정
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/login
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/register
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
-
-# ============================================
 # 🗄️ Supabase (https://supabase.com)
 # ============================================
 NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
@@ -361,17 +349,6 @@ OPENAI_API_KEY=sk-xxxxx
 ```
 
 ### 환경 변수 획득 방법
-
-<details>
-<summary><b>📌 Clerk 키 발급</b></summary>
-
-1. [Clerk Dashboard](https://clerk.com/)에 접속하여 로그인
-2. 새 Application 생성 또는 기존 앱 선택
-3. **API Keys** 메뉴에서 키 확인
-   - `Publishable key` → `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - `Secret keys` → `CLERK_SECRET_KEY`
-
-</details>
 
 <details>
 <summary><b>📌 Supabase 키 발급</b></summary>
@@ -415,7 +392,7 @@ CREATE TABLE discussions (
   materials_text TEXT,                    -- 배경 자료
   duration INTEGER DEFAULT 30,            -- 토론 시간(분)
   status TEXT DEFAULT 'draft',            -- 상태 (draft/active/completed)
-  instructor_id TEXT NOT NULL,            -- 교수 ID (Clerk)
+  instructor_id TEXT NOT NULL,            -- 교수 ID (Supabase Auth)
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -423,7 +400,7 @@ CREATE TABLE discussions (
 -- 👥 프로필 (Profiles)
 CREATE TABLE profiles (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  clerk_id TEXT UNIQUE NOT NULL,          -- Clerk 사용자 ID
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,  -- Supabase Auth 사용자 ID
   role TEXT NOT NULL,                     -- 역할 (instructor/student)
   university TEXT,                        -- 대학
   department TEXT,                        -- 학과
@@ -434,7 +411,7 @@ CREATE TABLE profiles (
 CREATE TABLE discussion_participations (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   discussion_id UUID REFERENCES discussions(id),
-  student_id TEXT NOT NULL,               -- 학생 ID (Clerk)
+  student_id TEXT NOT NULL,               -- 학생 ID (Supabase Auth)
   stance TEXT DEFAULT 'neutral',          -- 입장 (agree/disagree/neutral)
   argument TEXT,                          -- 근거/주장
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -608,11 +585,11 @@ npm run build
 </details>
 
 <details>
-<summary><b>🔴 Clerk 인증 오류</b></summary>
+<summary><b>🔴 Supabase 인증 오류</b></summary>
 
 1. 환경 변수가 올바르게 설정되었는지 확인
-2. Clerk 대시보드에서 도메인 설정 확인
-3. 개발/프로덕션 키가 올바른지 확인
+2. Supabase 대시보드에서 인증 설정 확인
+3. Supabase 프로젝트 URL과 키가 올바른지 확인
 
 </details>
 
@@ -643,8 +620,7 @@ copies or substantial portions of the Software.
 ## 🙏 감사의 말
 
 - [Next.js](https://nextjs.org/) - 강력한 React 프레임워크
-- [Supabase](https://supabase.com/) - 오픈소스 Firebase 대안
-- [Clerk](https://clerk.com/) - 현대적인 인증 솔루션
+- [Supabase](https://supabase.com/) - 오픈소스 Firebase 대안 (인증 및 데이터베이스)
 - [shadcn/ui](https://ui.shadcn.com/) - 아름다운 UI 컴포넌트
 
 ---

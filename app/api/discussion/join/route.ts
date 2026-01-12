@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser, clerkClient } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // POST /api/discussion/join - Join a discussion session with join code
 export async function POST(request: NextRequest) {
   try {
-    const user = await currentUser();
+    const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -83,9 +83,6 @@ export async function POST(request: NextRequest) {
       where: { student_id: user.id },
     });
 
-    const clerk = await clerkClient();
-    const clerkUser = await clerk.users.getUser(user.id);
-
     // Generate display name (anonymous mode or real name)
     const settings = session.settings as {
       anonymous?: boolean;
@@ -104,8 +101,8 @@ export async function POST(request: NextRequest) {
     } else {
       displayName =
         profile?.name ||
-        clerkUser.firstName ||
-        clerkUser.emailAddresses[0]?.emailAddress ||
+        user.name ||
+        user.email ||
         `Student ${user.id.slice(0, 4)}`;
     }
 

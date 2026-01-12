@@ -183,7 +183,6 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
                                         alt={step.title}
                                         fill
                                         className="object-cover"
-                                        unoptimized // For development/local paths
                                     />
 
                                     {/* Overlay for aesthetic */}

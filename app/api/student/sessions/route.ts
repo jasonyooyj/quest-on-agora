@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth";
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -12,15 +12,14 @@ const ITEMS_PER_PAGE = 10;
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await currentUser();
+    const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if user is student
-    const userRole = user.unsafeMetadata?.role as string;
-    if (userRole !== "student") {
+    if (user.role !== "student") {
       return NextResponse.json(
         { error: "Student access required" },
         { status: 403 }

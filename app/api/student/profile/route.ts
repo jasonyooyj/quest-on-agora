@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 // 프로필 조회
 export async function GET() {
   try {
-    const user = await currentUser();
+    const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if user is student
-    const userRole = user.unsafeMetadata?.role as string;
-    if (userRole !== "student") {
+    if (user.role !== "student") {
       return NextResponse.json(
         { error: "Student access required" },
         { status: 403 }
@@ -49,15 +48,14 @@ export async function GET() {
 // 프로필 생성/업데이트
 export async function POST(request: NextRequest) {
   try {
-    const user = await currentUser();
+    const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Check if user is student
-    const userRole = user.unsafeMetadata?.role as string;
-    if (userRole !== "student") {
+    if (user.role !== "student") {
       return NextResponse.json(
         { error: "Student access required" },
         { status: 403 }

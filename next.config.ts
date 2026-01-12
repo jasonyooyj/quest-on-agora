@@ -2,9 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  images: {
-    unoptimized: true, // sharp 사용 안 함
-  },
   experimental: {
     optimizePackageImports: [
       "lucide-react",
@@ -26,9 +23,8 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-tooltip",
     ],
   },
-  // Skip linting and type checking during build for speed
-  typescript: {
-    ignoreBuildErrors: true,
+  turbopack: {
+    root: __dirname,
   },
 };
 

@@ -7,16 +7,6 @@
 Create a `.env.local` file in your project root with the following variables:
 
 ```bash
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
-CLERK_SECRET_KEY=sk_test_your_secret_key_here
-
-# Clerk URLs
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/onboarding
-
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
@@ -31,19 +21,7 @@ DATABASE_URL=postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].poole
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-### 2. Clerk Setup
-
-1. Go to [clerk.com](https://clerk.com) and create an account
-2. Create a new application
-3. Copy your publishable key and secret key
-4. Update the environment variables above
-5. Configure your Clerk application settings:
-   - Set sign-in URL: `/sign-in`
-   - Set sign-up URL: `/sign-up`
-   - Set after sign-in URL: `/`
-   - Set after sign-up URL: `/onboarding`
-
-### 3. Supabase Setup
+### 2. Supabase Setup
 
 1. Go to [supabase.com](https://supabase.com) and create a project
 2. Get your project URL and anon key
@@ -65,7 +43,7 @@ OPENAI_API_KEY=your_openai_api_key_here
      - You can reset it if needed (this will require updating all connection strings)
 5. Set up the following tables (SQL provided below)
 
-### 4. OpenAI Setup
+### 3. OpenAI Setup
 
 1. Go to [platform.openai.com](https://platform.openai.com) and get an API key
 2. Add the key to your environment variables
@@ -203,7 +181,7 @@ CREATE TABLE chat_interactions (
 ## 🐛 Troubleshooting
 
 - **Build Errors**: Ensure all environment variables are set
-- **Authentication Issues**: Check Clerk configuration and keys
+- **Authentication Issues**: Check Supabase Auth configuration and keys
 - **API Errors**: Verify OpenAI and Supabase keys
 - **Database Issues**: Check Supabase table structure and permissions
 - **TypeScript Errors**: Run `npm run build` to check for type issues
@@ -223,7 +201,7 @@ npm run build
 
 ## 📱 Features Ready
 
-- ✅ **Complete Authentication System** with Clerk
+- ✅ **Complete Authentication System** with Supabase Auth
 - ✅ **Role-Based Access Control** (Instructor/Student)
 - ✅ **Exam Creation & Management** for instructors
 - ✅ **Interactive Exam Interface** for students

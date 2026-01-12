@@ -2,11 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getSupabaseClient } from "@/lib/supabase-client";
 import {
   GraduationCap,
   MessageSquare,
@@ -31,18 +31,52 @@ interface Discussion {
 
 export default function DiscussionsPage() {
   const router = useRouter();
-  const { isSignedIn, isLoaded, user } = useUser();
   const queryClient = useQueryClient();
+  const [user, setUser] = useState<{ id: string; role: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Get user role from metadata
-  const userRole = (user?.unsafeMetadata?.role as string) || "student";
-
-  // Redirect non-instructors
+  // Load user and check role
   useEffect(() => {
-    if (isLoaded && isSignedIn && userRole !== "instructor") {
-      router.push("/student");
-    }
-  }, [isLoaded, isSignedIn, userRole, router]);
+    const loadUser = async () => {
+      try {
+        const supabase = getSupabaseClient();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+
+        if (!authUser) {
+          router.push("/login");
+          return;
+        }
+
+        // Get profile to check role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', authUser.id)
+          .single();
+
+        if (profile) {
+          setUser({ id: authUser.id, role: profile.role });
+          
+          // Redirect non-instructors
+          if (profile.role !== "instructor") {
+            router.push("/student");
+            return;
+          }
+        } else {
+          // No profile, redirect to login
+          router.push("/login");
+          return;
+        }
+      } catch (error) {
+        console.error("Error loading user:", error);
+        router.push("/login");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUser();
+  }, [router]);
 
   // Fetch discussions from API using TanStack Query
   const { data: discussions = [], isLoading: loading } = useQuery({
@@ -58,7 +92,7 @@ export default function DiscussionsPage() {
       const result = await response.json();
       return (result.sessions || []) as Discussion[];
     },
-    enabled: !!(isLoaded && isSignedIn && userRole === "instructor"),
+    enabled: !!(user && user.role === "instructor"),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
@@ -105,33 +139,42 @@ export default function DiscussionsPage() {
     0
   );
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "instructor") {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Card className="w-full max-w-md shadow-xl border-0 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="text-center space-y-4">
+            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
+              <GraduationCap className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-xl">로그인이 필요합니다</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              토론 관리 페이지에 접근하려면 로그인해주세요
+            </p>
+          </CardHeader>
+          <CardContent className="text-center pb-8">
+            <Button
+              onClick={() => router.replace("/login")}
+              className="w-full min-h-[44px]"
+            >
+              강사로 로그인
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <SignedOut>
-        <div className="flex items-center justify-center h-screen">
-          <Card className="w-full max-w-md shadow-xl border-0 bg-card/80 backdrop-blur-sm">
-            <CardHeader className="text-center space-y-4">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
-                <GraduationCap className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <CardTitle className="text-xl">로그인이 필요합니다</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                토론 관리 페이지에 접근하려면 로그인해주세요
-              </p>
-            </CardHeader>
-            <CardContent className="text-center pb-8">
-              <Button
-                onClick={() => router.replace("/sign-in")}
-                className="w-full min-h-[44px]"
-              >
-                강사로 로그인
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </SignedOut>
-
-      <SignedIn>
         {/* Header */}
         <header className="bg-card/80 backdrop-blur-sm border-b border-border shadow-sm">
           <div className="max-w-7xl mx-auto px-6 py-4">
@@ -257,7 +300,6 @@ export default function DiscussionsPage() {
             </CardContent>
           </Card>
         </main>
-      </SignedIn>
     </div>
   );
 }
