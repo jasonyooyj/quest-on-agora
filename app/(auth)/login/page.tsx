@@ -110,6 +110,7 @@ function LoginForm() {
                     <span>Google로 계속하기</span>
                 </button>
 
+{/* 카카오 로그인 - 사업자등록증 제출 후 활성화 예정
                 <button
                     type="button"
                     onClick={() => handleOAuthSignIn('kakao')}
@@ -125,6 +126,7 @@ function LoginForm() {
                     )}
                     <span>카카오로 계속하기</span>
                 </button>
+                */}
             </div>
 
             <div className="relative mb-8">

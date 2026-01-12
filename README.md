@@ -2,10 +2,12 @@
 
 <div align="center">
 
+![Version](https://img.shields.io/badge/Version-0.2.0-brightgreen?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT-412991?style=for-the-badge&logo=openai)
+![Playwright](https://img.shields.io/badge/Playwright-E2E-45ba4b?style=for-the-badge&logo=playwright)
 
 **AI 소크라테스 대화로 학생의 비판적 사고를 이끌어내는 현대적인 토론 플랫폼**
 
@@ -24,6 +26,7 @@
 - [프로젝트 구조](#-프로젝트-구조)
 - [설치 및 실행](#-설치-및-실행)
 - [환경 변수 설정](#-환경-변수-설정)
+- [테스트](#-테스트)
 - [데이터베이스 스키마](#-데이터베이스-스키마)
 - [API 엔드포인트](#-api-엔드포인트)
 - [배포](#-배포)
@@ -77,11 +80,17 @@
 - 전체 공지 메시지 전송
 - 토론 방향 유도를 위한 질문 제시
 
+#### 📌 인용 및 핀 기능
+- 학생 발언 실시간 핀 (인용)
+- 핀한 발언 모아보기
+- 주요 논점 하이라이트
+
 #### 📈 분석 및 리포트
 - 학생별 참여도 및 기여도 분석
 - 핵심 논거 자동 추출
 - 입장 변화 추이 그래프
 - 토론 결과 PDF 리포트 생성
+- 클립보드 내보내기 기능
 
 ### 👨‍🎓 학생용 기능
 
@@ -101,6 +110,12 @@
 - 참고 자료 및 인용 추가
 - 다른 학생의 근거 열람 (설정에 따라)
 - 근거간 연결 및 반론 작성
+
+#### 🖼️ 갤러리 기능
+- 다른 학생 근거 열람 및 탐색
+- 필터링 (입장별, 좋아요순, 최신순)
+- 정렬 옵션 (인기순, 최신순)
+- 좋아요 및 댓글 기능
 
 #### 📱 실시간 알림
 - 교수 피드백 알림
@@ -134,8 +149,15 @@
 
 | 기술 | 버전 | 용도 |
 |------|------|------|
-| **OpenAI API** | 5.15.0 | GPT 모델 활용 AI 대화 |
+| **OpenAI API** | 6.16.0 | GPT 모델 활용 AI 대화 |
+| **LangChain** | 1.2.7 | AI 대화 체인 및 프롬프트 관리 |
 | **Supabase Auth** | - | 인증 및 사용자 관리 |
+
+### 테스트
+
+| 기술 | 버전 | 용도 |
+|------|------|------|
+| **Playwright** | 1.57.0 | E2E 테스트 프레임워크 |
 
 ### 추가 라이브러리
 
@@ -189,11 +211,10 @@ agora/
 │   │   └── register/                # 회원가입 페이지
 │   │
 │   ├── 📂 api/                      # API 엔드포인트
-│   │   ├── auth/                    # 인증 API
-│   │   ├── discussion/              # 토론 관련 API
-│   │   ├── discussions/             # 토론 목록/상세 API
-│   │   ├── instructor/              # 교수 전용 API
-│   │   ├── student/                 # 학생 전용 API
+│   │   ├── auth/                    # 인증 API (callback, confirm)
+│   │   ├── discussions/             # 토론 API (CRUD, messages, pins, gallery, report)
+│   │   ├── instructor/              # 교수 전용 API (summary, feedback)
+│   │   ├── student/                 # 학생 전용 API (ai-chat, argument)
 │   │   └── supa/                    # Supabase 연동 API
 │   │
 │   ├── 📂 instructor/               # 교수 대시보드
@@ -203,7 +224,8 @@ agora/
 │   │
 │   ├── 📂 student/                  # 학생 대시보드
 │   │   ├── page.tsx                 # 참여 토론 목록
-│   │   └── discussion/[code]/       # 토론 참여 페이지
+│   │   ├── discussions/[id]/        # 토론 참여 페이지
+│   │   └── discussions/[id]/gallery/  # 갤러리 페이지
 │   │
 │   ├── layout.tsx                   # 루트 레이아웃
 │   ├── page.tsx                     # 랜딩 페이지
@@ -234,7 +256,11 @@ agora/
 │   ├── supabase-server.ts           # 서버용 Supabase
 │   ├── supabase-middleware.ts       # 미들웨어용 Supabase
 │   ├── compression.ts               # 데이터 압축 유틸
-│   └── utils.ts                     # 공통 유틸리티
+│   ├── utils.ts                     # 공통 유틸리티
+│   ├── 📂 middleware/               # API 미들웨어
+│   │   └── auth.ts                  # 인증 미들웨어
+│   └── 📂 validations/              # Zod 스키마
+│       └── discussion.ts            # 토론 관련 유효성 검사
 │
 ├── 📂 database/                     # 데이터베이스 스크립트
 │   ├── create_all_rls_policies.sql  # RLS 정책 설정
@@ -248,6 +274,10 @@ agora/
 │   ├── favicon.ico
 │   └── images/
 │
+├── 📂 e2e/                          # E2E 테스트 (Playwright)
+│   ├── landing.spec.ts              # 랜딩 페이지 테스트
+│   └── auth.spec.ts                 # 인증 플로우 테스트
+│
 ├── 📂 hooks/                        # 커스텀 React Hooks
 ├── 📂 types/                        # TypeScript 타입 정의
 ├── 📂 tasks/                        # 작업 관리 파일
@@ -255,6 +285,7 @@ agora/
 ├── .env.local                       # 환경 변수 (비밀)
 ├── next.config.ts                   # Next.js 설정
 ├── tailwind.config.ts               # Tailwind CSS 설정
+├── playwright.config.ts             # Playwright E2E 설정
 ├── tsconfig.json                    # TypeScript 설정
 └── package.json                     # 프로젝트 의존성
 ```
@@ -319,6 +350,15 @@ npm run start
 
 # ESLint 검사
 npm run lint
+
+# E2E 테스트 실행
+npm run test:e2e
+
+# E2E 테스트 UI 모드
+npm run test:e2e:ui
+
+# E2E 테스트 리포트 보기
+npm run test:e2e:report
 ```
 
 ---
@@ -377,6 +417,50 @@ OPENAI_API_KEY=sk-xxxxx
 
 ---
 
+## 🧪 테스트
+
+### E2E 테스트 (Playwright)
+
+프로젝트는 [Playwright](https://playwright.dev/)를 사용하여 End-to-End 테스트를 수행합니다.
+
+#### 테스트 실행
+
+```bash
+# 전체 E2E 테스트 실행
+npm run test:e2e
+
+# UI 모드로 테스트 실행 (디버깅에 유용)
+npm run test:e2e:ui
+
+# 테스트 리포트 보기
+npm run test:e2e:report
+```
+
+#### 테스트 커버리지
+
+현재 구현된 E2E 테스트:
+
+| 테스트 파일 | 설명 |
+|-------------|------|
+| `e2e/landing.spec.ts` | 랜딩 페이지 로드, 네비게이션, 기능 섹션 테스트 |
+| `e2e/auth.spec.ts` | 로그인/회원가입 페이지 렌더링, 역할 선택 테스트 |
+
+#### 테스트 작성 가이드
+
+```typescript
+// e2e/example.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('페이지 로드 확인', async ({ page }) => {
+  await page.goto('/');
+  await expect(page).toHaveTitle(/Agora/);
+});
+```
+
+테스트 설정은 `playwright.config.ts` 파일에서 관리됩니다.
+
+---
+
 ## 🗄 데이터베이스 스키마
 
 ### 주요 테이블
@@ -399,7 +483,6 @@ CREATE TABLE discussions (
 
 -- 👥 프로필 (Profiles)
 CREATE TABLE profiles (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,  -- Supabase Auth 사용자 ID
   role TEXT NOT NULL,                     -- 역할 (instructor/student)
   university TEXT,                        -- 대학
@@ -471,6 +554,14 @@ Supabase의 RLS를 통해 데이터 접근 권한을 제어합니다:
 | DELETE | `/api/discussions/[id]` | 토론 삭제 |
 | POST | `/api/discussions/[id]/join` | 토론 참여 |
 | PUT | `/api/discussions/[id]/stance` | 입장 변경 |
+| GET | `/api/discussions/[id]/messages` | 채팅 메시지 조회 |
+| POST | `/api/discussions/[id]/messages` | 채팅 메시지 전송 |
+| GET | `/api/discussions/[id]/participants` | 참여자 목록 조회 |
+| GET | `/api/discussions/[id]/gallery` | 갤러리 근거 목록 조회 |
+| GET | `/api/discussions/[id]/pins` | 핀한 발언 목록 조회 |
+| POST | `/api/discussions/[id]/pins` | 발언 핀하기 |
+| DELETE | `/api/discussions/[id]/pins` | 핀 해제 |
+| GET | `/api/discussions/[id]/report` | 토론 리포트 생성 |
 
 ### 학생 API (`/api/student/`)
 
@@ -487,6 +578,7 @@ Supabase의 RLS를 통해 데이터 접근 권한을 제어합니다:
 | GET | `/api/instructor/dashboard` | 대시보드 데이터 |
 | POST | `/api/instructor/feedback` | 학생 피드백 전송 |
 | GET | `/api/instructor/analytics` | 토론 분석 데이터 |
+| POST | `/api/instructor/generate-summary` | AI 기반 토론 요약 생성 |
 
 ---
 
@@ -602,7 +694,7 @@ npm run build
 ```
 MIT License
 
-Copyright (c) 2024 Agora
+Copyright (c) 2024-2026 Agora
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
