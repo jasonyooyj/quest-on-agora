@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Loader2, Sparkles, UserCircle2, BrainCircle, Gauge } from 'lucide-react'
+import { X, Save, Loader2, Sparkles, UserCircle2, Brain, Gauge } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface DiscussionSettings {
@@ -25,7 +25,7 @@ const aiModeDescriptions: Record<string, { label: string; description: string; i
   socratic: {
     label: '소크라테스 산파술',
     description: '무의식적 전제와 근본 가치를 탐구합니다',
-    icon: BrainCircle,
+    icon: Brain,
     color: 'emerald'
   },
   balanced: {
@@ -153,8 +153,8 @@ export function SettingsDialog({
                       key={mode}
                       onClick={() => setSettings({ ...settings, aiMode: mode })}
                       className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden group/mode ${settings.aiMode === mode
-                          ? 'bg-white/5 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)]'
-                          : 'bg-white/[0.02] border-white/5 hover:border-white/20'
+                        ? 'bg-white/5 border-primary shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)]'
+                        : 'bg-white/[0.02] border-white/5 hover:border-white/20'
                         }`}
                     >
                       {settings.aiMode === mode && (

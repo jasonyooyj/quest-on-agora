@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Users, MessageSquare, Play, Pause, Clock,
     Copy, ArrowLeft, Settings, BarChart3,
-    AlertCircle, CheckCircle, User, Quote, X
+    AlertCircle, CheckCircle, User, Quote, X, Loader2
 } from 'lucide-react'
 import { SettingsDialog } from '@/components/instructor/SettingsDialog'
 

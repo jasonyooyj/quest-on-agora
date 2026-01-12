@@ -20,7 +20,7 @@ import {
   AlertCircle,
   X,
   Sparkles,
-  BrainCircle,
+  Brain,
   Gauge,
   UserCircle2
 } from 'lucide-react'
@@ -37,7 +37,7 @@ const discussionSchema = z.object({
 type DiscussionFormInput = z.input<typeof discussionSchema>
 
 const aiModeOptions = [
-  { value: 'socratic', label: '소크라테스', desc: '산파술 기반 깊은 탐구', icon: BrainCircle, color: 'emerald' },
+  { value: 'socratic', label: '소크라테스', desc: '산파술 기반 깊은 탐구', icon: Brain, color: 'emerald' },
   { value: 'balanced', label: '균형잡힌', desc: '다각도 관점의 조화', icon: Sparkles, color: 'blue' },
   { value: 'debate', label: '디베이트', desc: '도전적이고 예리한 반론', icon: Gauge, color: 'rose' },
   { value: 'minimal', label: '최소 개입', desc: '자율적인 토론 환경', icon: UserCircle2, color: 'zinc' },
@@ -236,7 +236,7 @@ export default function NewDiscussionPage() {
 
               <div className="flex items-center gap-3 mb-10">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
-                  <BrainCircle className="w-6 h-6" />
+                  <Brain className="w-6 h-6" />
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">AI 튜터 튜닝</h2>
@@ -251,8 +251,8 @@ export default function NewDiscussionPage() {
                     <label
                       key={mode.value}
                       className={`flex flex-col p-6 rounded-[2.5rem] border transition-all cursor-pointer relative overflow-hidden group/card ${selectedAiMode === mode.value
-                          ? 'bg-white/5 border-primary shadow-[0_0_30px_rgba(var(--primary-rgb),0.1)]'
-                          : 'bg-white/[0.01] border-white/5 hover:border-white/10 hover:bg-white/[0.03]'
+                        ? 'bg-white/5 border-primary shadow-[0_0_30px_rgba(var(--primary-rgb),0.1)]'
+                        : 'bg-white/[0.01] border-white/5 hover:border-white/10 hover:bg-white/[0.03]'
                         }`}
                     >
                       <input

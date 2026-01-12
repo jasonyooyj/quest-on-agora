@@ -7,7 +7,7 @@ import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-    Send, ArrowLeft, Clock, Loader2,
+    Send, ArrowLeft, ArrowRight, Clock, Loader2,
     HelpCircle, MessageSquare, ThumbsUp, ThumbsDown, Minus, Users,
     AlertCircle, CheckCircle
 } from 'lucide-react'
