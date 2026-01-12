@@ -7,6 +7,5 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #891 | 10:18 PM | 🟣 | Version 0.2.0 Released with E2E Testing and Instructor Monitoring Features | ~471 |
-| #883 | 10:16 PM | 🟣 | Landing Page E2E Tests Created | ~326 |
+| #950 | 10:38 PM | 🔵 | Landing Content Reveals Current Messaging and Value Propositions | ~533 |
 </claude-mem-context>

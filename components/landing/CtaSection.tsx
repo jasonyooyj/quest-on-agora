@@ -24,7 +24,7 @@ export function CtaSection() {
                             {CTA_CONTENT.description}
                         </p>
                         <Link href="/register">
-                            <button className="bg-[hsl(var(--coral))] text-white font-semibold uppercase tracking-wide px-8 py-4 hover:opacity-90 transition-opacity flex items-center gap-2">
+                            <button className="bg-[hsl(var(--coral))] text-white font-semibold uppercase tracking-wide px-8 py-4 border-2 border-background shadow-[3px_3px_0px_hsl(var(--background)/0.3)] hover:shadow-[5px_5px_0px_hsl(var(--background)/0.3)] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0 active:translate-y-0 active:shadow-none transition-all flex items-center gap-2">
                                 {CTA_CONTENT.buttonText}
                                 <ArrowRight className="w-5 h-5" />
                             </button>

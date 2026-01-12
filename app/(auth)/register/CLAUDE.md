@@ -7,6 +7,6 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
-| #891 | 10:18 PM | 🟣 | Version 0.2.0 Released with E2E Testing and Instructor Monitoring Features | ~471 |
-| #883 | 10:16 PM | 🟣 | Landing Page E2E Tests Created | ~326 |
+| #964 | 10:43 PM | 🔵 | Registration Page Implements Role-Based Signup with Conditional Fields | ~564 |
+| #882 | 10:16 PM | 🔵 | Registration Flow with Role-Based Fields and Email Confirmation | ~432 |
 </claude-mem-context>

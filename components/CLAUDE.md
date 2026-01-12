@@ -7,5 +7,6 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #957 | 10:40 PM | 🔵 | Interactive Demo Uses Multi-Step Walkthrough with Visual Previews | ~601 |
 | #775 | 7:40 PM | 🔵 | Comprehensive Codebase Comparison Complete | ~539 |
 </claude-mem-context>

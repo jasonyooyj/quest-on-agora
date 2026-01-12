@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Circle } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import { HERO_CONTENT } from "@/lib/constants/landing-content";
 
@@ -12,11 +12,11 @@ export function HeroSection() {
     const containerRef = useRef<HTMLDivElement>(null);
     const { scrollYProgress } = useScroll({
         target: containerRef,
-        offset: ["start start", "end end"],
+        offset: ["start start", "end start"],
     });
 
-    const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
-    const heroScale = useTransform(scrollYProgress, [0, 0.15], [1, 0.95]);
+    const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+    const heroScale = useTransform(scrollYProgress, [0, 0.8], [1, 0.95]);
 
     return (
         <motion.section
@@ -84,7 +84,7 @@ export function HeroSection() {
                             ease: [0.22, 1, 0.36, 1],
                         }}
                     >
-                        <div className="brutal-box bg-card p-6 relative">
+                        <div className="brutal-box bg-card p-6 relative group">
                             {/* Decorative corner */}
                             <div className="absolute -top-3 -right-3 w-6 h-6 bg-[hsl(var(--coral))]" />
 
@@ -92,43 +92,82 @@ export function HeroSection() {
                                 실시간 입장 분포
                             </div>
 
-                            <div className="flex gap-3 mb-6">
-                                <div className="flex-1">
-                                    <div className="h-32 bg-[hsl(var(--sage))] relative">
+                            <div className="flex gap-3 mb-6 items-end h-36">
+                                <motion.div
+                                    className="flex-1"
+                                    initial={{ height: 0 }}
+                                    animate={{ height: "100%" }}
+                                    transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                >
+                                    <div className="h-full bg-[hsl(var(--sage))] relative group/bar hover:opacity-90 transition-opacity cursor-default">
                                         <div className="absolute bottom-2 left-2 text-white text-sm font-semibold">
                                             찬성 45%
                                         </div>
                                     </div>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="h-24 bg-[hsl(var(--coral))] relative">
+                                </motion.div>
+                                <motion.div
+                                    className="flex-1"
+                                    initial={{ height: 0 }}
+                                    animate={{ height: "75%" }}
+                                    transition={{ duration: 0.8, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                                >
+                                    <div className="h-full bg-[hsl(var(--coral))] relative group/bar hover:opacity-90 transition-opacity cursor-default">
                                         <div className="absolute bottom-2 left-2 text-white text-sm font-semibold">
                                             반대 35%
                                         </div>
                                     </div>
-                                </div>
-                                <div className="flex-1">
-                                    <div className="h-16 bg-foreground/30 relative">
+                                </motion.div>
+                                <motion.div
+                                    className="flex-1"
+                                    initial={{ height: 0 }}
+                                    animate={{ height: "50%" }}
+                                    transition={{ duration: 0.8, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                                >
+                                    <div className="h-full bg-foreground/30 relative group/bar hover:opacity-90 transition-opacity cursor-default">
                                         <div className="absolute bottom-2 left-2 text-foreground text-sm font-semibold">
                                             중립 20%
                                         </div>
                                     </div>
-                                </div>
+                                </motion.div>
                             </div>
 
                             <div className="border-t-2 border-foreground pt-4">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Circle className="w-2 h-2 fill-[hsl(var(--sage))] text-[hsl(var(--sage))]" />
+                                <motion.div
+                                    className="flex items-center gap-2 mb-3"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.4, delay: 1.0 }}
+                                >
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--sage))] opacity-75" />
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--sage))]" />
+                                    </span>
                                     <span className="text-sm">학생 12 — 새 근거 추가</span>
-                                </div>
-                                <div className="flex items-center gap-2 mb-3">
-                                    <Circle className="w-2 h-2 fill-[hsl(var(--coral))] text-[hsl(var(--coral))]" />
+                                </motion.div>
+                                <motion.div
+                                    className="flex items-center gap-2 mb-3"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.4, delay: 1.1 }}
+                                >
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--coral))] opacity-75" />
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--coral))]" />
+                                    </span>
                                     <span className="text-sm">학생 7 — AI와 대화 중</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Circle className="w-2 h-2 fill-[hsl(var(--gold))] text-[hsl(var(--gold))]" />
+                                </motion.div>
+                                <motion.div
+                                    className="flex items-center gap-2"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.4, delay: 1.2 }}
+                                >
+                                    <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[hsl(var(--gold))] opacity-75" />
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[hsl(var(--gold))]" />
+                                    </span>
                                     <span className="text-sm">학생 3 — 도움 요청</span>
-                                </div>
+                                </motion.div>
                             </div>
                         </div>
                     </motion.div>

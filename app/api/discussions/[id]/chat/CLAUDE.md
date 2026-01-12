@@ -7,6 +7,7 @@
 
 | ID | Time | T | Title | Read |
 |----|------|---|-------|------|
+| #958 | 10:40 PM | 🔵 | AI Chat Implementation Uses LangChain with Four Distinct Modes | ~731 |
 | #775 | 7:40 PM | 🔵 | Comprehensive Codebase Comparison Complete | ~539 |
 | #760 | 7:33 PM | 🔵 | Agora AI Chat Implements Multiple Socratic Modes with Turn Limits and Graceful Fallbacks | ~794 |
 </claude-mem-context>

@@ -1,15 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
-import { toast } from "sonner";
 
 export function Footer() {
-    const handleDeadLink = (e: React.MouseEvent, label: string) => {
-        e.preventDefault();
-        toast.info(`${label} 페이지는 준비 중입니다.`);
-    };
-
     return (
         <footer className="border-t-2 border-foreground py-12">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -39,17 +31,16 @@ export function Footer() {
                         >
                             개인정보처리방침
                         </Link>
-                        <Link
-                            href="#"
-                            onClick={(e) => handleDeadLink(e, "문의하기")}
+                        <a
+                            href="mailto:questonkr@gmail.com"
                             className="hover:text-foreground transition-colors"
                         >
                             문의하기
-                        </Link>
+                        </a>
                     </div>
 
                     <div className="text-sm text-muted-foreground">
-                        © 2024 Agora. All rights reserved.
+                        © {new Date().getFullYear()} Agora. All rights reserved.
                     </div>
                 </div>
             </div>
