@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -31,7 +31,7 @@ const registerSchema = z.object({
 
 type RegisterForm = z.infer<typeof registerSchema>
 
-export default function RegisterPage() {
+function RegisterContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const redirect = searchParams.get('redirect')
@@ -409,5 +409,17 @@ export default function RegisterPage() {
                 </div>
             </motion.div>
         </div>
+    )
+}
+
+export default function RegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-zinc-50">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+        }>
+            <RegisterContent />
+        </Suspense>
     )
 }

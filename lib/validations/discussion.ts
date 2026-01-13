@@ -40,8 +40,8 @@ export const joinDiscussionSchema = z.object({
 export const sendMessageSchema = z.object({
   participantId: z.string().uuid('유효하지 않은 참가자 ID입니다'),
   userMessage: z.string()
-    .min(1, '메시지를 입력해주세요')
-    .max(5000, '메시지는 5000자 이내로 입력해주세요'),
+    .max(5000, '메시지는 5000자 이내로 입력해주세요')
+    .optional(),
   discussionId: z.string().uuid().optional(),
 })
 

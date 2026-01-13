@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getSupabaseClient } from '@/lib/supabase-client'
@@ -38,6 +39,7 @@ const getStanceStyle = (stance: string) => {
 export default function StudentDiscussionPage() {
     const params = useParams()
     const router = useRouter()
+    const queryClient = useQueryClient()
     const discussionId = params.id as string
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const [message, setMessage] = useState('')
@@ -157,13 +159,39 @@ export default function StudentDiscussionPage() {
         }
     }
 
-    const handleSendMessage = async () => {
-        if (!message.trim() || !participant || sending) return
+    // Auto-start discussion if stance is selected but no messages
+    useEffect(() => {
+        if (!isMessagesLoading && participant?.stance && messages.length === 0 && !sending && !streamingContent) {
+            handleSendMessage('')
+        }
+    }, [participant?.stance, messages.length, isMessagesLoading])
 
-        const currentMessage = message.trim()
-        setMessage('')
+    const handleSendMessage = async (forceMessage?: string) => {
+        const isAutoStart = forceMessage === ''
+        const textToSend = isAutoStart ? '' : (forceMessage || message).trim()
+
+        if (!isAutoStart && !textToSend) return
+        if (!participant || sending) return
+
+        if (!isAutoStart) setMessage('')
         setSending(true)
         setStreamingContent('')
+
+        // Optimistic update for user message
+        const optimisticUserMsgId = `temp-${Date.now()}`
+        if (!isAutoStart) {
+            queryClient.setQueryData(['discussion-messages', discussionId, participant.id], (old: any[] = []) => {
+                return [...old, {
+                    id: optimisticUserMsgId,
+                    sessionId: discussionId,
+                    participantId: participant.id,
+                    role: 'user',
+                    content: textToSend,
+                    createdAt: new Date().toISOString(),
+                    isVisibleToStudent: true
+                }]
+            })
+        }
 
         try {
             const response = await fetch(`/api/discussions/${discussionId}/chat`, {
@@ -171,7 +199,7 @@ export default function StudentDiscussionPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     participantId: participant.id,
-                    userMessage: currentMessage,
+                    userMessage: textToSend,
                     stream: true
                 })
             })
@@ -183,6 +211,8 @@ export default function StudentDiscussionPage() {
             const decoder = new TextDecoder()
 
             if (!reader) throw new Error('No reader available')
+
+            let fullContent = ''
 
             while (true) {
                 const { done, value } = await reader.read()
@@ -196,10 +226,32 @@ export default function StudentDiscussionPage() {
                         try {
                             const data = JSON.parse(line.slice(6))
                             if (data.chunk) {
+                                fullContent += data.chunk
                                 setStreamingContent(prev => prev + data.chunk)
                             }
                             if (data.done) {
-                                // Streaming complete, realtime subscription will update messages
+                                // Streaming complete
+                                // Optimistically add AI message to cache to prevent flicker
+                                queryClient.setQueryData(['discussion-messages', discussionId, participant.id], (old: any[] = []) => {
+                                    // Remove the optimistic user message if it was replaced by real one (optional, but good practice)
+                                    // Actually, we just append the AI message. The user message might be duplicated if Realtime arrives later,
+                                    // but useParticipantMessages handles deduplication by ID. Our temp ID won't match real ID.
+                                    // However, we should keep it simple. Realtime will eventually handle everything.
+                                    // But to stop flickering, we need the AI message HERE.
+
+                                    const exists = old.some((msg: any) => msg.role === 'ai' && msg.content === fullContent)
+                                    if (exists) return old
+
+                                    return [...old, {
+                                        id: `ai-temp-${Date.now()}`,
+                                        sessionId: discussionId,
+                                        participantId: participant.id,
+                                        role: 'ai',
+                                        content: fullContent,
+                                        createdAt: new Date().toISOString(),
+                                        isVisibleToStudent: true
+                                    }]
+                                })
                                 setStreamingContent('')
                             }
                             if (data.error) {
@@ -214,7 +266,13 @@ export default function StudentDiscussionPage() {
         } catch (error) {
             console.error('Error sending message:', error)
             toast.error('메시지 전송에 실패했습니다')
-            setMessage(currentMessage) // Rollback
+            if (!isAutoStart) {
+                setMessage(textToSend) // Rollback input
+                // Rollback optimistic update
+                queryClient.setQueryData(['discussion-messages', discussionId, participant.id], (old: any[] = []) => {
+                    return old.filter((msg: any) => !msg.id.startsWith('temp-'))
+                })
+            }
             setStreamingContent('')
         } finally {
             setSending(false)
@@ -271,6 +329,18 @@ export default function StudentDiscussionPage() {
         con: '반대',
         neutral: '중립'
     }
+
+    const getAiName = (mode?: string) => {
+        switch (mode) {
+            case 'debate': return '악마의 변호인'
+            case 'socratic': return 'AI 소크라테스'
+            case 'balanced': return 'AI 토론 파트너'
+            case 'minimal': return 'AI 리스너'
+            default: return 'AI 튜터'
+        }
+    }
+
+    const aiName = getAiName(discussion.settings?.aiMode)
 
     return (
         <div className="min-h-screen flex flex-col bg-white text-zinc-900 selection:bg-primary/30 relative overflow-hidden">
@@ -373,9 +443,9 @@ export default function StudentDiscussionPage() {
                         <div className="w-20 h-20 bg-zinc-100 border border-zinc-200 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
                             <MessageSquare className="w-10 h-10 text-primary" />
                         </div>
-                        <h3 className="text-2xl font-bold text-zinc-900 mb-3">AI 튜터와 토론을 시작하세요</h3>
+                        <h3 className="text-2xl font-bold text-zinc-900 mb-3">{aiName}와 토론을 시작하세요</h3>
                         <p className="text-zinc-500 font-medium max-w-sm mx-auto leading-relaxed">
-                            선택하신 입장을 바탕으로 AI 튜터가 비판적 질문을 던집니다.
+                            선택하신 입장을 바탕으로 {aiName}가 비판적 질문을 던집니다.
                             자신의 주장을 논리적으로 펼쳐보세요.
                         </p>
                         {discussion.settings?.maxTurns && discussion.settings?.duration !== null && (
@@ -403,7 +473,7 @@ export default function StudentDiscussionPage() {
                                 <div className={`flex items-center gap-3 mb-3 ${msg.role === 'user' ? 'opacity-60' : 'text-zinc-500'}`}>
                                     <span className="text-[10px] font-extrabold uppercase tracking-widest">
                                         {msg.role === 'user' ? '나' :
-                                            msg.role === 'instructor' ? '교수님' : 'AI 튜터'}
+                                            msg.role === 'instructor' ? '교수님' : aiName}
                                     </span>
                                     <span className="text-[9px] font-bold">
                                         {new Date(msg.createdAt || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -426,7 +496,7 @@ export default function StudentDiscussionPage() {
                             >
                                 <div className="max-w-[85%] lg:max-w-[75%] rounded-[2rem] p-6 glass-panel bg-zinc-50 border-zinc-200 text-zinc-900 rounded-tl-none shadow-sm backdrop-blur-xl">
                                     <div className="flex items-center gap-3 mb-3 text-zinc-500">
-                                        <span className="text-[10px] font-extrabold uppercase tracking-widest">AI 튜터</span>
+                                        <span className="text-[10px] font-extrabold uppercase tracking-widest">{aiName}</span>
                                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                     </div>
                                     <div className="whitespace-pre-wrap leading-relaxed text-[16px] font-medium">
@@ -436,7 +506,7 @@ export default function StudentDiscussionPage() {
                                 </div>
                             </motion.div>
                         ) : (
-                            <ThinkingIndicator />
+                            <ThinkingIndicator aiName={aiName} />
                         )
                     )}
 
@@ -459,7 +529,7 @@ export default function StudentDiscussionPage() {
                                     value={message}
                                     onChange={(e) => setMessage(e.target.value)}
                                     onKeyDown={handleKeyDown}
-                                    placeholder={sending ? "AI 튜터가 고찰 중입니다..." : "자신의 논리를 입력하세요..."}
+                                    placeholder={sending ? `${aiName}가 고찰 중입니다...` : "자신의 논리를 입력하세요..."}
                                     className="w-full ios-input resize-none h-[64px] py-4.5 pl-6 pr-6 leading-relaxed focus:border-primary/30 transition-all font-medium scrollbar-hide text-zinc-900"
                                     disabled={sending}
                                 />
@@ -468,7 +538,7 @@ export default function StudentDiscussionPage() {
                                 </div>
                             </div>
                             <button
-                                onClick={handleSendMessage}
+                                onClick={() => handleSendMessage()}
                                 disabled={!message.trim() || sending}
                                 className="group relative w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:scale-100 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] shadow-xl"
                             >
@@ -508,7 +578,7 @@ export default function StudentDiscussionPage() {
                                 <h2 className="text-3xl font-bold text-zinc-900 mb-3">입장을 선택하세요</h2>
                                 <p className="text-zinc-500 font-medium leading-relaxed">
                                     이번 토론에서 취할 입장을 선택해주세요. <br />
-                                    선택한 한 입장에 따라 AI 튜터와 심도 있는 논술을 나눕니다.
+                                    선택한 한 입장에 따라 {aiName}와 심도 있는 논술을 나눕니다.
                                 </p>
                             </div>
 
@@ -581,9 +651,13 @@ export default function StudentDiscussionPage() {
     )
 }
 
-function ThinkingIndicator() {
-    const [message, setMessage] = useState('AI 튜터가 답변을 작성 중입니다...')
+function ThinkingIndicator({ aiName = 'AI 튜터' }: { aiName?: string }) {
+    const [message, setMessage] = useState(`${aiName}가 답변을 작성 중입니다...`)
     const [elapsedSeconds, setElapsedSeconds] = useState(0)
+
+    useEffect(() => {
+        setMessage(`${aiName}가 답변을 작성 중입니다...`)
+    }, [aiName])
 
     useEffect(() => {
         const messages = [

@@ -59,6 +59,25 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             return handleMockResponse(discussionId || id, participantId, supabase)
         }
 
+        // Save user message if not starting (starting message is empty)
+        if (userMessage && userMessage.trim()) {
+            const { error: saveError } = await supabase
+                .from('discussion_messages')
+                .insert({
+                    session_id: discussionId || id,
+                    participant_id: participantId,
+                    role: 'user',
+                    content: userMessage,
+                    message_type: 'text',
+                    is_visible_to_student: true
+                })
+
+            if (saveError) {
+                console.error('Error saving user message:', saveError)
+                return NextResponse.json({ error: 'Failed to save message' }, { status: 500 })
+            }
+        }
+
         // Get conversation history
         const { data: history } = await supabase
             .from('discussion_messages')
@@ -104,7 +123,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                         // Unified LinkChain Logic for ALL modes
                         const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
 
-                        const promptTemplate = getDiscussionPromptTemplate(aiMode)
+                        // Determine if this is a starting message or a response
+                        const isStarting = !userTurns && (!userMessage || userMessage.trim() === '')
+                        const inputMessage = userMessage || ''
+
+                        const promptTemplate = getDiscussionPromptTemplate(aiMode, isStarting)
 
                         const chain = RunnableSequence.from([
                             promptTemplate,
@@ -117,7 +140,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                             description: discussion.description || '', // Added description
                             studentStance: stanceLabel || 'Unknown',
                             history: historyText,
-                            input: userMessage
+                            input: inputMessage
                         })
 
                         for await (const chunk of aiStream) {
@@ -159,9 +182,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Non-streaming response (original behavior)
         let aiResponse = ''
 
+        // Determine if this is a starting message or a response
+        const isStarting = !userTurns && (!userMessage || userMessage.trim() === '')
+        const inputMessage = userMessage || '' // Ensure string for template
+
         // Unified Logic for Non-streaming
         const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
-        const promptTemplate = getDiscussionPromptTemplate(aiMode)
+        const promptTemplate = getDiscussionPromptTemplate(aiMode, isStarting)
 
         const chain = RunnableSequence.from([
             promptTemplate,
@@ -174,7 +201,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             description: discussion.description || '',
             studentStance: stanceLabel || 'Unknown',
             history: historyText,
-            input: userMessage
+            input: inputMessage
         })
 
         // Save AI response to database
