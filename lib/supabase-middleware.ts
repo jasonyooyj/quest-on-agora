@@ -58,17 +58,25 @@ export async function updateSession(request: NextRequest) {
     if (isAdminPath) {
         // Not authenticated - redirect to login
         if (!user) {
+            console.log('[Admin] No user, redirecting to login')
             const url = request.nextUrl.clone()
             url.pathname = '/login'
             url.searchParams.set('redirect', request.nextUrl.pathname)
             return NextResponse.redirect(url)
         }
         // Authenticated but not admin - redirect to home
-        if (!ADMIN_EMAILS.includes(user.email?.toLowerCase() || '')) {
+        const userEmail = user.email?.toLowerCase() || ''
+        console.log('[Admin] User email:', userEmail)
+        console.log('[Admin] Admin emails:', ADMIN_EMAILS)
+        console.log('[Admin] Is admin:', ADMIN_EMAILS.includes(userEmail))
+
+        if (!ADMIN_EMAILS.includes(userEmail)) {
+            console.log('[Admin] Not admin, redirecting to home')
             const url = request.nextUrl.clone()
             url.pathname = '/'
             return NextResponse.redirect(url)
         }
+        console.log('[Admin] Access granted')
     }
 
     // Redirect to dashboard if authenticated and trying to access auth pages

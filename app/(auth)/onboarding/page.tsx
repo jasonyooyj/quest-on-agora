@@ -1,115 +1,97 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Loader2, ArrowRight, Mail, Lock, User, GraduationCap, Building, Chrome } from 'lucide-react'
+import { Loader2, ArrowRight, User, GraduationCap, Building } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
 
-const registerSchema = z.object({
+const onboardingSchema = z.object({
     name: z.string().min(2, '이름을 입력해주세요'),
-    email: z.string().email('올바른 이메일을 입력해주세요'),
-    password: z.string().min(6, '비밀번호는 6자 이상이어야 합니다'),
-    confirmPassword: z.string(),
     role: z.enum(['instructor', 'student']),
     studentNumber: z.string().optional(),
     school: z.string().optional(),
     department: z.string().optional(),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: '비밀번호가 일치하지 않습니다',
-    path: ['confirmPassword'],
 })
 
-type RegisterForm = z.infer<typeof registerSchema>
+type OnboardingForm = z.infer<typeof onboardingSchema>
 
-export default function RegisterPage() {
+export default function OnboardingPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
-    const [oauthLoading, setOauthLoading] = useState<string | null>(null)
     const [selectedRole, setSelectedRole] = useState<'instructor' | 'student'>('student')
+    const [userEmail, setUserEmail] = useState<string>('')
+    const [userId, setUserId] = useState<string>('')
 
-    const handleOAuthSignUp = async (provider: 'google' | 'kakao') => {
-        setOauthLoading(provider)
-        try {
-            const supabase = getSupabaseClient()
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider,
-                options: {
-                    redirectTo: `${window.location.origin}/auth/callback`,
-                },
-            })
-
-            if (error) {
-                toast.error(error.message)
-                setOauthLoading(null)
-            }
-        } catch (error) {
-            toast.error('소셜 로그인 중 오류가 발생했습니다')
-            setOauthLoading(null)
-        }
-    }
-
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegisterForm>({
-        resolver: zodResolver(registerSchema),
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm<OnboardingForm>({
+        resolver: zodResolver(onboardingSchema),
         defaultValues: {
             role: 'student',
         },
     })
 
-    const onSubmit = async (data: RegisterForm) => {
-        setIsLoading(true)
-        try {
+    useEffect(() => {
+        const checkUser = async () => {
             const supabase = getSupabaseClient()
+            const { data: { user } } = await supabase.auth.getUser()
 
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: data.email,
-                password: data.password,
-                options: {
-                    data: {
-                        name: data.name,
-                        role: data.role,
-                    },
-                },
-            })
-
-            if (authError) {
-                toast.error(authError.message)
+            if (!user) {
+                router.push('/login')
                 return
             }
 
-            if (authData.user) {
-                // Use server-side API route to bypass RLS
-                const profileResponse = await fetch('/api/auth/profile', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        id: authData.user.id,
-                        email: data.email,
-                        name: data.name,
-                        role: data.role,
-                        student_number: data.studentNumber || null,
-                        school: data.school || null,
-                        department: data.department || null,
-                    }),
-                })
+            setUserEmail(user.email || '')
+            setUserId(user.id)
 
-                if (!profileResponse.ok) {
-                    const errorData = await profileResponse.json()
-                    console.error('Profile creation error:', errorData)
-                    toast.error(`프로필 생성 오류: ${errorData.error || '알 수 없는 오류'}`)
-                    return
-                }
+            // Pre-fill name if available in metadata
+            if (user.user_metadata?.name || user.user_metadata?.full_name) {
+                setValue('name', user.user_metadata.name || user.user_metadata.full_name)
+            }
+        }
+
+        checkUser()
+    }, [router, setValue])
+
+    const onSubmit = async (data: OnboardingForm) => {
+        setIsLoading(true)
+        try {
+            // Use server-side API route to bypass RLS and create profile
+            const profileResponse = await fetch('/api/auth/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id: userId,
+                    email: userEmail,
+                    name: data.name,
+                    role: data.role,
+                    student_number: data.studentNumber || null,
+                    school: data.school || null,
+                    department: data.department || null,
+                }),
+            })
+
+            if (!profileResponse.ok) {
+                const errorData = await profileResponse.json()
+                throw new Error(errorData.error || '프로필 생성 실패')
             }
 
-            toast.success('회원가입이 완료되었습니다! 이메일을 확인해주세요.')
-            router.push('/confirm-email')
+            toast.success('환영합니다! 시작할 준비가 되었습니다.')
+
+            // Redirect based on role
+            if (data.role === 'instructor') {
+                router.push('/instructor')
+            } else {
+                router.push('/student')
+            }
+            router.refresh()
+
         } catch (error) {
-            toast.error('회원가입 중 오류가 발생했습니다')
+            console.error('Onboarding error:', error)
+            toast.error('설정 중 오류가 발생했습니다. 다시 시도해주세요.')
         } finally {
             setIsLoading(false)
         }
@@ -133,38 +115,12 @@ export default function RegisterPage() {
                 <div className="mb-10 text-center">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
                         <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase">아고라 회원가입</span>
+                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase">추가 정보 입력</span>
                     </div>
-                    <h2 className="text-4xl font-bold tracking-tight text-zinc-900 mb-3">새로운 시작</h2>
+                    <h2 className="text-4xl font-bold tracking-tight text-zinc-900 mb-3">거의 다 왔습니다!</h2>
                     <p className="text-zinc-600">
-                        Agora와 함께 토론의 새로운 장을 열어보세요
+                        원활한 서비스 이용을 위해 몇 가지 정보를 알려주세요
                     </p>
-                </div>
-
-                {/* OAuth Buttons */}
-                <div className="grid grid-cols-1 gap-4 mb-10">
-                    <button
-                        type="button"
-                        onClick={() => handleOAuthSignUp('google')}
-                        disabled={isLoading || oauthLoading !== null}
-                        className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-700 font-medium transition-all hover:bg-zinc-100 hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                        {oauthLoading === 'google' ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                            <Chrome className="w-5 h-5 text-zinc-500 group-hover:text-zinc-700 transition-colors" />
-                        )}
-                        <span>Google로 시작하기</span>
-                    </button>
-                </div>
-
-                <div className="relative mb-10">
-                    <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-zinc-200"></div>
-                    </div>
-                    <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
-                        <span className="bg-white px-4 text-zinc-500">또는 이메일로 가입</span>
-                    </div>
                 </div>
 
                 {/* Form */}
@@ -182,8 +138,8 @@ export default function RegisterPage() {
                                     setValue('role', 'instructor')
                                 }}
                                 className={`group relative p-6 rounded-3xl border transition-all duration-500 flex flex-col items-center gap-3 overflow-hidden ${selectedRole === 'instructor'
-                                    ? 'bg-primary/10 border-primary shadow-[0_0_20px_rgba(139,92,246,0.15)]'
-                                    : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100'
+                                        ? 'bg-primary/10 border-primary shadow-[0_0_20px_rgba(139,92,246,0.15)]'
+                                        : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100'
                                     }`}
                             >
                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${selectedRole === 'instructor' ? 'bg-primary text-primary-foreground' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'}`}>
@@ -201,8 +157,8 @@ export default function RegisterPage() {
                                     setValue('role', 'student')
                                 }}
                                 className={`group relative p-6 rounded-3xl border transition-all duration-500 flex flex-col items-center gap-3 overflow-hidden ${selectedRole === 'student'
-                                    ? 'bg-primary/10 border-primary shadow-[0_0_20px_rgba(139,92,246,0.15)]'
-                                    : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100'
+                                        ? 'bg-primary/10 border-primary shadow-[0_0_20px_rgba(139,92,246,0.15)]'
+                                        : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100'
                                     }`}
                             >
                                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${selectedRole === 'student' ? 'bg-primary text-primary-foreground' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'}`}>
@@ -216,7 +172,7 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-6">
                         {/* Name */}
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">
@@ -236,32 +192,16 @@ export default function RegisterPage() {
                             )}
                         </div>
 
-                        {/* Email */}
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">
-                                이메일
-                            </label>
-                            <div className="relative group">
-                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
-                                <input
-                                    type="email"
-                                    placeholder="you@university.edu"
-                                    className="ios-input pl-12 h-14"
-                                    {...register('email')}
-                                />
-                            </div>
-                            {errors.email && (
-                                <p className="mt-1.5 text-xs text-red-500 font-medium ml-1">{errors.email.message}</p>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Student-specific fields */}
-                    {selectedRole === 'student' && (
+                        {/* Student-specific fields */}
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            className="space-y-6 pt-2"
+                            initial={false}
+                            animate={{
+                                height: selectedRole === 'student' ? 'auto' : 0,
+                                opacity: selectedRole === 'student' ? 1 : 0,
+                                marginBottom: selectedRole === 'student' ? 24 : 0
+                            }}
+                            style={{ overflow: 'hidden' }}
+                            className="space-y-6"
                         >
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
@@ -306,51 +246,11 @@ export default function RegisterPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    )}
-
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {/* Password */}
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">
-                                비밀번호
-                            </label>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
-                                <input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="ios-input pl-12 h-14"
-                                    {...register('password')}
-                                />
-                            </div>
-                            {errors.password && (
-                                <p className="mt-1.5 text-xs text-red-500 font-medium ml-1">{errors.password.message}</p>
-                            )}
-                        </div>
-
-                        {/* Confirm Password */}
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">
-                                비밀번호 확인
-                            </label>
-                            <div className="relative group">
-                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
-                                <input
-                                    type="password"
-                                    placeholder="••••••••"
-                                    className="ios-input pl-12 h-14"
-                                    {...register('confirmPassword')}
-                                />
-                            </div>
-                            {errors.confirmPassword && (
-                                <p className="mt-1.5 text-xs text-red-500 font-medium ml-1">{errors.confirmPassword.message}</p>
-                            )}
-                        </div>
                     </div>
 
                     <button
                         type="submit"
-                        disabled={isLoading || oauthLoading !== null}
+                        disabled={isLoading}
                         className="group relative w-full h-16 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-full overflow-hidden shadow-lg transition-all hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-2">
@@ -366,19 +266,6 @@ export default function RegisterPage() {
                         <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </button>
                 </form>
-
-                {/* Footer */}
-                <div className="mt-12 text-center">
-                    <p className="text-zinc-500 text-sm">
-                        이미 계정이 있으신가요?{' '}
-                        <Link
-                            href="/login"
-                            className="text-zinc-900 font-bold hover:text-primary underline-offset-4 hover:underline transition-colors"
-                        >
-                            로그인
-                        </Link>
-                    </p>
-                </div>
             </motion.div>
         </div>
     )

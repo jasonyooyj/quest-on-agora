@@ -44,6 +44,10 @@
   --radius: 1.75rem;
   /* Large, friendly corners (28px) */
 
+  /* Demo/Landing Accent Colors */
+  --coral: 15 95% 60%;
+  --sage: 140 25% 75%;
+
   /* Glass Effects (Light Mode) */
   --glass-border: rgba(0, 0, 0, 0.06);
   --glass-bg: rgba(255, 255, 255, 0.8);

@@ -24,8 +24,8 @@ function getSafeRedirectPath(redirect: string | null): string {
 export async function GET(request: NextRequest) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
-    const redirectParam = requestUrl.searchParams.get('redirect')
-    const safeRedirect = getSafeRedirectPath(redirectParam)
+    // We ignore the client-provided redirect param for OAuth to enforce role-based routing
+    // const redirectParam = requestUrl.searchParams.get('redirect') 
 
     if (code) {
         const supabase = await createSupabaseServerClient()
@@ -33,8 +33,31 @@ export async function GET(request: NextRequest) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
-            // Successfully authenticated, redirect to the intended page
-            return NextResponse.redirect(new URL(safeRedirect, requestUrl.origin))
+            // Check if user has a profile
+            const { data: { user } } = await supabase.auth.getUser()
+
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', user.id)
+                    .single()
+
+                if (profile) {
+                    // User has a profile, redirect based on role
+                    if (profile.role === 'instructor') {
+                        return NextResponse.redirect(new URL('/instructor', requestUrl.origin))
+                    } else if (profile.role === 'student') {
+                        return NextResponse.redirect(new URL('/student', requestUrl.origin))
+                    }
+                } else {
+                    // No profile found (first time OAuth), redirect to onboarding
+                    return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
+                }
+            }
+
+            // Fallback default
+            return NextResponse.redirect(new URL('/instructor', requestUrl.origin))
         }
 
         // If there was an error, redirect to error page
