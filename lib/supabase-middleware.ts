@@ -1,6 +1,12 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Admin emails for access control (server-side only)
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(e => e.length > 0)
+
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
         request,
@@ -34,8 +40,10 @@ export async function updateSession(request: NextRequest) {
 
     // Protected routes
     const protectedPaths = ['/instructor', '/student']
+    const adminPaths = ['/admin']
     const authPaths = ['/login', '/register']
     const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
+    const isAdminPath = adminPaths.some(path => request.nextUrl.pathname.startsWith(path))
     const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path))
 
     // Redirect to login if not authenticated and trying to access protected route
@@ -44,6 +52,23 @@ export async function updateSession(request: NextRequest) {
         url.pathname = '/login'
         url.searchParams.set('redirect', request.nextUrl.pathname)
         return NextResponse.redirect(url)
+    }
+
+    // Admin route protection
+    if (isAdminPath) {
+        // Not authenticated - redirect to login
+        if (!user) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/login'
+            url.searchParams.set('redirect', request.nextUrl.pathname)
+            return NextResponse.redirect(url)
+        }
+        // Authenticated but not admin - redirect to home
+        if (!ADMIN_EMAILS.includes(user.email?.toLowerCase() || '')) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/'
+            return NextResponse.redirect(url)
+        }
     }
 
     // Redirect to dashboard if authenticated and trying to access auth pages
