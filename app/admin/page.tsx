@@ -317,9 +317,9 @@ export default function AdminDashboard() {
                   className="flex items-center justify-between p-4 hover:bg-zinc-50 transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-medium text-zinc-900 truncate">{discussion.title}</p>
-                      {getStatusBadge(discussion.status)}
+                    <div className="flex items-center gap-2 mb-1 flex-nowrap">
+                      <p className="font-medium text-zinc-900 truncate flex-1 min-w-0">{discussion.title}</p>
+                      <span className="shrink-0">{getStatusBadge(discussion.status)}</span>
                     </div>
                     <p className="text-sm text-zinc-500">
                       {discussion.instructor_name} · {discussion.participant_count}명 참여
