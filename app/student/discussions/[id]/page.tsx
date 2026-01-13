@@ -242,7 +242,7 @@ export default function StudentDiscussionPage() {
             <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none mix-blend-multiply" />
 
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200">
                 <div className="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-5">
                         <Link

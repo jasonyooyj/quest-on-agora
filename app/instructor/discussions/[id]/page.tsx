@@ -428,7 +428,7 @@ Agora 토론 플랫폼에서 생성됨`
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-200/40 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none mix-blend-multiply" />
 
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200 h-24 flex items-center">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200 h-20 flex items-center">
                 <div className="max-w-[1920px] w-full mx-auto px-8 flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <button

@@ -141,16 +141,16 @@ export default function NewDiscussionPage() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-indigo-200/30 rounded-full filter blur-[150px] pointer-events-none mix-blend-multiply" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200 h-24 flex items-center">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200 h-20 flex items-center">
         <div className="max-w-[1400px] mx-auto w-full px-8 flex items-center justify-between">
-          <Link href="/instructor" className="flex items-center gap-4 group">
-            <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-500">
-              <MessageCircle className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+          <Link href="/instructor" className="flex items-center gap-3 group">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full animate-pulse" />
+              <MessageCircle className="relative w-8 h-8 text-primary group-hover:scale-110 transition-transform duration-500" />
             </div>
-            <div>
-              <span className="text-xl font-black tracking-tighter block leading-none text-zinc-900">Agora</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Instructor Platform</span>
-            </div>
+            <span className="text-2xl font-bold tracking-tighter bg-gradient-to-br from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
+              Agora
+            </span>
           </Link>
 
           <Link

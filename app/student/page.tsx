@@ -273,7 +273,7 @@ export default function StudentDashboard() {
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none mix-blend-multiply" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3 group">
@@ -323,11 +323,11 @@ export default function StudentDashboard() {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-[10px] font-bold text-primary tracking-widest uppercase">학생 대시보드</span>
+            <span className="text-[10px] font-black text-primary tracking-[0.2em] uppercase">학생 플랫폼</span>
           </div>
-          <h1 className="text-5xl font-bold tracking-tight text-zinc-900 mb-4">
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight text-zinc-900 mb-6 font-display">
             반가워요, <span className="text-primary">{user?.name}</span>님
           </h1>
           <p className="text-zinc-600 text-xl max-w-2xl leading-relaxed">

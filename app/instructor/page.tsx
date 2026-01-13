@@ -247,7 +247,7 @@ export default function InstructorDashboard() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-8 backdrop-blur-md">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            <span className="text-[10px] font-black text-primary tracking-[0.2em] uppercase">Instructor Platform</span>
+            <span className="text-[10px] font-black text-primary tracking-[0.2em] uppercase">교수자 플랫폼</span>
           </div>
           <h1 className="text-5xl md:text-6xl font-black tracking-tight text-zinc-900 mb-6 font-display">
             안녕하세요, <span className="text-primary">{user?.name}</span>님
