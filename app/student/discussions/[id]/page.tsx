@@ -123,7 +123,7 @@ export default function StudentDiscussionPage() {
             // React Query will auto-refetch due to realtime subscription
             setShowStanceSelector(false)
 
-            const stanceLabel = discussion.settings?.stanceLabels?.[tempStance] || tempStance
+            const stanceLabel = discussion?.settings?.stanceLabels?.[tempStance] || tempStance
             toast.success(`"${stanceLabel}" 입장으로 시작합니다`, {
                 description: 'AI 튜터와 심도 있는 토론을 나눠보세요'
             })
