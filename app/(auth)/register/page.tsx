@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -33,6 +33,8 @@ type RegisterForm = z.infer<typeof registerSchema>
 
 export default function RegisterPage() {
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const redirect = searchParams.get('redirect')
     const [isLoading, setIsLoading] = useState(false)
     const [oauthLoading, setOauthLoading] = useState<string | null>(null)
     const [selectedRole, setSelectedRole] = useState<'instructor' | 'student'>('student')
@@ -44,7 +46,7 @@ export default function RegisterPage() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${getURL()}auth/callback`,
+                    redirectTo: `${getURL()}auth/callback${redirect ? `?next=${redirect}` : ''}`,
                 },
             })
 
@@ -80,6 +82,7 @@ export default function RegisterPage() {
                 email: data.email,
                 password: data.password,
                 options: {
+                    emailRedirectTo: `${getURL()}auth/callback${redirect ? `?next=${redirect}` : ''}`,
                     data: {
                         name: data.name,
                         role: data.role,

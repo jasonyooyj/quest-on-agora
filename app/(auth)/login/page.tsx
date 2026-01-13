@@ -70,7 +70,7 @@ function LoginForm() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${getURL()}auth/callback`,
+                    redirectTo: `${getURL()}auth/callback${redirect ? `?next=${redirect}` : ''}`,
                 },
             })
 
@@ -208,7 +208,7 @@ function LoginForm() {
                     <p className="text-zinc-500 text-sm">
                         계정이 없으신가요?{' '}
                         <Link
-                            href="/register"
+                            href={`/register${redirect && redirect !== '/instructor' ? `?redirect=${redirect}` : ''}`}
                             className="text-zinc-900 font-bold hover:text-primary underline-offset-4 hover:underline transition-colors"
                         >
                             회원가입
