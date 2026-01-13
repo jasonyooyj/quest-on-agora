@@ -393,7 +393,7 @@ export default function StudentDiscussionPage() {
                         >
                             <HelpCircle className={`w-4 h-4 ${participant?.needsHelp ? 'animate-bounce' : ''}`} />
                             <span className="text-sm font-bold">
-                                {participant?.needsHelp ? '호출 중...' : '강사 호출'}
+                                {participant?.needsHelp ? '요청 중...' : '도움 요청'}
                             </span>
                         </button>
                     </div>
