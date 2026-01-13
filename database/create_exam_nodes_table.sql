@@ -36,26 +36,34 @@ CREATE INDEX IF NOT EXISTS idx_exam_nodes_sort_order ON exam_nodes(parent_id, so
 -- RLS 활성화
 ALTER TABLE exam_nodes ENABLE ROW LEVEL SECURITY;
 
--- RLS 정책 생성 (Clerk 사용자용)
+-- RLS 정책 생성 (Supabase Auth 사용자용)
+-- SECURITY FIX: Changed from "IS NOT NULL" to proper auth.uid() comparison
+-- This ensures instructors can only access their OWN nodes
+
 -- Instructors can view their own nodes
 DROP POLICY IF EXISTS "Instructors can view their own nodes" ON exam_nodes;
 CREATE POLICY "Instructors can view their own nodes" ON exam_nodes
-  FOR SELECT USING (instructor_id IS NOT NULL);
+  FOR SELECT USING (instructor_id = auth.uid()::text);
 
 -- Instructors can insert their own nodes
 DROP POLICY IF EXISTS "Instructors can insert their own nodes" ON exam_nodes;
 CREATE POLICY "Instructors can insert their own nodes" ON exam_nodes
-  FOR INSERT WITH CHECK (instructor_id IS NOT NULL);
+  FOR INSERT WITH CHECK (instructor_id = auth.uid()::text);
 
 -- Instructors can update their own nodes
 DROP POLICY IF EXISTS "Instructors can update their own nodes" ON exam_nodes;
 CREATE POLICY "Instructors can update their own nodes" ON exam_nodes
-  FOR UPDATE USING (instructor_id IS NOT NULL);
+  FOR UPDATE USING (instructor_id = auth.uid()::text);
 
 -- Instructors can delete their own nodes
 DROP POLICY IF EXISTS "Instructors can delete their own nodes" ON exam_nodes;
 CREATE POLICY "Instructors can delete their own nodes" ON exam_nodes
-  FOR DELETE USING (instructor_id IS NOT NULL);
+  FOR DELETE USING (instructor_id = auth.uid()::text);
+
+-- Service role has full access (for admin operations)
+DROP POLICY IF EXISTS "Service role has full access to exam nodes" ON exam_nodes;
+CREATE POLICY "Service role has full access to exam nodes" ON exam_nodes
+  FOR ALL USING (auth.role() = 'service_role');
 
 -- updated_at 자동 업데이트 트리거
 CREATE OR REPLACE FUNCTION update_exam_nodes_updated_at()
