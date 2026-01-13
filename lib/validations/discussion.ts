@@ -10,8 +10,8 @@ export const discussionSettingsSchema = z.object({
   stanceLabels: z.record(z.string(), z.string()).optional(),
   aiMode: aiModeSchema.default('socratic'),
   aiContext: z.string().max(5000).optional(),
-  maxTurns: z.number().min(3).max(50).default(10),
-  duration: z.number().min(3).max(60).optional(),
+  maxTurns: z.number().min(3).max(50).nullable().default(10),
+  duration: z.number().min(3).max(60).nullable().optional(),
 })
 
 // Create discussion request schema

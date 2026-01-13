@@ -9,8 +9,18 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Send, ArrowLeft, ArrowRight, Clock, Loader2,
     HelpCircle, MessageSquare, ThumbsUp, ThumbsDown, Minus, Users,
-    AlertCircle, CheckCircle
+    AlertCircle, CheckCircle, FileCheck
 } from 'lucide-react'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { useDiscussionSession, useDiscussionParticipants, useParticipantMessages } from '@/hooks/useDiscussion'
 
 const getStanceIcon = (stance: string) => {
@@ -34,6 +44,8 @@ export default function StudentDiscussionPage() {
     const [showStanceSelector, setShowStanceSelector] = useState(false)
     const [sending, setSending] = useState(false)
     const [streamingContent, setStreamingContent] = useState('')
+    const [showSubmitDialog, setShowSubmitDialog] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     // Using React Query hooks
     const {
@@ -117,6 +129,31 @@ export default function StudentDiscussionPage() {
         } catch (error) {
             console.error('Error toggling help:', error)
             toast.error('오류가 발생했습니다')
+        }
+    }
+
+    const handleSubmitDiscussion = async () => {
+        if (!participant || isSubmitting) return
+
+        setIsSubmitting(true)
+        try {
+            const response = await fetch(`/api/discussions/${discussionId}/participants`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_submitted: true })
+            })
+
+            if (!response.ok) throw new Error('Failed to submit')
+
+            toast.success('대화가 제출되었습니다', {
+                description: '더 이상 메시지를 보낼 수 없습니다'
+            })
+            setShowSubmitDialog(false)
+        } catch (error) {
+            console.error('Error submitting discussion:', error)
+            toast.error('제출 중 오류가 발생했습니다')
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -266,6 +303,16 @@ export default function StudentDiscussionPage() {
                         >
                             <Users className="w-5 h-5" />
                         </Link>
+                        {!participant?.isSubmitted && participant?.stance && (
+                            <button
+                                onClick={() => setShowSubmitDialog(true)}
+                                className="h-11 px-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center gap-2 transition-all hover:shadow-lg active:scale-95"
+                                title="대화 제출"
+                            >
+                                <FileCheck className="w-4 h-4" />
+                                제출
+                            </button>
+                        )}
                         <button
                             onClick={requestHelp}
                             className={`w-11 h-11 rounded-full border transition-all active:scale-95 flex items-center justify-center ${participant?.needsHelp
@@ -396,31 +443,40 @@ export default function StudentDiscussionPage() {
 
             {/* Input Area */}
             <footer className="border-t border-zinc-200 bg-white/80 backdrop-blur-xl p-6 sticky bottom-0 z-50">
-                <div className="max-w-3xl mx-auto flex gap-4">
-                    <div className="relative flex-1 group">
-                        <textarea
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder={sending ? "AI 튜터가 고찰 중입니다..." : "자신의 논리를 입력하세요..."}
-                            className="w-full ios-input resize-none h-[64px] py-4.5 pl-6 pr-6 leading-relaxed focus:border-primary/30 transition-all font-medium scrollbar-hide text-zinc-900"
-                            disabled={sending}
-                        />
-                        <div className="absolute top-0 right-0 h-full flex items-center pr-2">
-                            {/* Optional secondary actions here */}
+                <div className="max-w-3xl mx-auto">
+                    {participant?.isSubmitted ? (
+                        <div className="flex items-center justify-center gap-3 py-4 text-zinc-500">
+                            <CheckCircle className="w-5 h-5 text-emerald-500" />
+                            <p className="font-bold">대화가 제출되었습니다. 더 이상 메시지를 보낼 수 없습니다.</p>
                         </div>
-                    </div>
-                    <button
-                        onClick={handleSendMessage}
-                        disabled={!message.trim() || sending}
-                        className="group relative w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:scale-100 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] shadow-xl"
-                    >
-                        {sending ? (
-                            <Loader2 className="w-6 h-6 animate-spin" />
-                        ) : (
-                            <Send className="w-6 h-6 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                        )}
-                    </button>
+                    ) : (
+                        <div className="flex gap-4">
+                            <div className="relative flex-1 group">
+                                <textarea
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder={sending ? "AI 튜터가 고찰 중입니다..." : "자신의 논리를 입력하세요..."}
+                                    className="w-full ios-input resize-none h-[64px] py-4.5 pl-6 pr-6 leading-relaxed focus:border-primary/30 transition-all font-medium scrollbar-hide text-zinc-900"
+                                    disabled={sending}
+                                />
+                                <div className="absolute top-0 right-0 h-full flex items-center pr-2">
+                                    {/* Optional secondary actions here */}
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleSendMessage}
+                                disabled={!message.trim() || sending}
+                                className="group relative w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:scale-100 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] shadow-xl"
+                            >
+                                {sending ? (
+                                    <Loader2 className="w-6 h-6 animate-spin" />
+                                ) : (
+                                    <Send className="w-6 h-6 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </footer>
 
@@ -478,6 +534,46 @@ export default function StudentDiscussionPage() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Submit Confirmation Dialog */}
+            <AlertDialog open={showSubmitDialog} onOpenChange={setShowSubmitDialog}>
+                <AlertDialogContent className="rounded-[2rem] border-zinc-200 max-w-md">
+                    <AlertDialogHeader>
+                        <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <FileCheck className="w-8 h-8 text-white" />
+                        </div>
+                        <AlertDialogTitle className="text-2xl font-bold text-center">
+                            대화를 제출하시겠습니까?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-center text-zinc-500 leading-relaxed">
+                            제출 후에는 더 이상 메시지를 보낼 수 없습니다.<br />
+                            현재까지의 대화 내용이 강사에게 전달됩니다.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex gap-3 sm:gap-3 mt-4">
+                        <AlertDialogCancel
+                            className="flex-1 h-12 rounded-full border-zinc-200 font-bold"
+                            disabled={isSubmitting}
+                        >
+                            계속 대화하기
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleSubmitDiscussion}
+                            disabled={isSubmitting}
+                            className="flex-1 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 font-bold"
+                        >
+                            {isSubmitting ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    제출 중...
+                                </>
+                            ) : (
+                                '제출하기'
+                            )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

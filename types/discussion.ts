@@ -13,7 +13,8 @@ export interface DiscussionSettings {
   allowStanceChange?: boolean;
   aiMode?: AIMode;
   stanceLabels?: Record<string, string>;
-  maxTurns?: number;
+  maxTurns?: number | null; // null = 무제한
+  duration?: number | null; // null = 무제한
 }
 
 export interface DiscussionSession {

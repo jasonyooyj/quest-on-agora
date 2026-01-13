@@ -74,7 +74,7 @@ export default function NewDiscussionPage() {
   const [useCustomStances, setUseCustomStances] = useState(false)
   const [stanceLabels, setStanceLabels] = useState({ pro: '찬성', con: '반대' })
   const [additionalStances, setAdditionalStances] = useState<string[]>([])
-  const [duration, setDuration] = useState(15)
+  const [duration, setDuration] = useState<number | null>(15)
   const [previews, setPreviews] = useState<Record<string, string>>({})
   const [isFetchingPreviews, setIsFetchingPreviews] = useState(false)
   const previewTimeoutRef = useRef<NodeJS.Timeout>(null)
@@ -199,7 +199,7 @@ export default function NewDiscussionPage() {
       }
 
       const joinCode = generateJoinCode()
-      const maxTurns = Math.max(3, Math.round(duration / 3))
+      const maxTurns = duration === null ? null : Math.max(3, Math.round(duration / 3))
 
       const labels: Record<string, string> = {
         pro: stanceLabels.pro,
@@ -824,8 +824,8 @@ export default function NewDiscussionPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-4xl font-black text-zinc-900 leading-none">{duration}</div>
-                      <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">MINUTES</div>
+                      <div className="text-4xl font-black text-zinc-900 leading-none">{duration === null ? '∞' : duration}</div>
+                      <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mt-1">{duration === null ? 'UNLIMITED' : 'MINUTES'}</div>
                     </div>
                   </div>
 
@@ -833,16 +833,19 @@ export default function NewDiscussionPage() {
                     <input
                       type="range"
                       min="3"
-                      max="60"
+                      max="63"
                       step="3"
-                      value={duration}
-                      onChange={(e) => setDuration(parseInt(e.target.value))}
+                      value={duration === null ? 63 : duration}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value)
+                        setDuration(value > 60 ? null : value)
+                      }}
                       className="w-full h-2 bg-zinc-200 rounded-full appearance-none cursor-pointer accent-primary"
                     />
                     <div className="flex justify-between text-[10px] font-black text-zinc-500 tracking-widest uppercase px-1 mt-4">
                       <span>Quick (3m)</span>
                       <span>Target (30m)</span>
-                      <span>Deep (60m)</span>
+                      <span>Unlimited</span>
                     </div>
                   </div>
 
@@ -851,15 +854,15 @@ export default function NewDiscussionPage() {
                       <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/stat:opacity-100 transition-opacity" />
                       <span className="text-[10px] font-black text-zinc-500 tracking-[0.2em] uppercase block mb-2">예상 상호작용</span>
                       <div className="text-4xl font-black text-zinc-900 flex items-baseline gap-2">
-                        {Math.max(3, Math.round(duration / 3))}
-                        <span className="text-sm font-black text-zinc-500 uppercase">Turns</span>
+                        {duration === null ? '∞' : Math.max(3, Math.round(duration / 3))}
+                        <span className="text-sm font-black text-zinc-500 uppercase">{duration === null ? '' : 'Turns'}</span>
                       </div>
                     </div>
                     <div className="p-8 rounded-[2.5rem] bg-white/80 border border-zinc-200 backdrop-blur-md relative group/stat overflow-hidden shadow-sm">
                       <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover/stat:opacity-100 transition-opacity" />
                       <span className="text-[10px] font-black text-zinc-500 tracking-[0.2em] uppercase block mb-2">분석 정밀도</span>
                       <div className="text-4xl font-black text-zinc-900 flex items-baseline gap-2">
-                        {duration >= 30 ? 'HIGH' : 'MID'}
+                        {duration === null ? 'MAX' : duration >= 30 ? 'HIGH' : 'MID'}
                         <span className="text-sm font-black text-zinc-500 uppercase">Level</span>
                       </div>
                     </div>
