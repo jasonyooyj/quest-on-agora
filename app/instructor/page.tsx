@@ -152,9 +152,9 @@ export default function InstructorDashboard() {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      draft: 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50',
+      draft: 'bg-zinc-100 text-zinc-600 border-zinc-200',
       active: 'bg-primary/10 text-primary border-primary/20',
-      closed: 'bg-zinc-900/50 text-zinc-500 border-zinc-800/50',
+      closed: 'bg-zinc-100 text-zinc-500 border-zinc-200',
     }
     const labels = {
       draft: '초안',
@@ -183,13 +183,13 @@ export default function InstructorDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-white selection:bg-primary/30 relative overflow-hidden">
-      {/* Bioluminescent background blobs */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none" />
+    <div className="min-h-screen bg-white text-zinc-900 selection:bg-primary/30 relative overflow-hidden">
+      {/* Background blobs */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/15 rounded-full filter blur-[120px] animate-blob pointer-events-none mix-blend-multiply" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none mix-blend-multiply" />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/5">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="flex items-center justify-between h-20">
             <Link href="/" className="flex items-center gap-3 group">
@@ -197,14 +197,14 @@ export default function InstructorDashboard() {
                 <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full animate-pulse" />
                 <MessageCircle className="relative w-8 h-8 text-primary group-hover:scale-110 transition-transform duration-500" />
               </div>
-              <span className="text-2xl font-bold tracking-tighter bg-gradient-to-br from-white to-white/60 bg-clip-text text-transparent">
+              <span className="text-2xl font-bold tracking-tighter bg-gradient-to-br from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
                 Agora
               </span>
             </Link>
 
             <div className="flex items-center gap-6">
               <Link href="/instructor/discussions/new">
-                <button className="group relative h-12 bg-white text-black font-bold rounded-full px-6 transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
+                <button className="group relative h-12 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-full px-6 transition-all hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
                   <Plus className="w-4 h-4" />
                   <span>새 토론</span>
                 </button>
@@ -212,21 +212,21 @@ export default function InstructorDashboard() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="group relative w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all active:scale-95">
-                    <User className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+                  <button className="group relative w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 hover:border-zinc-300 transition-all active:scale-95">
+                    <User className="w-5 h-5 text-zinc-500 group-hover:text-zinc-900 transition-colors" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 glass-panel bg-[#121214]/90 border-white/5 p-2 shadow-2xl backdrop-blur-xl">
+                <DropdownMenuContent align="end" className="w-64 glass-panel bg-white/95 border-zinc-200 p-2 shadow-2xl backdrop-blur-xl">
                   <div className="px-4 py-3 mb-2">
-                    <p className="text-sm font-bold text-white mb-0.5">{user?.name}</p>
+                    <p className="text-sm font-bold text-zinc-900 mb-0.5">{user?.name}</p>
                     <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
                   </div>
-                  <DropdownMenuSeparator className="bg-white/5" />
-                  <DropdownMenuItem className="rounded-xl focus:bg-white/5 focus:text-white cursor-pointer py-2.5">
-                    <Settings className="w-4 h-4 mr-3 text-zinc-400" />
+                  <DropdownMenuSeparator className="bg-zinc-200" />
+                  <DropdownMenuItem className="rounded-xl focus:bg-zinc-100 focus:text-zinc-900 cursor-pointer py-2.5">
+                    <Settings className="w-4 h-4 mr-3 text-zinc-500" />
                     설정
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout} className="rounded-xl focus:bg-red-500/10 focus:text-red-400 text-red-400 cursor-pointer py-2.5">
+                  <DropdownMenuItem onClick={handleLogout} className="rounded-xl focus:bg-red-500/10 focus:text-red-500 text-red-500 cursor-pointer py-2.5">
                     <LogOut className="w-4 h-4 mr-3" />
                     로그아웃
                   </DropdownMenuItem>
@@ -249,10 +249,10 @@ export default function InstructorDashboard() {
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] font-black text-primary tracking-[0.2em] uppercase">Instructor Platform</span>
           </div>
-          <h1 className="text-5xl md:text-6xl font-black tracking-tight text-white mb-6 font-display">
+          <h1 className="text-5xl md:text-6xl font-black tracking-tight text-zinc-900 mb-6 font-display">
             안녕하세요, <span className="text-primary">{user?.name}</span>님
           </h1>
-          <p className="text-zinc-400 text-xl max-w-2xl leading-relaxed">
+          <p className="text-zinc-600 text-xl max-w-2xl leading-relaxed">
             학생들의 비판적 사고를 이끄는 새로운 토론 주제를 <br className="hidden md:block" />
             지금 바로 설계하고 실시간으로 분석해보세요.
           </p>
@@ -265,36 +265,36 @@ export default function InstructorDashboard() {
           transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"
         >
-          <div className="glass-panel p-8 bg-white/[0.02] border-white/5 hover:border-white/10 transition-all group">
+          <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div className="p-3 rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
                 <MessageCircle className="w-6 h-6" />
               </div>
-              <span className="text-4xl font-bold tracking-tight text-white">
+              <span className="text-4xl font-bold tracking-tight text-zinc-900">
                 {discussions.length}
               </span>
             </div>
             <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">전체 토론 세션</p>
           </div>
 
-          <div className="glass-panel p-8 bg-white/[0.02] border-white/5 hover:border-white/10 transition-all group">
+          <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 transition-transform group-hover:scale-110">
+              <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110">
                 <Activity className="w-6 h-6" />
               </div>
-              <span className="text-4xl font-bold tracking-tight text-white">
+              <span className="text-4xl font-bold tracking-tight text-zinc-900">
                 {activeCount}
               </span>
             </div>
             <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">실시간 진행 중</p>
           </div>
 
-          <div className="glass-panel p-8 bg-white/[0.02] border-white/5 hover:border-white/10 transition-all group">
+          <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-400 transition-transform group-hover:scale-110">
+              <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-500 transition-transform group-hover:scale-110">
                 <Users className="w-6 h-6" />
               </div>
-              <span className="text-4xl font-bold tracking-tight text-white">
+              <span className="text-4xl font-bold tracking-tight text-zinc-900">
                 {totalParticipants}
               </span>
             </div>
@@ -310,25 +310,25 @@ export default function InstructorDashboard() {
         >
           <div className="flex items-end justify-between mb-8 px-2">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-1">토론 관리</h2>
+              <h2 className="text-3xl font-bold text-zinc-900 mb-1">토론 관리</h2>
               <p className="text-zinc-500 font-medium">관리 중인 모든 토론 세션의 현황입니다</p>
             </div>
-            <div className="bg-white/5 px-4 py-2 rounded-full border border-white/5 text-sm font-bold text-zinc-400">
+            <div className="bg-zinc-100 px-4 py-2 rounded-full border border-zinc-200 text-sm font-bold text-zinc-600">
               {discussions.length} Sessions
             </div>
           </div>
 
           {discussions.length === 0 ? (
-            <div className="glass-panel bg-white/[0.02] border-white/5 p-20 text-center">
-              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                <MessageCircle className="w-10 h-10 text-zinc-600" />
+            <div className="glass-panel bg-white/90 border-zinc-200 p-20 text-center shadow-sm">
+              <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <MessageCircle className="w-10 h-10 text-zinc-400" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">생성된 토론이 없습니다</h3>
+              <h3 className="text-2xl font-bold text-zinc-900 mb-3">생성된 토론이 없습니다</h3>
               <p className="text-zinc-500 mb-8 max-w-sm mx-auto">
                 첫 번째 토론을 만들어 학생들과 의미 있는 대화를 시작하세요.
               </p>
               <Link href="/instructor/discussions/new">
-                <button className="group relative h-14 bg-white text-black font-extrabold rounded-full px-8 transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-1 active:scale-95">
+                <button className="group relative h-14 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-extrabold rounded-full px-8 transition-all hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:-translate-y-1 active:scale-95">
                   <span className="relative z-10 flex items-center gap-2">
                     첫 토론 만들기
                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
@@ -347,7 +347,7 @@ export default function InstructorDashboard() {
                   className="group"
                 >
                   <div
-                    className="glass-panel bg-white/[0.02] border-white/5 p-6 hover:bg-white/[0.04] hover:border-white/10 transition-all cursor-pointer relative overflow-hidden active:scale-[0.99]"
+                    className="glass-panel bg-white/90 border-zinc-200 p-6 hover:bg-white hover:border-zinc-300 transition-all cursor-pointer relative overflow-hidden active:scale-[0.99] shadow-sm"
                     onClick={() => router.push(`/instructor/discussions/${discussion.id}`)}
                   >
                     <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -355,7 +355,7 @@ export default function InstructorDashboard() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-4 mb-3">
-                          <h3 className="text-xl font-bold text-white truncate group-hover:text-primary transition-colors">
+                          <h3 className="text-xl font-bold text-zinc-900 truncate group-hover:text-primary transition-colors">
                             {discussion.title}
                           </h3>
                           {getStatusBadge(discussion.status)}
@@ -368,7 +368,7 @@ export default function InstructorDashboard() {
                         )}
 
                         <div className="flex flex-wrap items-center gap-6">
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-white/5 bg-white/5 px-3 py-1 rounded-lg transition-colors group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20"
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-zinc-200 bg-zinc-100 px-3 py-1 rounded-lg transition-colors group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleCopyCode(discussion.join_code);
@@ -376,11 +376,11 @@ export default function InstructorDashboard() {
                             <span>참여 코드: {discussion.join_code}</span>
                             <Copy className="w-3 h-3" />
                           </div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                             <Users className="w-3.5 h-3.5" />
                             <span>{discussion.participant_count || 0}명 참여</span>
                           </div>
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-600 uppercase tracking-widest">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                             <Clock className="w-3.5 h-3.5" />
                             <span>{format(new Date(discussion.created_at), 'yyyy.MM.dd', { locale: ko })}</span>
                           </div>
@@ -391,26 +391,26 @@ export default function InstructorDashboard() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <button
-                              className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-zinc-400 hover:text-white transition-all"
+                              className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-all"
                               onClick={(e) => e.stopPropagation()}
                             >
                               <MoreVertical className="w-5 h-5" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48 glass-panel bg-[#121214]/90 border-white/5 p-2 shadow-2xl backdrop-blur-xl">
+                          <DropdownMenuContent align="end" className="w-48 glass-panel bg-white/95 border-zinc-200 p-2 shadow-2xl backdrop-blur-xl">
                             <DropdownMenuItem
-                              className="rounded-xl focus:bg-white/5 focus:text-white cursor-pointer py-2.5"
+                              className="rounded-xl focus:bg-zinc-100 focus:text-zinc-900 cursor-pointer py-2.5"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleCopyCode(discussion.join_code)
                               }}
                             >
-                              <Copy className="w-4 h-4 mr-3 text-zinc-400" />
+                              <Copy className="w-4 h-4 mr-3 text-zinc-500" />
                               코드 복사
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-white/5" />
+                            <DropdownMenuSeparator className="bg-zinc-200" />
                             <DropdownMenuItem
-                              className="rounded-xl focus:bg-red-500/10 focus:text-red-400 text-red-400 cursor-pointer py-2.5"
+                              className="rounded-xl focus:bg-red-500/10 focus:text-red-500 text-red-500 cursor-pointer py-2.5"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleDeleteDiscussion(discussion.id, discussion.title)
@@ -422,7 +422,7 @@ export default function InstructorDashboard() {
                           </DropdownMenuContent>
                         </DropdownMenu>
 
-                        <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-white text-zinc-500 transition-all">
+                        <div className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-white text-zinc-400 transition-all">
                           <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                         </div>
                       </div>

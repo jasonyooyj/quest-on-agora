@@ -20,9 +20,9 @@ const getStanceIcon = (stance: string) => {
 }
 
 const getStanceStyle = (stance: string) => {
-    if (stance === 'pro') return 'border-emerald-500/20 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/10'
-    if (stance === 'con') return 'border-rose-500/20 bg-rose-500/5 text-rose-400 hover:bg-rose-500/10'
-    return 'border-zinc-700/50 bg-zinc-800/50 text-zinc-400 hover:bg-zinc-800/80'
+    if (stance === 'pro') return 'border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+    if (stance === 'con') return 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100'
+    return 'border-zinc-200 bg-zinc-50 text-zinc-600 hover:bg-zinc-100'
 }
 
 export default function StudentDiscussionPage() {
@@ -193,15 +193,15 @@ export default function StudentDiscussionPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#09090b] flex items-center justify-center relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none" />
+            <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none mix-blend-multiply" />
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none mix-blend-multiply" />
                 <div className="text-center relative z-10">
                     <div className="relative mb-6">
                         <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
                         <Loader2 className="w-16 h-16 animate-spin mx-auto text-primary relative" />
                     </div>
-                    <p className="text-zinc-400 text-lg font-bold tracking-tight animate-pulse">토론방 입장 중...</p>
+                    <p className="text-zinc-500 text-lg font-bold tracking-tight animate-pulse">토론방 입장 중...</p>
                 </div>
             </div>
         )
@@ -236,23 +236,23 @@ export default function StudentDiscussionPage() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col bg-[#09090b] text-white selection:bg-primary/30 relative overflow-hidden">
+        <div className="min-h-screen flex flex-col bg-white text-zinc-900 selection:bg-primary/30 relative overflow-hidden">
             {/* Bioluminescent background blobs */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full filter blur-[120px] animate-blob pointer-events-none mix-blend-multiply" />
+            <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-200/40 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none mix-blend-multiply" />
 
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/5">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-200">
                 <div className="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-5">
                         <Link
                             href="/student"
-                            className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-white transition-all active:scale-90"
+                            className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-700 transition-all active:scale-90"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <div>
-                            <h1 className="font-bold text-xl tracking-tight text-white line-clamp-1">
+                            <h1 className="font-bold text-xl tracking-tight text-zinc-900 line-clamp-1">
                                 {discussion.title}
                             </h1>
                         </div>
@@ -261,7 +261,7 @@ export default function StudentDiscussionPage() {
                     <div className="flex items-center gap-3">
                         <Link
                             href={`/student/discussions/${discussionId}/gallery`}
-                            className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 text-zinc-400 hover:text-white transition-all active:scale-95"
+                            className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-all active:scale-95"
                             title="답변 갤러리"
                         >
                             <Users className="w-5 h-5" />
@@ -269,8 +269,8 @@ export default function StudentDiscussionPage() {
                         <button
                             onClick={requestHelp}
                             className={`w-11 h-11 rounded-full border transition-all active:scale-95 flex items-center justify-center ${participant?.needsHelp
-                                ? 'border-amber-500/50 bg-amber-500/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-                                : 'border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white shadow-none'
+                                ? 'border-amber-300 bg-amber-100 text-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
+                                : 'border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 shadow-none'
                                 }`}
                             title={participant?.needsHelp ? '도움 요청 취소' : '도움 요청'}
                         >
@@ -281,16 +281,16 @@ export default function StudentDiscussionPage() {
             </header>
 
             {/* Stance Bar */}
-            <div className="bg-white/[0.02] border-b border-white/5 backdrop-blur-sm relative z-40">
+            <div className="bg-zinc-50 border-b border-zinc-200 backdrop-blur-sm relative z-40">
                 <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">내 입장</span>
                         {participant?.stance ? (
                             <button
                                 onClick={() => setShowStanceSelector(true)}
-                                className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl border font-bold text-sm transition-all hover:translate-y-[-2px] hover:shadow-lg active:scale-95 ${participant.stance === 'pro' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400' :
-                                    participant.stance === 'con' ? 'border-rose-500/20 bg-rose-500/10 text-rose-400' :
-                                        'border-zinc-700 bg-zinc-800 text-zinc-300'
+                                className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl border font-bold text-sm transition-all hover:translate-y-[-2px] hover:shadow-lg active:scale-95 ${participant.stance === 'pro' ? 'border-emerald-200 bg-emerald-50 text-emerald-600' :
+                                    participant.stance === 'con' ? 'border-rose-200 bg-rose-50 text-rose-600' :
+                                        'border-zinc-200 bg-zinc-100 text-zinc-600'
                                     }`}
                             >
                                 <span className="opacity-70">{getStanceIcon(participant.stance)}</span>
@@ -308,7 +308,7 @@ export default function StudentDiscussionPage() {
                     </div>
 
                     {participant?.isSubmitted && (
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 border border-emerald-200 text-[10px] font-extrabold text-emerald-600 uppercase tracking-widest">
                             <CheckCircle className="w-3.5 h-3.5" />
                             제출 완료
                         </div>
@@ -320,10 +320,10 @@ export default function StudentDiscussionPage() {
             <main className="flex-1 overflow-y-auto p-6 scroll-smooth relative z-10 custom-scrollbar">
                 <div className="max-w-3xl mx-auto space-y-8 pb-10">
                     <div className="text-center py-12 px-6">
-                        <div className="w-20 h-20 bg-white/[0.03] border border-white/10 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                        <div className="w-20 h-20 bg-zinc-100 border border-zinc-200 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm">
                             <MessageSquare className="w-10 h-10 text-primary" />
                         </div>
-                        <h3 className="text-2xl font-bold text-white mb-3">AI 튜터와 토론을 시작하세요</h3>
+                        <h3 className="text-2xl font-bold text-zinc-900 mb-3">AI 튜터와 토론을 시작하세요</h3>
                         <p className="text-zinc-500 font-medium max-w-sm mx-auto leading-relaxed">
                             선택하신 입장을 바탕으로 AI 튜터가 비판적 질문을 던집니다.
                             자신의 주장을 논리적으로 펼쳐보세요.
@@ -347,10 +347,10 @@ export default function StudentDiscussionPage() {
                             <div className={`max-w-[85%] lg:max-w-[75%] rounded-[2rem] p-6 transition-all ${msg.role === 'user'
                                 ? 'bg-primary text-white shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] rounded-tr-none'
                                 : msg.role === 'instructor'
-                                    ? 'glass-panel bg-amber-500/5 border-amber-500/20 text-white rounded-tl-none shadow-xl'
-                                    : 'glass-panel bg-white/[0.03] border-white/5 text-white rounded-tl-none shadow-2xl backdrop-blur-xl'
+                                    ? 'glass-panel bg-amber-50 border-amber-200 text-zinc-900 rounded-tl-none shadow-sm'
+                                    : 'glass-panel bg-zinc-50 border-zinc-200 text-zinc-900 rounded-tl-none shadow-sm backdrop-blur-xl'
                                 }`}>
-                                <div className="flex items-center gap-3 mb-3 opacity-60">
+                                <div className={`flex items-center gap-3 mb-3 ${msg.role === 'user' ? 'opacity-60' : 'text-zinc-500'}`}>
                                     <span className="text-[10px] font-extrabold uppercase tracking-widest">
                                         {msg.role === 'user' ? '나' :
                                             msg.role === 'instructor' ? '교수님' : 'AI 튜터'}
@@ -359,7 +359,7 @@ export default function StudentDiscussionPage() {
                                         {new Date(msg.createdAt || '').toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
-                                <div className="whitespace-pre-wrap leading-relaxed text-[16px] font-medium selection:bg-white/20">
+                                <div className={`whitespace-pre-wrap leading-relaxed text-[16px] font-medium ${msg.role === 'user' ? 'selection:bg-white/20' : ''}`}>
                                     {msg.content}
                                 </div>
                             </div>
@@ -374,8 +374,8 @@ export default function StudentDiscussionPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="flex justify-start"
                             >
-                                <div className="max-w-[85%] lg:max-w-[75%] rounded-[2rem] p-6 glass-panel bg-white/[0.03] border-white/5 text-white rounded-tl-none shadow-2xl backdrop-blur-xl">
-                                    <div className="flex items-center gap-3 mb-3 opacity-60">
+                                <div className="max-w-[85%] lg:max-w-[75%] rounded-[2rem] p-6 glass-panel bg-zinc-50 border-zinc-200 text-zinc-900 rounded-tl-none shadow-sm backdrop-blur-xl">
+                                    <div className="flex items-center gap-3 mb-3 text-zinc-500">
                                         <span className="text-[10px] font-extrabold uppercase tracking-widest">AI 튜터</span>
                                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                     </div>
@@ -395,7 +395,7 @@ export default function StudentDiscussionPage() {
             </main>
 
             {/* Input Area */}
-            <footer className="border-t border-white/5 bg-black/40 backdrop-blur-xl p-6 sticky bottom-0 z-50">
+            <footer className="border-t border-zinc-200 bg-white/80 backdrop-blur-xl p-6 sticky bottom-0 z-50">
                 <div className="max-w-3xl mx-auto flex gap-4">
                     <div className="relative flex-1 group">
                         <textarea
@@ -403,7 +403,7 @@ export default function StudentDiscussionPage() {
                             onChange={(e) => setMessage(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder={sending ? "AI 튜터가 고찰 중입니다..." : "자신의 논리를 입력하세요..."}
-                            className="w-full ios-input resize-none h-[64px] py-4.5 pl-6 pr-6 leading-relaxed bg-white/[0.03] focus:bg-white/[0.05] border-white/5 focus:border-primary/30 transition-all font-medium scrollbar-hide"
+                            className="w-full ios-input resize-none h-[64px] py-4.5 pl-6 pr-6 leading-relaxed focus:border-primary/30 transition-all font-medium scrollbar-hide text-zinc-900"
                             disabled={sending}
                         />
                         <div className="absolute top-0 right-0 h-full flex items-center pr-2">
@@ -413,7 +413,7 @@ export default function StudentDiscussionPage() {
                     <button
                         onClick={handleSendMessage}
                         disabled={!message.trim() || sending}
-                        className="group relative w-16 h-16 bg-white text-black rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:scale-100 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] shadow-xl"
+                        className="group relative w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95 disabled:opacity-30 disabled:grayscale disabled:scale-100 hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] shadow-xl"
                     >
                         {sending ? (
                             <Loader2 className="w-6 h-6 animate-spin" />
@@ -432,7 +432,7 @@ export default function StudentDiscussionPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="absolute inset-0 bg-black/60 backdrop-blur-xl"
+                            className="absolute inset-0 bg-black/30 backdrop-blur-xl"
                             onClick={() => setShowStanceSelector(false)}
                         />
                         <motion.div
@@ -440,13 +440,13 @@ export default function StudentDiscussionPage() {
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.9, opacity: 0, y: 20 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="glass-panel bg-[#121214]/90 border-white/10 max-w-xl w-full p-10 shadow-[0_0_100px_rgba(0,0,0,0.5)] relative z-10"
+                            className="glass-panel bg-white/95 border-zinc-200 max-w-xl w-full p-10 shadow-2xl relative z-10 backdrop-blur-xl"
                         >
                             <div className="mb-10 text-center">
                                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
                                     <AlertCircle className="w-8 h-8 text-primary" />
                                 </div>
-                                <h2 className="text-3xl font-bold text-white mb-3">입장을 선택하세요</h2>
+                                <h2 className="text-3xl font-bold text-zinc-900 mb-3">입장을 선택하세요</h2>
                                 <p className="text-zinc-500 font-medium leading-relaxed">
                                     이번 토론에서 취할 입장을 선택해주세요. <br />
                                     선택한 한 입장에 따라 AI 튜터와 심도 있는 논술을 나눕니다.
@@ -458,10 +458,10 @@ export default function StudentDiscussionPage() {
                                     <button
                                         key={option}
                                         onClick={() => handleStanceSelect(option)}
-                                        className={`group flex items-center gap-6 p-6 border rounded-[2rem] transition-all hover:-translate-y-1 hover:shadow-2xl active:scale-[0.98] ${getStanceStyle(option)
+                                        className={`group flex items-center gap-6 p-6 border rounded-[2rem] transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] ${getStanceStyle(option)
                                             }`}
                                     >
-                                        <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/5 transition-colors group-hover:bg-white/10">
+                                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 flex items-center justify-center border border-zinc-200 transition-colors group-hover:bg-zinc-200">
                                             {getStanceIcon(option)}
                                         </div>
                                         <div className="text-left">
@@ -513,7 +513,7 @@ function ThinkingIndicator() {
 
     return (
         <div className="flex justify-start">
-            <div className="p-6 glass-panel bg-primary/10 border-primary/20 rounded-[2rem] rounded-tl-none shadow-xl">
+            <div className="p-6 glass-panel bg-primary/5 border-primary/20 rounded-[2rem] rounded-tl-none shadow-sm">
                 <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-3 text-sm font-bold text-primary">
                         <Loader2 className="w-5 h-5 animate-spin" />

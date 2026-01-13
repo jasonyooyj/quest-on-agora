@@ -47,7 +47,7 @@ export function QuoteSection() {
     return (
         <section className="py-24 lg:py-40 relative">
             <div className="max-w-4xl mx-auto px-6 lg:px-12">
-                <div className="relative glass-panel p-12 md:p-20 rounded-[3rem] border-white/10 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden">
+                <div className="relative glass-panel p-12 md:p-20 rounded-[3rem] border-zinc-200 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.1)] overflow-hidden">
                     {/* Spatial Background Elements */}
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
                     <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px]" />
@@ -65,13 +65,13 @@ export function QuoteSection() {
                                 exit="exit"
                                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                             >
-                                <blockquote className="text-2xl md:text-3xl font-bold leading-relaxed text-zinc-100 tracking-tight">
+                                <blockquote className="text-2xl md:text-3xl font-bold leading-relaxed text-zinc-900 tracking-tight">
                                     "{currentTestimonial.text}"
                                 </blockquote>
                                 <div className="mt-12 flex items-center gap-5">
-                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border transition-all duration-300 shadow-xl ${currentTestimonial.role === "instructor"
-                                            ? "bg-emerald-500/20 border-emerald-500/30 text-emerald-400"
-                                            : "bg-primary/20 border-primary/30 text-primary"
+                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border transition-all duration-300 shadow-lg ${currentTestimonial.role === "instructor"
+                                            ? "bg-emerald-100 border-emerald-200 text-emerald-600"
+                                            : "bg-primary/15 border-primary/30 text-primary"
                                         }`}
                                     >
                                         {currentTestimonial.role === "instructor" ? (
@@ -81,10 +81,10 @@ export function QuoteSection() {
                                         )}
                                     </div>
                                     <div>
-                                        <div className="font-bold text-lg flex items-center gap-3 text-white">
+                                        <div className="font-bold text-lg flex items-center gap-3 text-zinc-900">
                                             {currentTestimonial.author}
                                             <span className={`text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-full border ${currentTestimonial.role === "instructor"
-                                                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                                    ? "bg-emerald-50 border-emerald-200 text-emerald-600"
                                                     : "bg-primary/10 border-primary/20 text-primary"
                                                 }`}
                                             >
@@ -101,7 +101,7 @@ export function QuoteSection() {
                     </div>
 
                     {/* Navigation */}
-                    <div className="flex flex-col md:flex-row items-center justify-between mt-12 gap-8 pt-10 border-t border-white/5">
+                    <div className="flex flex-col md:flex-row items-center justify-between mt-12 gap-8 pt-10 border-t border-zinc-200">
                         <div className="flex gap-3">
                             {TESTIMONIALS.map((_, index) => (
                                 <button
@@ -111,8 +111,8 @@ export function QuoteSection() {
                                         setCurrentIndex(index);
                                     }}
                                     className={`h-1.5 rounded-full transition-all duration-500 ${index === currentIndex
-                                            ? "bg-primary w-10 shadow-[0_0_10px_rgba(139,92,246,0.5)]"
-                                            : "bg-white/10 hover:bg-white/30 w-1.5"
+                                            ? "bg-primary w-10"
+                                            : "bg-zinc-200 hover:bg-zinc-300 w-1.5"
                                         }`}
                                     aria-label={`Go to testimonial ${index + 1}`}
                                 />
@@ -121,14 +121,14 @@ export function QuoteSection() {
                         <div className="flex gap-4">
                             <button
                                 onClick={handlePrev}
-                                className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                                className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
                                 aria-label="Previous testimonial"
                             >
                                 <ChevronLeft className="w-6 h-6" />
                             </button>
                             <button
                                 onClick={handleNext}
-                                className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/5 transition-all"
+                                className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
                                 aria-label="Next testimonial"
                             >
                                 <ChevronRight className="w-6 h-6" />

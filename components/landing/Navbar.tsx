@@ -18,7 +18,7 @@ export function Navbar() {
     return (
         <motion.header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-spring ${isScrolled
-                ? "top-4 mx-auto max-w-4xl glass-panel rounded-full py-2 px-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/10 bg-black/40 backdrop-blur-2xl"
+                ? "top-4 mx-auto max-w-4xl glass-panel rounded-full py-2 px-6 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-zinc-200 bg-white/80 backdrop-blur-2xl"
                 : "bg-transparent py-6"
                 }`}
             initial={{ y: -100 }}
@@ -28,10 +28,10 @@ export function Navbar() {
             <div className={`flex items-center justify-between ${isScrolled ? "w-full" : "container mx-auto px-4 md:px-6"}`}>
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-[0_0_15px_rgba(99,102,241,0.5)] group-hover:shadow-[0_0_25px_rgba(168,85,247,0.6)] transition-all duration-300">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-[0_4px_12px_rgba(99,102,241,0.3)] group-hover:shadow-[0_4px_20px_rgba(168,85,247,0.4)] transition-all duration-300">
                         <MessageCircle className="w-4 h-4 text-white" />
                     </div>
-                    <span className="text-lg font-semibold tracking-tight text-white/90 group-hover:text-white transition-colors">
+                    <span className="text-lg font-semibold tracking-tight text-zinc-900 group-hover:text-zinc-700 transition-colors">
                         Agora
                     </span>
                 </Link>
@@ -47,10 +47,10 @@ export function Navbar() {
                         <Link
                             key={item.name}
                             href={item.href}
-                            className="text-sm font-medium text-zinc-400 hover:text-white transition-colors relative group"
+                            className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors relative group"
                         >
                             {item.name}
-                            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-indigo-400 transition-all duration-300 group-hover:w-full opacity-50" />
+                            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-indigo-500 transition-all duration-300 group-hover:w-full" />
                         </Link>
                     ))}
                 </nav>
@@ -59,12 +59,12 @@ export function Navbar() {
                 <div className="hidden md:flex items-center gap-4">
                     <Link
                         href="/login"
-                        className="text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+                        className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
                     >
                         로그인
                     </Link>
                     <Link href="/register">
-                        <Button className="bg-white text-black hover:bg-zinc-200 border-none rounded-full px-6 font-medium shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_25px_rgba(255,255,255,0.4)] transition-all duration-300 transform hover:-translate-y-0.5">
+                        <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 border-none rounded-full px-6 font-medium shadow-[0_4px_14px_rgba(99,102,241,0.3)] hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] transition-all duration-300 transform hover:-translate-y-0.5">
                             무료로 시작하기
                         </Button>
                     </Link>
@@ -72,7 +72,7 @@ export function Navbar() {
 
                 {/* Mobile Menu Toggle */}
                 <button
-                    className="md:hidden text-white/70 hover:text-white"
+                    className="md:hidden text-zinc-600 hover:text-zinc-900"
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 >
                     {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -86,7 +86,7 @@ export function Navbar() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden glass-panel border-b border-white/5 overflow-hidden"
+                        className="md:hidden glass-panel border-b border-zinc-200 overflow-hidden"
                     >
                         <div className="flex flex-col p-6 gap-4">
                             {[
@@ -98,22 +98,22 @@ export function Navbar() {
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="text-lg font-medium text-zinc-400 hover:text-white"
+                                    className="text-lg font-medium text-zinc-600 hover:text-zinc-900"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     {item.name}
                                 </Link>
                             ))}
-                            <hr className="border-white/10 my-2" />
+                            <hr className="border-zinc-200 my-2" />
                             <Link
                                 href="/login"
-                                className="text-lg font-medium text-zinc-400 hover:text-white"
+                                className="text-lg font-medium text-zinc-600 hover:text-zinc-900"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 로그인
                             </Link>
                             <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                                <Button className="w-full bg-white text-black hover:bg-zinc-200 rounded-full mt-2">
+                                <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 rounded-full mt-2">
                                     무료로 시작하기
                                 </Button>
                             </Link>

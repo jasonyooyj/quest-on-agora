@@ -14,28 +14,28 @@ const icons = {
 
 const colorClasses = {
     sage: {
-        bg: "bg-emerald-500/20",
-        bgLight: "bg-emerald-500/10",
-        text: "text-emerald-400",
-        border: "border-emerald-500/30",
+        bg: "bg-emerald-100",
+        bgLight: "bg-emerald-50",
+        text: "text-emerald-600",
+        border: "border-emerald-200",
     },
     gold: {
-        bg: "bg-amber-500/20",
-        bgLight: "bg-amber-500/10",
-        text: "text-amber-400",
-        border: "border-amber-500/30",
+        bg: "bg-amber-100",
+        bgLight: "bg-amber-50",
+        text: "text-amber-600",
+        border: "border-amber-200",
     },
     coral: {
-        bg: "bg-primary/20",
+        bg: "bg-primary/15",
         bgLight: "bg-primary/10",
         text: "text-primary",
         border: "border-primary/30",
     },
     muted: {
-        bg: "bg-zinc-800/50",
-        bgLight: "bg-zinc-800/30",
-        text: "text-zinc-400",
-        border: "border-white/5",
+        bg: "bg-zinc-100",
+        bgLight: "bg-zinc-50",
+        text: "text-zinc-600",
+        border: "border-zinc-200",
     },
 };
 
@@ -53,10 +53,10 @@ export function AiModesSection() {
                     className="text-center mb-16"
                 >
                     <span className="tag">{AI_MODES_CONTENT.tag}</span>
-                    <h2 className="mt-6 text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                    <h2 className="mt-6 text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-600">
                         {AI_MODES_CONTENT.title}
                     </h2>
-                    <p className="mt-4 text-zinc-400 text-lg max-w-2xl mx-auto leading-relaxed">
+                    <p className="mt-4 text-zinc-600 text-lg max-w-2xl mx-auto leading-relaxed">
                         {AI_MODES_CONTENT.description}
                     </p>
                 </motion.div>
@@ -81,8 +81,8 @@ export function AiModesSection() {
                             >
                                 <div
                                     className={`glass-panel p-8 cursor-pointer transition-all duration-300 rounded-[2.5rem] relative overflow-hidden group ${isSelected
-                                        ? `border-primary/50 bg-white/5 shadow-2xl shadow-primary/10 -translate-y-1`
-                                        : "hover:-translate-y-1 hover:bg-white/[0.04]"
+                                        ? `border-primary/50 bg-zinc-50 shadow-xl -translate-y-1`
+                                        : "hover:-translate-y-1 hover:bg-zinc-50"
                                         }`}
                                     onClick={() =>
                                         setSelectedMode(isSelected ? null : mode.id)
@@ -98,7 +98,7 @@ export function AiModesSection() {
                                                 <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${colors.text}`}>
                                                     {mode.label}
                                                 </span>
-                                                <h3 className="text-xl font-bold text-white mt-0.5">
+                                                <h3 className="text-xl font-bold text-zinc-900 mt-0.5">
                                                     {mode.title}
                                                 </h3>
                                             </div>
@@ -109,7 +109,7 @@ export function AiModesSection() {
                                     </div>
 
                                     {/* Description */}
-                                    <p className="text-zinc-400 text-sm md:text-base leading-relaxed mb-6">
+                                    <p className="text-zinc-600 text-sm md:text-base leading-relaxed mb-6">
                                         {mode.description}
                                     </p>
 
@@ -123,21 +123,21 @@ export function AiModesSection() {
                                                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                                                 className="overflow-hidden"
                                             >
-                                                <div className="mt-8 pt-8 border-t border-white/5 space-y-6">
+                                                <div className="mt-8 pt-8 border-t border-zinc-200 space-y-6">
                                                     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 mb-4">
                                                         대화 예시
                                                     </div>
 
                                                     {/* Student Message */}
                                                     <div className="flex gap-4">
-                                                        <div className="w-10 h-10 rounded-xl bg-zinc-800/50 flex items-center justify-center flex-shrink-0 border border-white/5">
-                                                            <User className="w-5 h-5 text-zinc-400" />
+                                                        <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center flex-shrink-0 border border-zinc-200">
+                                                            <User className="w-5 h-5 text-zinc-500" />
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="text-[10px] font-bold text-zinc-500 mb-1 uppercase tracking-wider">
                                                                 학생
                                                             </div>
-                                                            <div className="text-sm md:text-base bg-white/[0.03] p-4 rounded-2xl border border-white/5 text-zinc-300">
+                                                            <div className="text-sm md:text-base bg-zinc-50 p-4 rounded-2xl border border-zinc-200 text-zinc-700">
                                                                 {mode.example.student}
                                                             </div>
                                                         </div>
@@ -152,7 +152,7 @@ export function AiModesSection() {
                                                             <div className={`text-[10px] font-bold ${colors.text} mb-1 uppercase tracking-wider`}>
                                                                 AI ({mode.label})
                                                             </div>
-                                                            <div className={`text-sm md:text-base ${colors.bgLight} p-4 rounded-2xl border ${colors.border} text-zinc-100`}>
+                                                            <div className={`text-sm md:text-base ${colors.bgLight} p-4 rounded-2xl border ${colors.border} text-zinc-700`}>
                                                                 {mode.example.ai}
                                                             </div>
                                                         </div>

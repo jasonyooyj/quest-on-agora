@@ -20,10 +20,10 @@ export function FaqSection() {
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                     className="text-center mb-12"
                 >
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 bg-primary/10 text-primary border border-primary/20">
                         {FAQ_CONTENT.tag}
                     </span>
-                    <h2 className="mt-6 text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
+                    <h2 className="mt-6 text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-600">
                         {FAQ_CONTENT.title}
                     </h2>
                 </motion.div>
@@ -39,12 +39,12 @@ export function FaqSection() {
                             <AccordionItem
                                 key={index}
                                 value={`item-${index}`}
-                                className="border-none rounded-2xl glass-panel px-6 data-[state=open]:bg-white/5 transition-all duration-300"
+                                className="border-none rounded-2xl glass-panel px-6 data-[state=open]:bg-zinc-50 transition-all duration-300"
                             >
-                                <AccordionTrigger className="text-base font-semibold hover:no-underline py-5 text-zinc-100">
+                                <AccordionTrigger className="text-base font-semibold hover:no-underline py-5 text-zinc-900">
                                     {item.question}
                                 </AccordionTrigger>
-                                <AccordionContent className="text-zinc-400 leading-relaxed pb-5">
+                                <AccordionContent className="text-zinc-600 leading-relaxed pb-5">
                                     {item.answer}
                                 </AccordionContent>
                             </AccordionItem>
