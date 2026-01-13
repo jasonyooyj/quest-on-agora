@@ -42,9 +42,11 @@ export async function updateSession(request: NextRequest) {
     const protectedPaths = ['/instructor', '/student']
     const adminPaths = ['/admin']
     const authPaths = ['/login', '/register']
+    const onboardingPath = '/onboarding'
     const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
     const isAdminPath = adminPaths.some(path => request.nextUrl.pathname.startsWith(path))
     const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path))
+    const isOnboardingPath = request.nextUrl.pathname.startsWith(onboardingPath)
 
     // Redirect to login if not authenticated and trying to access protected route
     if (!user && isProtectedPath) {
@@ -52,6 +54,22 @@ export async function updateSession(request: NextRequest) {
         url.pathname = '/login'
         url.searchParams.set('redirect', request.nextUrl.pathname)
         return NextResponse.redirect(url)
+    }
+
+    // Check if authenticated user has completed onboarding (has profile)
+    if (user && (isProtectedPath || isAdminPath) && !isOnboardingPath) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, role')
+            .eq('id', user.id)
+            .single()
+
+        if (!profile) {
+            // User hasn't completed onboarding - redirect to onboarding
+            const url = request.nextUrl.clone()
+            url.pathname = '/onboarding'
+            return NextResponse.redirect(url)
+        }
     }
 
     // Admin route protection

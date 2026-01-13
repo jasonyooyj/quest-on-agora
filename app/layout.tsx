@@ -37,7 +37,6 @@ export default function RootLayout({
           <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-200/40 blur-[120px] animate-blob" />
           <div className="absolute top-[20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-indigo-200/30 blur-[120px] animate-blob animation-delay-2000" />
           <div className="absolute bottom-[-20%] left-[20%] w-[50%] h-[50%] rounded-full bg-blue-100/30 blur-[120px] animate-blob animation-delay-4000" />
-          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-multiply" />
         </div>
         <QueryProvider>
           {children}

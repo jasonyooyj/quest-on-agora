@@ -18,7 +18,8 @@ import {
   LogOut,
   User,
   ArrowRight,
-  Activity
+  Activity,
+  Link2
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -119,6 +120,16 @@ export default function InstructorDashboard() {
     try {
       await navigator.clipboard.writeText(code)
       toast.success('참여 코드가 복사되었습니다')
+    } catch {
+      toast.error('복사에 실패했습니다')
+    }
+  }
+
+  const handleCopyUrl = async (code: string) => {
+    try {
+      const url = `${window.location.origin}/join/${code}`
+      await navigator.clipboard.writeText(url)
+      toast.success('참여 링크가 복사되었습니다')
     } catch {
       toast.error('복사에 실패했습니다')
     }
@@ -368,13 +379,21 @@ export default function InstructorDashboard() {
                         )}
 
                         <div className="flex flex-wrap items-center gap-6">
-                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-zinc-200 bg-zinc-100 px-3 py-1 rounded-lg transition-colors group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/20"
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border border-zinc-200 bg-zinc-100 px-3 py-1 rounded-lg transition-colors hover:bg-zinc-200"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleCopyCode(discussion.join_code);
                             }}>
                             <span>참여 코드: {discussion.join_code}</span>
                             <Copy className="w-3 h-3" />
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest border border-primary/20 bg-primary/10 px-3 py-1 rounded-lg transition-colors hover:bg-primary/20"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyUrl(discussion.join_code);
+                            }}>
+                            <Link2 className="w-3 h-3" />
+                            <span>URL 복사</span>
                           </div>
                           <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                             <Users className="w-3.5 h-3.5" />
@@ -407,6 +426,16 @@ export default function InstructorDashboard() {
                             >
                               <Copy className="w-4 h-4 mr-3 text-zinc-500" />
                               코드 복사
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="rounded-xl focus:bg-primary/10 focus:text-primary cursor-pointer py-2.5"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCopyUrl(discussion.join_code)
+                              }}
+                            >
+                              <Link2 className="w-4 h-4 mr-3 text-primary" />
+                              URL 복사
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-zinc-200" />
                             <DropdownMenuItem

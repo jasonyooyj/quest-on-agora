@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -28,7 +28,9 @@ import {
   Wand2,
   Check,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Save,
+  RotateCcw
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -56,6 +58,25 @@ interface GeneratedTopic {
     pro: string
     con: string
   }
+}
+
+// Draft storage key and interface
+const DRAFT_STORAGE_KEY = 'agora-discussion-draft'
+
+interface DraftData {
+  title: string
+  description: string
+  aiMode: string
+  anonymous: boolean
+  useCustomStances: boolean
+  stanceLabels: { pro: string; con: string }
+  additionalStances: string[]
+  duration: number | null
+  showTopicGenerator: boolean
+  learningMaterial: string
+  generatedTopics: GeneratedTopic[]
+  selectedTopicIndex: number | null
+  savedAt: number
 }
 
 function generateJoinCode(): string {
@@ -86,6 +107,12 @@ export default function NewDiscussionPage() {
   const [generatedTopics, setGeneratedTopics] = useState<GeneratedTopic[]>([])
   const [selectedTopicIndex, setSelectedTopicIndex] = useState<number | null>(null)
 
+  // Draft state
+  const [hasDraft, setHasDraft] = useState(false)
+  const [draftSavedAt, setDraftSavedAt] = useState<Date | null>(null)
+  const [isLoadingDraft, setIsLoadingDraft] = useState(true)
+  const draftTimeoutRef = useRef<NodeJS.Timeout>(null)
+
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<DiscussionFormInput>({
     resolver: zodResolver(discussionSchema),
     defaultValues: {
@@ -96,6 +123,99 @@ export default function NewDiscussionPage() {
   const selectedAiMode = watch('aiMode')
   const title = watch('title')
   const description = watch('description')
+
+  // Clear draft from localStorage
+  const clearDraft = useCallback(() => {
+    try {
+      localStorage.removeItem(DRAFT_STORAGE_KEY)
+      setHasDraft(false)
+      setDraftSavedAt(null)
+    } catch (error) {
+      console.error('Error clearing draft:', error)
+    }
+  }, [])
+
+  // Save draft to localStorage
+  const saveDraft = useCallback(() => {
+    try {
+      const draftData: DraftData = {
+        title: title || '',
+        description: description || '',
+        aiMode: selectedAiMode,
+        anonymous,
+        useCustomStances,
+        stanceLabels,
+        additionalStances,
+        duration,
+        showTopicGenerator,
+        learningMaterial,
+        generatedTopics,
+        selectedTopicIndex,
+        savedAt: Date.now(),
+      }
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draftData))
+      setHasDraft(true)
+      setDraftSavedAt(new Date())
+    } catch (error) {
+      console.error('Error saving draft:', error)
+    }
+  }, [title, description, selectedAiMode, anonymous, useCustomStances, stanceLabels, additionalStances, duration, showTopicGenerator, learningMaterial, generatedTopics, selectedTopicIndex])
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY)
+      if (savedDraft) {
+        const draft: DraftData = JSON.parse(savedDraft)
+
+        // Restore form fields
+        if (draft.title) setValue('title', draft.title)
+        if (draft.description) setValue('description', draft.description)
+        if (draft.aiMode) setValue('aiMode', draft.aiMode as 'socratic' | 'balanced' | 'minimal' | 'debate')
+
+        // Restore state values
+        setAnonymous(draft.anonymous ?? true)
+        setUseCustomStances(draft.useCustomStances ?? false)
+        setStanceLabels(draft.stanceLabels ?? { pro: '찬성', con: '반대' })
+        setAdditionalStances(draft.additionalStances ?? [])
+        setDuration(draft.duration ?? 15)
+        setShowTopicGenerator(draft.showTopicGenerator ?? false)
+        setLearningMaterial(draft.learningMaterial ?? '')
+        setGeneratedTopics(draft.generatedTopics ?? [])
+        setSelectedTopicIndex(draft.selectedTopicIndex ?? null)
+
+        setHasDraft(true)
+        setDraftSavedAt(new Date(draft.savedAt))
+
+        toast.success('임시저장된 내용을 불러왔습니다')
+      }
+    } catch (error) {
+      console.error('Error loading draft:', error)
+    } finally {
+      setIsLoadingDraft(false)
+    }
+  }, [setValue])
+
+  // Auto-save draft when form data changes (debounced)
+  useEffect(() => {
+    if (isLoadingDraft) return // Don't save while loading
+
+    // Only save if there's meaningful content
+    const hasContent = title || description || learningMaterial || additionalStances.length > 0 || useCustomStances
+    if (!hasContent) return
+
+    if (draftTimeoutRef.current) {
+      clearTimeout(draftTimeoutRef.current)
+    }
+
+    draftTimeoutRef.current = setTimeout(() => {
+      saveDraft()
+    }, 1000) // 1 second debounce
+
+    return () => {
+      if (draftTimeoutRef.current) clearTimeout(draftTimeoutRef.current)
+    }
+  }, [title, description, selectedAiMode, anonymous, useCustomStances, stanceLabels, additionalStances, duration, showTopicGenerator, learningMaterial, generatedTopics, selectedTopicIndex, saveDraft, isLoadingDraft])
 
   useEffect(() => {
     if (!title || title.length < 5) {
@@ -241,6 +361,9 @@ export default function NewDiscussionPage() {
         return
       }
 
+      // Clear draft on successful creation
+      clearDraft()
+
       toast.success('토론이 생성되었습니다!')
       router.push(`/instructor/discussions/${discussion.id}`)
     } catch (error) {
@@ -271,12 +394,57 @@ export default function NewDiscussionPage() {
             </span>
           </Link>
 
-          <Link
-            href="/instructor"
-            className="w-12 h-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 transition-all active:scale-95 text-zinc-500 hover:text-zinc-900"
-          >
-            <X className="w-5 h-5" />
-          </Link>
+          <div className="flex items-center gap-4">
+            {/* Draft Status Indicator */}
+            <AnimatePresence>
+              {hasDraft && draftSavedAt && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="flex items-center gap-3"
+                >
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">
+                    <Save className="w-4 h-4" />
+                    <span className="text-xs font-bold">
+                      임시저장됨 · {draftSavedAt.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearDraft()
+                      // Reset form to defaults
+                      setValue('title', '')
+                      setValue('description', '')
+                      setValue('aiMode', 'socratic')
+                      setAnonymous(true)
+                      setUseCustomStances(false)
+                      setStanceLabels({ pro: '찬성', con: '반대' })
+                      setAdditionalStances([])
+                      setDuration(15)
+                      setShowTopicGenerator(false)
+                      setLearningMaterial('')
+                      setGeneratedTopics([])
+                      setSelectedTopicIndex(null)
+                      toast.success('임시저장이 삭제되었습니다')
+                    }}
+                    className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition-all active:scale-95 text-zinc-500"
+                    title="임시저장 삭제"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <Link
+              href="/instructor"
+              className="w-12 h-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 transition-all active:scale-95 text-zinc-500 hover:text-zinc-900"
+            >
+              <X className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </header>
 

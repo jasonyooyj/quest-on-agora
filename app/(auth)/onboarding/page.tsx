@@ -9,6 +9,7 @@ import { motion } from 'framer-motion'
 import { Loader2, ArrowRight, User, GraduationCap, Building } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
+import { getJoinIntent, clearJoinIntent } from '@/lib/join-intent'
 
 const onboardingSchema = z.object({
     name: z.string().min(2, '이름을 입력해주세요'),
@@ -80,6 +81,17 @@ export default function OnboardingPage() {
             }
 
             toast.success('환영합니다! 시작할 준비가 되었습니다.')
+
+            // Check for pending join intent (student only)
+            if (data.role === 'student') {
+                const joinIntent = getJoinIntent()
+                if (joinIntent) {
+                    clearJoinIntent()
+                    router.push(`/join/${joinIntent}`)
+                    router.refresh()
+                    return
+                }
+            }
 
             // Redirect based on role
             if (data.role === 'instructor') {

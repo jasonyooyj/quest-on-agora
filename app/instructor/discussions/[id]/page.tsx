@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Users, MessageSquare, Play, Pause, Clock,
     Copy, ArrowLeft, Settings, BarChart3,
-    AlertCircle, CheckCircle, User, Quote, X, Loader2
+    AlertCircle, CheckCircle, User, Quote, X, Loader2, Link2
 } from 'lucide-react'
 import { SettingsDialog } from '@/components/instructor/SettingsDialog'
 
@@ -22,6 +22,8 @@ interface Discussion {
         anonymous: boolean
         stanceOptions: string[]
         aiMode: string
+        maxTurns?: number | null
+        duration?: number | null
     }
     created_at: string
 }
@@ -238,6 +240,14 @@ export default function InstructorDiscussionPage() {
         }
     }
 
+    const copyJoinUrl = () => {
+        if (discussion) {
+            const url = `${window.location.origin}/join/${discussion.join_code}`
+            navigator.clipboard.writeText(url)
+            toast.success('참여 링크가 복사되었습니다!')
+        }
+    }
+
     const generateReport = async () => {
         setGeneratingReport(true)
         try {
@@ -428,79 +438,90 @@ Agora 토론 플랫폼에서 생성됨`
             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-200/40 rounded-full filter blur-[120px] animate-blob animation-delay-2000 pointer-events-none mix-blend-multiply" />
 
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200 h-20 flex items-center">
-                <div className="max-w-[1920px] w-full mx-auto px-8 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
+            <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200 py-5 flex items-center">
+                <div className="max-w-[1920px] w-full mx-auto px-10 flex items-center justify-between">
+                    <div className="flex items-center gap-5">
                         <button
                             onClick={() => router.push('/instructor')}
-                            className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-700 transition-all active:scale-90"
+                            className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-all active:scale-90"
                         >
-                            <ArrowLeft className="w-6 h-6" />
+                            <ArrowLeft className="w-5 h-5" />
                         </button>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 mb-1">
+
+                        <div className="h-10 w-px bg-zinc-200" />
+
+                        <div className="space-y-2">
+                            <h1 className="text-xl font-bold tracking-tight text-zinc-900">
                                 {discussion.title}
                             </h1>
-                            <div className="flex items-center gap-4">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest ${discussion.status === 'active' ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' :
+                            <div className="flex items-center gap-2.5">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest ${discussion.status === 'active' ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' :
                                     discussion.status === 'closed' ? 'bg-zinc-100 text-zinc-500 border border-zinc-200' : 'bg-amber-100 text-amber-600 border border-amber-200'
                                     }`}>
-                                    {discussion.status === 'active' ? '토론 진행중' :
-                                        discussion.status === 'closed' ? '토론 종료됨' : '토론 대기중'}
+                                    {discussion.status === 'active' ? '진행중' :
+                                        discussion.status === 'closed' ? '종료됨' : '대기중'}
                                 </span>
                                 <button
                                     onClick={copyJoinCode}
-                                    className="px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[xs] font-bold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200 transition-all flex items-center gap-2"
+                                    className="px-3 py-1.5 rounded-full bg-zinc-100 border border-zinc-200 text-xs font-bold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200 transition-all flex items-center gap-2"
                                 >
-                                    <span className="opacity-60"><Copy className="w-3 h-3" /></span>
+                                    <Copy className="w-3.5 h-3.5 opacity-50" />
                                     {discussion.join_code}
+                                </button>
+                                <button
+                                    onClick={copyJoinUrl}
+                                    className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-bold text-primary hover:bg-primary/20 transition-all flex items-center gap-2"
+                                    title="참여 링크 복사"
+                                >
+                                    <Link2 className="w-3.5 h-3.5" />
+                                    URL
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={toggleDiscussionStatus}
-                            className={`h-12 px-6 rounded-full font-bold flex items-center gap-3 transition-all active:scale-95 shadow-lg ${discussion.status === 'active'
+                            className={`h-11 px-5 rounded-full font-bold text-sm flex items-center gap-2.5 transition-all active:scale-95 shadow-lg ${discussion.status === 'active'
                                 ? 'bg-rose-500 text-white hover:bg-rose-600 shadow-rose-500/20'
                                 : 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-emerald-500/20'
                                 }`}
                         >
                             {discussion.status === 'active' ? (
                                 <>
-                                    <Pause className="w-5 h-5 fill-current" />
-                                    토론 종료
+                                    <Pause className="w-4 h-4 fill-current" />
+                                    종료
                                 </>
                             ) : (
                                 <>
-                                    <Play className="w-5 h-5 fill-current" />
-                                    토론 시작
+                                    <Play className="w-4 h-4 fill-current" />
+                                    시작
                                 </>
                             )}
                         </button>
                         <button
                             onClick={generateReport}
                             disabled={generatingReport}
-                            className="h-12 px-6 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold flex items-center gap-3 transition-all hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] active:scale-95 shadow-xl disabled:opacity-50"
+                            className="h-11 px-5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center gap-2.5 transition-all hover:shadow-[0_0_30px_rgba(99,102,241,0.4)] active:scale-95 shadow-xl disabled:opacity-50"
                         >
                             {generatingReport ? (
                                 <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <Loader2 className="w-4 h-4 animate-spin" />
                                     생성 중...
                                 </>
                             ) : (
                                 <>
-                                    <BarChart3 className="w-5 h-5" />
-                                    AI 리포트
+                                    <BarChart3 className="w-4 h-4" />
+                                    리포트
                                 </>
                             )}
                         </button>
                         <button
                             onClick={() => setShowSettings(true)}
-                            className="w-12 h-12 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 text-zinc-700 transition-all active:scale-90"
+                            className="w-11 h-11 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 transition-all active:scale-90"
                         >
-                            <Settings className="w-6 h-6" />
+                            <Settings className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
@@ -508,9 +529,9 @@ Agora 토론 플랫폼에서 생성됨`
 
             {/* Stats Bar */}
             <div className="bg-zinc-50 border-b border-zinc-200 backdrop-blur-sm relative z-40">
-                <div className="max-w-[1920px] w-full mx-auto px-8 py-5 flex items-center gap-10">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <div className="max-w-[1920px] w-full mx-auto px-10 py-4 flex items-center gap-8">
+                    <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                             <Users className="w-5 h-5" />
                         </div>
                         <div>
@@ -523,8 +544,8 @@ Agora 토론 플랫폼에서 생성됨`
 
                     <div className="h-8 w-px bg-zinc-200" />
 
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-500">
+                    <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-500">
                             <CheckCircle className="w-5 h-5" />
                         </div>
                         <div>
@@ -538,8 +559,8 @@ Agora 토론 플랫폼에서 생성됨`
                     {needsHelpCount > 0 && (
                         <>
                             <div className="h-8 w-px bg-zinc-200" />
-                            <div className="flex items-center gap-3 animate-pulse">
-                                <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-500">
+                            <div className="flex items-center gap-4 animate-pulse">
+                                <div className="w-11 h-11 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-500">
                                     <AlertCircle className="w-5 h-5" />
                                 </div>
                                 <div>
@@ -550,7 +571,7 @@ Agora 토론 플랫폼에서 생성됨`
                         </>
                     )}
 
-                    <div className="ml-auto flex items-center gap-3">
+                    <div className="ml-auto flex items-center gap-2.5">
                         {Object.entries(stanceCounts).map(([stance, count]) => (
                             <div key={stance} className={`px-4 py-2 rounded-2xl border font-bold text-xs flex items-center gap-2 transition-all hover:bg-zinc-100 ${stance === 'pro' ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : stance === 'con' ? 'border-rose-200 bg-rose-50 text-rose-600' : 'border-zinc-200 bg-zinc-50 text-zinc-600'}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full ${stance === 'pro' ? 'bg-emerald-500' :
