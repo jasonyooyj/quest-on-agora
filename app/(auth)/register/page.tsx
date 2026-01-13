@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Loader2, ArrowRight, Mail, Lock, User, GraduationCap, Building } from 'lucide-react'
+import { Loader2, ArrowRight, Mail, Lock, User, GraduationCap, Building, Chrome } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
 
@@ -30,7 +30,29 @@ type RegisterForm = z.infer<typeof registerSchema>
 export default function RegisterPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+    const [oauthLoading, setOauthLoading] = useState<string | null>(null)
     const [selectedRole, setSelectedRole] = useState<'instructor' | 'student'>('student')
+
+    const handleOAuthSignUp = async (provider: 'google' | 'kakao') => {
+        setOauthLoading(provider)
+        try {
+            const supabase = getSupabaseClient()
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider,
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback?redirect=/instructor`,
+                },
+            })
+
+            if (error) {
+                toast.error(error.message)
+                setOauthLoading(null)
+            }
+        } catch (error) {
+            toast.error('소셜 로그인 중 오류가 발생했습니다')
+            setOauthLoading(null)
+        }
+    }
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegisterForm>({
         resolver: zodResolver(registerSchema),
@@ -117,6 +139,32 @@ export default function RegisterPage() {
                     <p className="text-zinc-400">
                         Agora와 함께 토론의 새로운 장을 열어보세요
                     </p>
+                </div>
+
+                {/* OAuth Buttons */}
+                <div className="grid grid-cols-1 gap-4 mb-10">
+                    <button
+                        type="button"
+                        onClick={() => handleOAuthSignUp('google')}
+                        disabled={isLoading || oauthLoading !== null}
+                        className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-full bg-white/5 border border-white/10 text-white font-medium transition-all hover:bg-white/10 hover:border-white/20 hover:shadow-xl hover:-translate-y-0.5"
+                    >
+                        {oauthLoading === 'google' ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <Chrome className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+                        )}
+                        <span>Google로 시작하기</span>
+                    </button>
+                </div>
+
+                <div className="relative mb-10">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-white/5"></div>
+                    </div>
+                    <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-widest">
+                        <span className="bg-[#09090b] px-4 text-zinc-500">또는 이메일로 가입</span>
+                    </div>
                 </div>
 
                 {/* Form */}
@@ -302,7 +350,7 @@ export default function RegisterPage() {
 
                     <button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isLoading || oauthLoading !== null}
                         className="group relative w-full h-16 bg-white text-black font-bold rounded-full overflow-hidden shadow-lg transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-2">
