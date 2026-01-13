@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
         })
 
         if (!error) {
-            // Redirect to success page or login
-            return NextResponse.redirect(new URL('/email-confirmed', requestUrl.origin))
+            // Redirect to next (e.g. /update-password) or success page
+            return NextResponse.redirect(new URL(next, requestUrl.origin))
         }
     }
 

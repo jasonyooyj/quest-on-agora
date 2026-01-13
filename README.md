@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-0.3.1-brightgreen?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-0.5.1-brightgreen?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-16.0.7-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)
@@ -213,8 +213,10 @@ agora/
 │   │
 │   ├── 📂 api/                      # API 엔드포인트
 │   │   ├── auth/                    # 인증 API (callback, confirm)
-│   │   ├── discussions/             # 토론 API (CRUD, messages, pins, gallery, report)
+│   │   ├── discussions/             # 토론 API (목록, 상세, 생성)
+│   │   ├── discussion/              # 토론 단일 항목 API
 │   │   ├── instructor/              # 교수 전용 API (summary, feedback)
+│   │   ├── join/                    # 토론 참여 API
 │   │   ├── student/                 # 학생 전용 API (ai-chat, argument)
 │   │   └── supa/                    # Supabase 연동 API
 │   │
@@ -367,9 +369,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxx
 SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx
 
 # Supabase > Settings > API 에서 확인
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxx
-SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx
+# NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxxx
+# SUPABASE_SERVICE_ROLE_KEY=eyJxxxxx
 
 # ============================================
 # 🤖 OpenAI (https://platform.openai.com)

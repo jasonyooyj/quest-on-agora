@@ -24,8 +24,16 @@ function getSafeRedirectPath(redirect: string | null): string {
 export async function GET(request: NextRequest) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
-    // We ignore the client-provided redirect param for OAuth to enforce role-based routing
-    // const redirectParam = requestUrl.searchParams.get('redirect') 
+    const next = requestUrl.searchParams.get('next')
+    const errorParam = requestUrl.searchParams.get('error')
+    const errorDescription = requestUrl.searchParams.get('error_description')
+
+    // Handle errors from Supabase (e.g. invalid link, expired link)
+    if (errorParam) {
+        return NextResponse.redirect(
+            new URL(`/auth/error?message=${encodeURIComponent(errorDescription || '인증 과정에서 오류가 발생했습니다')}`, requestUrl.origin)
+        )
+    }
 
     if (code) {
         const supabase = await createSupabaseServerClient()
@@ -33,6 +41,12 @@ export async function GET(request: NextRequest) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
+            // 1. Check for specific redirect content (e.g. password recovery)
+            if (next && next.startsWith('/')) {
+                return NextResponse.redirect(new URL(next, requestUrl.origin))
+            }
+
+            // 2. Fallback to role-based redirect
             // Check if user has a profile
             const { data: { user } } = await supabase.auth.getUser()
 

@@ -315,13 +315,16 @@ export default function StudentDiscussionPage() {
                         )}
                         <button
                             onClick={requestHelp}
-                            className={`w-11 h-11 rounded-full border transition-all active:scale-95 flex items-center justify-center ${participant?.needsHelp
-                                ? 'border-amber-300 bg-amber-100 text-amber-600 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-                                : 'border-zinc-200 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 shadow-none'
+                            className={`h-11 px-4 rounded-full border transition-all active:scale-95 flex items-center gap-2 ${participant?.needsHelp
+                                ? 'border-red-500 bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse'
+                                : 'border-red-200 text-red-600 hover:bg-red-50 shadow-sm hover:shadow-md'
                                 }`}
-                            title={participant?.needsHelp ? '도움 요청 취소' : '도움 요청'}
+                            title={participant?.needsHelp ? '도움 요청 취소' : '강사 도움 요청'}
                         >
-                            <HelpCircle className="w-5 h-5" />
+                            <HelpCircle className={`w-4 h-4 ${participant?.needsHelp ? 'animate-bounce' : ''}`} />
+                            <span className="text-sm font-bold">
+                                {participant?.needsHelp ? '호출 중...' : '강사 호출'}
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -375,7 +378,7 @@ export default function StudentDiscussionPage() {
                             선택하신 입장을 바탕으로 AI 튜터가 비판적 질문을 던집니다.
                             자신의 주장을 논리적으로 펼쳐보세요.
                         </p>
-                        {discussion.settings?.maxTurns && (
+                        {discussion.settings?.maxTurns && discussion.settings?.duration !== null && (
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-full text-[10px] font-extrabold text-primary uppercase tracking-widest mt-8">
                                 <Clock className="w-3.5 h-3.5" />
                                 <span>최대 {discussion.settings.maxTurns}턴 진행</span>

@@ -49,9 +49,9 @@ const getStanceIcon = (stance: string) => {
 }
 
 const getStanceStyle = (stance: string) => {
-    if (stance === 'pro') return 'bg-blue-50 border-blue-200 text-blue-700'
-    if (stance === 'con') return 'bg-red-50 border-red-200 text-red-700'
-    return 'bg-gray-50 border-gray-200 text-gray-700'
+    if (stance === 'pro') return 'bg-blue-500/10 border-blue-500/20 text-blue-600'
+    if (stance === 'con') return 'bg-red-500/10 border-red-500/20 text-red-600'
+    return 'bg-zinc-500/10 border-zinc-500/20 text-zinc-600'
 }
 
 export default function GalleryPage() {
@@ -120,49 +120,49 @@ export default function GalleryPage() {
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b-2 border-foreground bg-background">
-                <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+            <header className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl">
+                <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
                         <Link
                             href={`/student/discussions/${discussionId}`}
-                            className="p-2 border-2 border-border hover:border-foreground transition-colors"
+                            className="p-2.5 rounded-full hover:bg-black/5 transition-colors"
                         >
-                            <ArrowLeft className="w-4 h-4" />
+                            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                         </Link>
                         <div>
-                            <h1 className="font-bold text-lg" style={{ fontFamily: 'var(--font-display)' }}>
+                            <h1 className="font-semibold text-xl tracking-tight text-foreground/90">
                                 답변 갤러리
                             </h1>
-                            <p className="text-sm text-muted-foreground">{discussion.title}</p>
+                            <p className="text-sm text-muted-foreground/80 font-medium">{discussion.title}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Users className="w-4 h-4" />
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 text-xs font-medium text-secondary-foreground border border-border/50">
+                        <Users className="w-3.5 h-3.5" />
                         <span>{submissions.length}명 제출</span>
                     </div>
                 </div>
             </header>
 
             {/* Filters */}
-            <div className="border-b-2 border-border bg-muted/30">
+            {/* Filters */}
+            <div className="border-b border-border/40 bg-muted/20 backdrop-blur-sm">
                 <div className="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center gap-4">
                     {/* Stance Filter */}
-                    <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 text-muted-foreground" />
-                        <div className="flex gap-1">
+                    <div className="flex items-center gap-3">
+                        <Filter className="w-4 h-4 text-muted-foreground/70" />
+                        <div className="flex gap-1.5 p-1 bg-muted/50 rounded-full border border-border/40">
                             {['all', 'pro', 'con', 'neutral'].map((stance) => (
                                 <button
                                     key={stance}
                                     onClick={() => setStanceFilter(stance)}
-                                    className={`px-3 py-1 text-sm border-2 transition-all ${
-                                        stanceFilter === stance
-                                            ? 'border-foreground bg-foreground text-background'
-                                            : 'border-border hover:border-foreground'
-                                    }`}
+                                    className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${stanceFilter === stance
+                                            ? 'bg-white text-black shadow-sm ring-1 ring-black/5'
+                                            : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
+                                        }`}
                                 >
                                     {stance === 'all' ? '전체' :
-                                     stance === 'pro' ? '찬성' :
-                                     stance === 'con' ? '반대' : '중립'}
+                                        stance === 'pro' ? '찬성' :
+                                            stance === 'con' ? '반대' : '중립'}
                                 </button>
                             ))}
                         </div>
@@ -170,22 +170,19 @@ export default function GalleryPage() {
 
                     {/* Sort */}
                     <div className="flex items-center gap-2 ml-auto">
-                        <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value as 'latest' | 'likes' | 'comments')}
-                            className="px-3 py-1 text-sm border-2 border-border bg-background"
-                        >
-                            <option value="latest">최신순</option>
-                            <option value="likes">좋아요순</option>
-                            <option value="comments">댓글순</option>
-                        </select>
+                        <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground/70" />
+                        <div className="relative">
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value as 'latest' | 'likes' | 'comments')}
+                                className="appearance-none pl-3 pr-8 py-1.5 text-xs font-medium bg-transparent border-none rounded-lg focus:ring-0 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                <option value="latest">최신순</option>
+                                <option value="likes">좋아요순</option>
+                                <option value="comments">댓글순</option>
+                            </select>
+                        </div>
                     </div>
-
-                    {/* Results count */}
-                    <span className="text-sm text-muted-foreground">
-                        {submissions.length}개 결과
-                    </span>
                 </div>
             </div>
 
@@ -217,52 +214,61 @@ export default function GalleryPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.1 }}
-                                className="brutal-box bg-card overflow-hidden"
+                                className="brutal-box bg-card/60 backdrop-blur-md overflow-hidden hover:scale-[1.01] transition-transform duration-500 rounded-[2rem] border border-white/20 shadow-sm"
                             >
                                 {/* Card Header */}
-                                <div className="p-4 border-b-2 border-border flex items-center justify-between">
+                                <div className="p-5 flex items-start justify-between">
                                     <div className="flex items-center gap-3">
-                                        <span className={`flex items-center gap-1.5 px-3 py-1 border-2 text-sm font-medium ${getStanceStyle(submission.stance || 'neutral')}`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${getStanceStyle(submission.stance || 'neutral')} bg-opacity-20`}>
                                             {getStanceIcon(submission.stance || 'neutral')}
-                                            {discussion.settings.stanceLabels?.[submission.stance || 'neutral'] || submission.stance || '중립'}
-                                        </span>
-                                        <span className="text-sm text-muted-foreground">
-                                            {discussion.settings.anonymous
-                                                ? `학생 ${index + 1}`
-                                                : submission.display_name || `학생 ${index + 1}`}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                        <Clock className="w-3 h-3" />
-                                        {new Date(submission.created_at).toLocaleDateString('ko-KR')}
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <span className="font-semibold text-sm text-foreground/90">
+                                                    {discussion.settings.anonymous
+                                                        ? `학생 ${index + 1}`
+                                                        : submission.display_name || `학생 ${index + 1}`}
+                                                </span>
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium border ${getStanceStyle(submission.stance || 'neutral')}`}>
+                                                    {discussion.settings.stanceLabels?.[submission.stance || 'neutral'] || submission.stance || '중립'}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+                                                <Clock className="w-3 h-3" />
+                                                {new Date(submission.created_at).toLocaleDateString('ko-KR')}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Statement */}
-                                <div className="p-4">
-                                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                                <div className="px-5 pb-5">
+                                    <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground/80 font-normal">
                                         {submission.stance_statement || '(입장 설명 없음)'}
                                     </p>
                                 </div>
 
                                 {/* Actions */}
-                                <div className="px-4 py-3 border-t-2 border-border bg-muted/20 flex items-center gap-4">
+                                <div className="px-5 py-4 border-t border-border/40 bg-muted/10 flex items-center gap-3">
                                     <button
                                         onClick={() => handleLike(submission.id, submission.hasLiked)}
-                                        className={`flex items-center gap-1.5 px-3 py-1.5 border-2 transition-all ${submission.hasLiked
-                                            ? 'border-[hsl(var(--coral))] bg-[hsl(var(--coral))]/10 text-[hsl(var(--coral))]'
-                                            : 'border-border hover:border-foreground'
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${submission.hasLiked
+                                                ? 'bg-rose-500/10 text-rose-600 ring-1 ring-rose-500/20'
+                                                : 'hover:bg-black/5 text-muted-foreground hover:text-foreground'
                                             }`}
                                     >
-                                        <Heart className={`w-4 h-4 ${submission.hasLiked ? 'fill-current' : ''}`} />
-                                        <span className="text-sm font-medium">{submission.likeCount}</span>
+                                        <Heart className={`w-3.5 h-3.5 ${submission.hasLiked ? 'fill-current' : ''}`} />
+                                        <span className="mt-0.5">{submission.likeCount}</span>
                                     </button>
                                     <button
                                         onClick={() => setExpandedId(expandedId === submission.id ? null : submission.id)}
-                                        className="flex items-center gap-1.5 px-3 py-1.5 border-2 border-border hover:border-foreground transition-colors"
+                                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${expandedId === submission.id
+                                                ? 'bg-indigo-500/10 text-indigo-600 ring-1 ring-indigo-500/20'
+                                                : 'hover:bg-black/5 text-muted-foreground hover:text-foreground'
+                                            }`}
                                     >
-                                        <MessageCircle className="w-4 h-4" />
-                                        <span className="text-sm font-medium">{submission.commentCount}</span>
+                                        <MessageCircle className="w-3.5 h-3.5" />
+                                        <span className="mt-0.5">{submission.commentCount}</span>
                                     </button>
                                 </div>
 
@@ -273,7 +279,7 @@ export default function GalleryPage() {
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: 'auto', opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            className="border-t-2 border-border overflow-hidden"
+                                            className="border-t border-border/40 bg-muted/30"
                                         >
                                             <div className="p-4 space-y-4">
                                                 {/* Existing Comments */}
@@ -301,7 +307,7 @@ export default function GalleryPage() {
                                                 )}
 
                                                 {/* Comment Input */}
-                                                <div className="flex gap-2 pt-2 border-t border-border">
+                                                <div className="flex gap-2 pt-2 border-t border-border/40">
                                                     <input
                                                         type="text"
                                                         value={commentText}

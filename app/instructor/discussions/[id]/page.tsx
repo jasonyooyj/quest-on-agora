@@ -527,6 +527,18 @@ Agora 토론 플랫폼에서 생성됨`
                 </div>
             </header>
 
+            {/* Draft Status Banner */}
+            {discussion.status === 'draft' && (
+                <div className="w-full bg-amber-50 border-b border-amber-200 px-10 py-4 flex items-center justify-center gap-2 relative z-40 animate-in slide-in-from-top-2 fade-in duration-300">
+                    <AlertCircle className="w-5 h-5 text-amber-600" />
+                    <p className="text-amber-800 font-medium text-sm">
+                        이 토론은 현재 <span className="font-bold text-amber-900">임시 저장(Draft)</span> 상태입니다. 학생들은 입장할 수 없습니다. 우측 상단의
+                        <span className="font-bold mx-1.5 inline-flex items-center gap-1 bg-emerald-500 text-white px-2.5 py-0.5 rounded-md text-xs shadow-sm"><Play className="w-3 h-3 fill-current" /> 시작</span>
+                        버튼을 눌러 토론을 활성화하세요.
+                    </p>
+                </div>
+            )}
+
             {/* Stats Bar */}
             <div className="bg-zinc-50 border-b border-zinc-200 backdrop-blur-sm relative z-40">
                 <div className="max-w-[1920px] w-full mx-auto px-10 py-4 flex items-center gap-8">

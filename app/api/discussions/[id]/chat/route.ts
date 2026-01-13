@@ -77,8 +77,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const stanceLabel = participant?.stance ? settings?.stanceLabels?.[participant.stance] : undefined
         const aiMode = settings?.aiMode || 'socratic'
         const userTurns = history?.filter(m => m.role === 'user').length || 0
+        // If duration is null (unlimited), maxTurns should be ignored
+        const isUnlimited = settings?.duration === null
         const maxTurns = settings?.maxTurns || 10
-        const isClosing = userTurns >= maxTurns - 1
+        const isClosing = !isUnlimited && userTurns >= maxTurns - 1
 
         // Initialize ChatOpenAI with streaming if requested
         const chat = new ChatOpenAI({

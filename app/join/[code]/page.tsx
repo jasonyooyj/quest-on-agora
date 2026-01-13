@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
-import { Loader2, MessageSquare, AlertCircle } from 'lucide-react'
+import { Loader2, MessageSquare, AlertCircle, Clock } from 'lucide-react'
 import { saveJoinIntent, clearJoinIntent } from '@/lib/join-intent'
 
-type JoinStatus = 'loading' | 'joining' | 'error' | 'unauthorized'
+type JoinStatus = 'loading' | 'joining' | 'error' | 'unauthorized' | 'draft' | 'closed'
 
 export default function JoinPage() {
   const params = useParams()
@@ -54,6 +54,18 @@ export default function JoinPage() {
           if (data.needsOnboarding) {
             saveJoinIntent(code)
             router.push('/onboarding')
+            return
+          }
+
+          if (data.code === 'DRAFT_MODE') {
+            setStatus('draft')
+            setErrorMessage(data.error)
+            return
+          }
+
+          if (data.code === 'DISCUSSION_CLOSED') {
+            setStatus('closed')
+            setErrorMessage(data.error)
             return
           }
 
@@ -129,6 +141,38 @@ export default function JoinPage() {
               <p className="text-zinc-500 text-sm">
                 참여 코드: <span className="font-mono font-bold">{code}</span>
               </p>
+            </div>
+          )}
+
+          {status === 'draft' && (
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 mb-4">
+                <Clock className="w-6 h-6 text-amber-600" />
+              </div>
+              <p className="text-zinc-900 font-medium mb-2">토론 대기 중</p>
+              <p className="text-zinc-500 text-sm mb-6">{errorMessage}</p>
+              <button
+                onClick={() => router.push('/student')}
+                className="px-6 py-2.5 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 rounded-lg font-medium transition-colors"
+              >
+                대시보드로 이동
+              </button>
+            </div>
+          )}
+
+          {status === 'closed' && (
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-100 mb-4">
+                <AlertCircle className="w-6 h-6 text-zinc-500" />
+              </div>
+              <p className="text-zinc-900 font-medium mb-2">토론 종료</p>
+              <p className="text-zinc-500 text-sm mb-6">{errorMessage}</p>
+              <button
+                onClick={() => router.push('/student')}
+                className="px-6 py-2.5 bg-zinc-900 text-white rounded-lg font-medium hover:bg-zinc-800 transition-colors"
+              >
+                대시보드로 이동
+              </button>
             </div>
           )}
 

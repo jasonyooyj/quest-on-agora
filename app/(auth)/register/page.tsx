@@ -7,9 +7,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Loader2, ArrowRight, Mail, Lock, User, GraduationCap, Building, Chrome } from 'lucide-react'
+import { Loader2, ArrowRight, Mail, Lock, User, GraduationCap, Building } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
+import { getURL } from '@/lib/utils'
 import { toast } from 'sonner'
+import GoogleIcon from '@/components/icons/GoogleIcon'
 
 const registerSchema = z.object({
     name: z.string().min(2, '이름을 입력해주세요'),
@@ -42,7 +44,7 @@ export default function RegisterPage() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${window.location.origin}/auth/callback`,
+                    redirectTo: `${getURL()}auth/callback`,
                 },
             })
 
@@ -165,14 +167,14 @@ export default function RegisterPage() {
                         type="button"
                         onClick={() => handleOAuthSignUp('google')}
                         disabled={isLoading || oauthLoading !== null}
-                        className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-700 font-medium transition-all hover:bg-zinc-100 hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5"
+                        className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-full bg-white border border-zinc-200 text-zinc-700 font-medium transition-all hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-md active:scale-[0.98]"
                     >
                         {oauthLoading === 'google' ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <Loader2 className="w-5 h-5 animate-spin text-zinc-600" />
                         ) : (
-                            <Chrome className="w-5 h-5 text-zinc-500 group-hover:text-zinc-700 transition-colors" />
+                            <GoogleIcon className="w-5 h-5" />
                         )}
-                        <span>Google로 시작하기</span>
+                        <span className="text-sm font-roboto">Google로 시작하기</span>
                     </button>
                 </div>
 

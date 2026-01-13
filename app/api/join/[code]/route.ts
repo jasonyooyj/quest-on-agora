@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseRouteClient } from '@/lib/supabase-server'
+import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
 
 interface RouteParams {
   params: Promise<{ code: string }>
@@ -59,7 +59,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     // Find discussion by join code
-    const { data: discussion, error: discussionError } = await supabase
+    // Use admin client to bypass RLS (so we can distinguish between "not found" and "not active/draft")
+    const supabaseAdmin = await createSupabaseAdminClient()
+    const { data: discussion, error: discussionError } = await supabaseAdmin
       .from('discussion_sessions')
       .select('*')
       .eq('join_code', joinCode)
@@ -72,12 +74,26 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    if (discussion.status !== 'active') {
+    if (discussion.status === 'draft') {
       return NextResponse.json(
-        { error: '이 토론은 현재 참여가 불가능합니다' },
-        { status: 400 }
+        {
+          error: '이 토론은 아직 시작되지 않았습니다. 강사가 시작할 때까지 기다려주세요.',
+          code: 'DRAFT_MODE'
+        },
+        { status: 403 } // Forbidden
       )
     }
+
+    if (discussion.status === 'closed') {
+      return NextResponse.json(
+        {
+          error: '이 토론은 종료되었습니다.',
+          code: 'DISCUSSION_CLOSED'
+        },
+        { status: 403 } // Forbidden
+      )
+    }
+
 
     // Check if already participating
     const { data: existing } = await supabase

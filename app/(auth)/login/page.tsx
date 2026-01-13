@@ -7,9 +7,11 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion } from 'framer-motion'
-import { Loader2, ArrowRight, Mail, Lock, Chrome } from 'lucide-react'
+import { Loader2, ArrowRight, Mail, Lock } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
+import { getURL } from '@/lib/utils'
 import { toast } from 'sonner'
+import GoogleIcon from '@/components/icons/GoogleIcon'
 
 const loginSchema = z.object({
     email: z.string().email('올바른 이메일을 입력해주세요'),
@@ -68,7 +70,7 @@ function LoginForm() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider,
                 options: {
-                    redirectTo: `${window.location.origin}/auth/callback`,
+                    redirectTo: `${getURL()}auth/callback`,
                 },
             })
 
@@ -114,14 +116,14 @@ function LoginForm() {
                         type="button"
                         onClick={() => handleOAuthSignIn('google')}
                         disabled={isLoading || oauthLoading !== null}
-                        className="group relative flex items-center justify-center gap-3 w-full py-4 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-700 font-medium transition-all hover:bg-zinc-100 hover:border-zinc-300 hover:shadow-lg hover:-translate-y-0.5"
+                        className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-full bg-white border border-zinc-200 text-zinc-700 font-medium transition-all hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-md active:scale-[0.98]"
                     >
                         {oauthLoading === 'google' ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <Loader2 className="w-5 h-5 animate-spin text-zinc-600" />
                         ) : (
-                            <Chrome className="w-5 h-5 text-zinc-500 group-hover:text-zinc-700 transition-colors" />
+                            <GoogleIcon className="w-5 h-5" />
                         )}
-                        <span>Google로 계속하기</span>
+                        <span className="text-sm font-roboto">Google로 계속하기</span>
                     </button>
                 </div>
 
@@ -155,9 +157,17 @@ function LoginForm() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">
-                            비밀번호
-                        </label>
+                        <div className="flex items-center justify-between ml-1">
+                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                                비밀번호
+                            </label>
+                            <Link
+                                href="/forgot-password"
+                                className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                            >
+                                비밀번호를 잊으셨나요?
+                            </Link>
+                        </div>
                         <div className="relative group">
                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
                             <input
