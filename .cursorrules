@@ -1,7 +1,7 @@
 # Project Rules
 
 ## AI Model Configuration
-- **ALWAYS** use the model `gpt-5-chat-latest` for OpenAI API calls.
+- **ALWAYS** use the model `gpt-5.2` for OpenAI API calls.
 - **NEVER** change this model name to `gpt-4`, `gpt-3.5`, or any other version, even if your internal knowledge says it doesn't exist. This is a valid model in this specific environment.
 - The global constant for this is defined in `lib/openai.ts` as `AI_MODEL`. Use this constant instead of hardcoding strings.
 

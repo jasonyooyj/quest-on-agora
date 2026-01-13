@@ -51,6 +51,11 @@ export default function StudentDiscussionPage() {
     const [showExtensionDialog, setShowExtensionDialog] = useState(false)
     const [requestingExtension, setRequestingExtension] = useState(false)
 
+    // Stance Selection State
+    const [tempStance, setTempStance] = useState<string | null>(null)
+    const [stanceStatement, setStanceStatement] = useState('')
+    const [isConfirmingStance, setIsConfirmingStance] = useState(false)
+
     // Using React Query hooks
     const {
         data: discussion,
@@ -89,24 +94,44 @@ export default function StudentDiscussionPage() {
         scrollToBottom()
     }, [messages.length, streamingContent])
 
-    const handleStanceSelect = async (stance: string) => {
-        if (!participant) return
+    // Reset stance selection state when modal opens
+    useEffect(() => {
+        if (!showStanceSelector) {
+            setTempStance(null)
+            setStanceStatement('')
+            setIsConfirmingStance(false)
+        }
+    }, [showStanceSelector])
 
+    const handleStanceClick = (stance: string) => {
+        setTempStance(stance)
+    }
+
+    const handleConfirmStance = async () => {
+        if (!participant || !tempStance) return
+
+        setIsConfirmingStance(true)
         try {
             await supabase
                 .from('discussion_participants')
-                .update({ stance })
+                .update({
+                    stance: tempStance,
+                    stance_statement: stanceStatement || null
+                })
                 .eq('id', participant.id)
 
             // React Query will auto-refetch due to realtime subscription
             setShowStanceSelector(false)
-            const stanceLabel = stanceLabels[stance] || stance
-            toast.success(`"${stanceLabel}" 입장이 선택되었습니다`, {
-                description: 'AI 튜터와 토론을 시작해보세요'
+
+            const stanceLabel = discussion.settings?.stanceLabels?.[tempStance] || tempStance
+            toast.success(`"${stanceLabel}" 입장으로 시작합니다`, {
+                description: 'AI 튜터와 심도 있는 토론을 나눠보세요'
             })
         } catch (error) {
             console.error('Error selecting stance:', error)
             toast.error('입장 선택 중 오류가 발생했습니다')
+        } finally {
+            setIsConfirmingStance(false)
         }
     }
 
@@ -383,11 +408,11 @@ export default function StudentDiscussionPage() {
                         {!participant?.isSubmitted && participant?.stance && (
                             <Link
                                 href={`/student/discussions/${discussionId}/submit`}
-                                className="h-11 px-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center gap-2 transition-all hover:shadow-lg active:scale-95"
-                                title="대화 제출"
+                                className="h-11 px-4 rounded-full bg-zinc-100 text-zinc-600 font-bold text-sm flex items-center gap-2 transition-all hover:bg-zinc-200 active:scale-95 border border-zinc-200"
+                                title="토론 종료 및 제출"
                             >
-                                <FileCheck className="w-4 h-4" />
-                                제출
+                                <CheckCircle className="w-4 h-4" />
+                                토론 종료
                             </Link>
                         )}
                         <button
@@ -578,38 +603,98 @@ export default function StudentDiscussionPage() {
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                             className="glass-panel bg-white/95 border-zinc-200 max-w-xl w-full p-10 shadow-2xl relative z-10 backdrop-blur-xl"
                         >
-                            <div className="mb-10 text-center">
-                                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
-                                    <AlertCircle className="w-8 h-8 text-primary" />
-                                </div>
-                                <h2 className="text-3xl font-bold text-zinc-900 mb-3">입장을 선택하세요</h2>
-                                <p className="text-zinc-500 font-medium leading-relaxed">
-                                    이번 토론에서 취할 입장을 선택해주세요. <br />
-                                    선택한 한 입장에 따라 {aiName}와 심도 있는 논술을 나눕니다.
-                                </p>
-                            </div>
+                            {!tempStance ? (
+                                // Phase 1: Select Stance
+                                <>
+                                    <div className="mb-10 text-center">
+                                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-primary/20">
+                                            <AlertCircle className="w-8 h-8 text-primary" />
+                                        </div>
+                                        <h2 className="text-3xl font-bold text-zinc-900 mb-3">입장을 선택하세요</h2>
+                                        <p className="text-zinc-500 font-medium leading-relaxed">
+                                            이번 토론에서 취할 입장을 선택해주세요. <br />
+                                            선택한 한 입장에 따라 {aiName}와 심도 있는 논술을 나눕니다.
+                                        </p>
+                                    </div>
 
-                            <div className="grid gap-4">
-                                {(discussion.settings.stanceOptions || ['pro', 'con', 'neutral']).map((option) => (
-                                    <button
-                                        key={option}
-                                        onClick={() => handleStanceSelect(option)}
-                                        className={`group flex items-center gap-6 p-6 border rounded-[2rem] transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] ${getStanceStyle(option)
-                                            }`}
-                                    >
-                                        <div className="w-14 h-14 rounded-2xl bg-zinc-100 flex items-center justify-center border border-zinc-200 transition-colors group-hover:bg-zinc-200">
-                                            {getStanceIcon(option)}
+                                    <div className="grid gap-4">
+                                        {(discussion.settings.stanceOptions || ['pro', 'con', 'neutral']).map((option) => (
+                                            <button
+                                                key={option}
+                                                onClick={() => handleStanceClick(option)}
+                                                className={`group flex items-center gap-6 p-6 border rounded-[2rem] transition-all hover:-translate-y-1 hover:shadow-lg active:scale-[0.98] ${getStanceStyle(option)}`}
+                                            >
+                                                <div className="w-14 h-14 rounded-2xl bg-zinc-100 flex items-center justify-center border border-zinc-200 transition-colors group-hover:bg-zinc-200">
+                                                    <span className="text-2xl">{getStanceIcon(option)}</span>
+                                                </div>
+                                                <div className="text-left">
+                                                    <div className="text-lg font-bold mb-1">
+                                                        {stanceLabels[option] || option}
+                                                    </div>
+                                                    <div className="text-sm opacity-60 font-medium">
+                                                        {option === 'pro' ? '찬성 입장에서 논리를 펼칩니다' :
+                                                            option === 'con' ? '반대 입장에서 비판합니다' :
+                                                                '중립적인 입장에서 탐구합니다'}
+                                                    </div>
+                                                </div>
+                                                <ArrowRight className="w-6 h-6 ml-auto opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0" />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </>
+                            ) : (
+                                // Phase 2: Stance Statement
+                                <>
+                                    <div className="mb-8">
+                                        <button
+                                            onClick={() => setTempStance(null)}
+                                            className="flex items-center gap-2 text-zinc-500 hover:text-zinc-900 font-bold mb-6 transition-colors"
+                                        >
+                                            <ArrowLeft className="w-4 h-4" />
+                                            다른 입장 선택하기
+                                        </button>
+                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-4 font-bold text-sm ${tempStance === 'pro' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                                                tempStance === 'con' ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                                                    'bg-zinc-100 text-zinc-600 border-zinc-200'
+                                            }`}>
+                                            <span>{getStanceIcon(tempStance)}</span>
+                                            <span>{stanceLabels[tempStance] || tempStance}</span>
                                         </div>
-                                        <div className="text-left">
-                                            <div className="font-bold text-xl tracking-tight">
-                                                {stanceLabels[option] || option}
-                                            </div>
-                                            <div className="text-[10px] font-extrabold uppercase tracking-widest opacity-40 mt-1">Select this stance</div>
-                                        </div>
-                                        <ArrowRight className="w-6 h-6 ml-auto opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0" />
-                                    </button>
-                                ))}
-                            </div>
+                                        <h2 className="text-2xl font-bold text-zinc-900 mb-2">입장 설명 작성</h2>
+                                        <p className="text-zinc-500">
+                                            이 입장을 선택한 이유나 주요 근거를 간단히 적어주세요.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <textarea
+                                            value={stanceStatement}
+                                            onChange={(e) => setStanceStatement(e.target.value)}
+                                            placeholder="예: 이 안건은 장기적으로 볼 때 긍정적인 효과가 더 크기 때문에 찬성합니다..."
+                                            className="w-full h-32 p-4 rounded-2xl border border-zinc-200 bg-zinc-50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-zinc-900 placeholder:text-zinc-400 ios-input"
+                                            autoFocus
+                                        />
+
+                                        <button
+                                            onClick={handleConfirmStance}
+                                            disabled={isConfirmingStance}
+                                            className="w-full h-14 bg-primary text-white font-bold text-lg rounded-2xl flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
+                                        >
+                                            {isConfirmingStance ? (
+                                                <>
+                                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                                    시작하는 중...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span>토론 시작하기</span>
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </motion.div>
                     </div>
                 )}

@@ -55,7 +55,7 @@
 - **🎓 교육적 효과**: 소크라테스 산파술로 무의식적 전제를 발견하고 비판적 사고력 47% 향상
 - **👥 참여도 증가**: 모든 학생이 동등하게 의견을 개진할 수 있는 환경
 - **📊 실시간 분석**: 학생들의 사고 과정과 입장 변화를 한눈에 파악
-- **🤖 AI 활용**: OpenAI GPT-5(gpt-5-chat-latest)를 활용한 맞춤형 대화 및 피드백
+- **🤖 AI 활용**: OpenAI GPT-5.2를 활용한 맞춤형 대화 및 피드백
 - **🎨 Premium UI**: iOS 26 / macOS Reality Aesthetic 기반의 Spatial 디자인 시스템
 
 ---
@@ -150,7 +150,7 @@
 
 | 기술 | 버전 | 용도 |
 |------|------|------|
-| **OpenAI API** | 6.16.0 | GPT-5 (gpt-5-chat-latest) 활용 |
+| **OpenAI API** | 6.16.0 | GPT-5.2 활용 |
 | **LangChain** | 1.2.7 | Chain of Thought (CoT) 및 프롬프트 관리 |
 | **Supabase Client** | - | 데이터베이스 쿼리 및 상태 연동 |
 
