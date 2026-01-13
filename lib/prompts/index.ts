@@ -202,6 +202,77 @@ export const DEBATE_OPENING_PROMPT = PromptTemplate.fromTemplate(`
 `)
 
 // ==========================================
+// Wrap-up Prompts (used when maxTurns is reached)
+// ==========================================
+
+/**
+ * Generic wrap-up prompt used when maxTurns is reached.
+ * Asks the student to reflect on the discussion.
+ */
+export const WRAPUP_PROMPT = PromptTemplate.fromTemplate(`
+당신은 "{discussionTitle}" 주제에 대한 토론을 마무리하는 역할입니다.
+{description}
+학생의 입장: "{studentStance}"
+
+현재 대화 내역:
+{history}
+
+학생의 마지막 발언: "{input}"
+
+이제 토론이 마무리 단계에 접어들었습니다. 다음을 수행하세요:
+1. 학생의 마지막 발언에 간단히 반응하십시오.
+2. 지금까지의 토론을 자연스럽게 마무리하면서, 학생이 스스로 정리할 수 있도록 다음과 같은 질문을 던지십시오:
+   - "오늘 대화를 통해 가장 인상 깊었거나 새롭게 알게 된 점이 있나요?"
+   - "처음 생각과 비교해서 달라진 점이 있다면 무엇인가요?"
+
+최종 답변만 한국어로 출력하십시오.
+`)
+
+/**
+ * Returns the wrap-up prompt for the given discussion mode.
+ */
+export const getWrapupPromptTemplate = (mode: string): PromptTemplate => {
+  // For now, use the same wrap-up prompt for all modes
+  // Can be customized per mode later if needed
+  return WRAPUP_PROMPT
+}
+
+// ==========================================
+// Key Points Extraction Prompt
+// ==========================================
+
+/**
+ * Prompt for extracting key discussion points from conversation history.
+ * Used to help students write their final reflection.
+ */
+export const KEY_POINTS_EXTRACTION_PROMPT = PromptTemplate.fromTemplate(`
+당신은 토론 분석 전문가입니다. 다음 대화를 분석하여 학생이 최종 정리를 작성할 때 참고할 수 있는 핵심 포인트를 추출해주세요.
+
+토론 주제: "{discussionTitle}"
+{description}
+학생의 입장: "{studentStance}"
+
+대화 내역:
+{history}
+
+다음 형식으로 정확히 3~5개의 핵심 포인트를 추출하세요:
+
+1. 각 포인트는 대화에서 다뤄진 중요한 논점이나 아이디어입니다.
+2. 학생의 주장과 AI의 질문/반론 양쪽을 반영하세요.
+3. 각 포인트는 한 문장으로 간결하게 작성하세요.
+4. 학생이 자신의 생각을 정리하는 데 도움이 되도록 구성하세요.
+
+응답은 반드시 아래 JSON 형식으로만 출력하세요:
+{
+  "keyPoints": [
+    "첫 번째 핵심 포인트",
+    "두 번째 핵심 포인트",
+    "세 번째 핵심 포인트"
+  ]
+}
+`)
+
+// ==========================================
 // Instructor/Admin Prompts
 // ==========================================
 
@@ -253,3 +324,4 @@ export const EXAM_SUMMARY_SYSTEM_PROMPT = `당신은 학생의 시험 답안을 
  * - Analyzes participant stances and message history to generate an executive summary.
  */
 export const DISCUSSION_REPORT_SYSTEM_PROMPT = `당신은 교육 토론 분석 전문가입니다. 토론의 전체적인 흐름과 주요 논점을 분석하고, 학생들의 참여 수준과 사고의 깊이를 평가하는 역할을 맡고 있습니다. 한국어로 작성해주세요.`
+

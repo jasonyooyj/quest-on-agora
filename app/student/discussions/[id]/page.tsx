@@ -48,6 +48,8 @@ export default function StudentDiscussionPage() {
     const [streamingContent, setStreamingContent] = useState('')
     const [showSubmitDialog, setShowSubmitDialog] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [showExtensionDialog, setShowExtensionDialog] = useState(false)
+    const [requestingExtension, setRequestingExtension] = useState(false)
 
     // Using React Query hooks
     const {
@@ -230,6 +232,11 @@ export default function StudentDiscussionPage() {
                                 setStreamingContent(prev => prev + data.chunk)
                             }
                             if (data.done) {
+                                // Check if this was a wrap-up message
+                                if (data.isClosing) {
+                                    // Show extension dialog after a short delay
+                                    setTimeout(() => setShowExtensionDialog(true), 1500)
+                                }
                                 // Streaming complete
                                 // Optimistically add AI message to cache to prevent flicker
                                 queryClient.setQueryData(['discussion-messages', discussionId, participant.id], (old: any[] = []) => {
@@ -374,14 +381,14 @@ export default function StudentDiscussionPage() {
                             <Users className="w-5 h-5" />
                         </Link>
                         {!participant?.isSubmitted && participant?.stance && (
-                            <button
-                                onClick={() => setShowSubmitDialog(true)}
+                            <Link
+                                href={`/student/discussions/${discussionId}/submit`}
                                 className="h-11 px-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center gap-2 transition-all hover:shadow-lg active:scale-95"
                                 title="대화 제출"
                             >
                                 <FileCheck className="w-4 h-4" />
                                 제출
-                            </button>
+                            </Link>
                         )}
                         <button
                             onClick={requestHelp}
@@ -643,6 +650,66 @@ export default function StudentDiscussionPage() {
                             ) : (
                                 '제출하기'
                             )}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Extension Request Dialog */}
+            <AlertDialog open={showExtensionDialog} onOpenChange={setShowExtensionDialog}>
+                <AlertDialogContent className="rounded-[2rem] border-zinc-200 max-w-md">
+                    <AlertDialogHeader>
+                        <div className="w-16 h-16 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Clock className="w-8 h-8 text-white" />
+                        </div>
+                        <AlertDialogTitle className="text-2xl font-bold text-center">
+                            토론이 마무리 단계입니다
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-center text-zinc-500 leading-relaxed">
+                            충분히 토론하셨나요?<br />
+                            더 대화를 계속하거나 지금 제출할 수 있습니다.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="gap-3 flex-col sm:flex-row">
+                        <AlertDialogCancel
+                            className="flex-1 h-12 rounded-full border-zinc-200 font-bold"
+                            onClick={async () => {
+                                setRequestingExtension(true)
+                                try {
+                                    await fetch(`/api/discussions/${discussionId}/participants`, {
+                                        method: 'PATCH',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ requested_extension: true })
+                                    })
+                                    toast.success('대화를 계속합니다', {
+                                        description: '교수님에게 연장 요청이 전달되었습니다'
+                                    })
+                                } catch (error) {
+                                    console.error('Error requesting extension:', error)
+                                } finally {
+                                    setRequestingExtension(false)
+                                    setShowExtensionDialog(false)
+                                }
+                            }}
+                            disabled={requestingExtension}
+                        >
+                            {requestingExtension ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    처리 중...
+                                </>
+                            ) : (
+                                '조금 더 대화하기'
+                            )}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                setShowExtensionDialog(false)
+                                router.push(`/student/discussions/${discussionId}/submit`)
+                            }}
+                            className="flex-1 h-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 font-bold"
+                        >
+                            제출하러 가기
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

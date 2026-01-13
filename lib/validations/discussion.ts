@@ -10,7 +10,7 @@ export const discussionSettingsSchema = z.object({
   stanceLabels: z.record(z.string(), z.string()).optional(),
   aiMode: aiModeSchema.default('socratic'),
   aiContext: z.string().max(5000).optional(),
-  maxTurns: z.number().min(3).max(50).nullable().default(10),
+  maxTurns: z.number().min(3).max(100).nullable().default(15),
   duration: z.number().min(3).max(60).nullable().optional(),
 })
 
@@ -49,9 +49,11 @@ export const sendMessageSchema = z.object({
 export const updateParticipantSchema = z.object({
   stance: z.string().max(50).optional(),
   stance_statement: z.string().max(2000).optional(),
+  final_reflection: z.string().max(5000).optional(),
   is_submitted: z.boolean().optional(),
   needs_help: z.boolean().optional(),
   is_online: z.boolean().optional(),
+  requested_extension: z.boolean().optional(),
 })
 
 // Comment schema

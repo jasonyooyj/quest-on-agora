@@ -18,7 +18,7 @@ export default function DemoStep1Creation() {
   const [duration, setDuration] = useState(15)
 
   const currentMode = DEMO_MOCK.aiModes.find(m => m.value === selectedMode)
-  const maxTurns = Math.max(3, Math.round(duration / 3))
+  const maxTurns = Math.max(5, duration)
 
   return (
     <div className="w-full h-full bg-white p-5 flex flex-col overflow-hidden">
@@ -44,20 +44,18 @@ export default function DemoStep1Creation() {
                 onClick={() => setSelectedMode(mode.value)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className={`p-3 rounded-xl border transition-all text-center ${
-                  isSelected
-                    ? 'bg-primary/10 border-primary/30 shadow-sm'
-                    : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
-                }`}
+                className={`p-3 rounded-xl border transition-all text-center ${isSelected
+                  ? 'bg-primary/10 border-primary/30 shadow-sm'
+                  : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300'
+                  }`}
               >
-                <div className={`w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center ${
-                  isSelected
-                    ? mode.color === 'emerald' ? 'bg-emerald-500 text-white'
-                      : mode.color === 'blue' ? 'bg-blue-500 text-white'
+                <div className={`w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center ${isSelected
+                  ? mode.color === 'emerald' ? 'bg-emerald-500 text-white'
+                    : mode.color === 'blue' ? 'bg-blue-500 text-white'
                       : mode.color === 'rose' ? 'bg-rose-500 text-white'
-                      : 'bg-zinc-600 text-white'
-                    : 'bg-zinc-200 text-zinc-500'
-                }`}>
+                        : 'bg-zinc-600 text-white'
+                  : 'bg-zinc-200 text-zinc-500'
+                  }`}>
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className={`text-sm font-bold ${isSelected ? 'text-zinc-900' : 'text-zinc-600'}`}>
@@ -77,12 +75,11 @@ export default function DemoStep1Creation() {
         className="p-4 rounded-xl bg-zinc-900 text-zinc-100 mb-4"
       >
         <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-            currentMode?.color === 'emerald' ? 'bg-emerald-500'
-              : currentMode?.color === 'blue' ? 'bg-blue-500'
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${currentMode?.color === 'emerald' ? 'bg-emerald-500'
+            : currentMode?.color === 'blue' ? 'bg-blue-500'
               : currentMode?.color === 'rose' ? 'bg-rose-500'
-              : 'bg-zinc-700'
-          }`}>
+                : 'bg-zinc-700'
+            }`}>
             {currentMode && (() => {
               const Icon = icons[currentMode.value as keyof typeof icons]
               return <Icon className="w-5 h-5" />
@@ -115,13 +112,11 @@ export default function DemoStep1Creation() {
             </div>
             <button
               onClick={() => setAnonymous(!anonymous)}
-              className={`w-12 h-7 rounded-full transition-all relative ${
-                anonymous ? 'bg-primary' : 'bg-zinc-300'
-              }`}
+              className={`w-12 h-7 rounded-full transition-all relative ${anonymous ? 'bg-primary' : 'bg-zinc-300'
+                }`}
             >
-              <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
-                anonymous ? 'left-6' : 'left-1'
-              }`} />
+              <div className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${anonymous ? 'left-6' : 'left-1'
+                }`} />
             </button>
           </div>
 

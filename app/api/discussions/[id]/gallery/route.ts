@@ -38,6 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
                 display_name,
                 stance,
                 stance_statement,
+                final_reflection,
                 is_submitted,
                 created_at
             `)

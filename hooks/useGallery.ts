@@ -7,6 +7,7 @@ interface Submission {
     display_name: string | null
     stance: string | null
     stance_statement: string | null
+    final_reflection: string | null
     is_submitted: boolean
     created_at: string
     likeCount: number

@@ -33,9 +33,12 @@ interface Participant {
     display_name: string | null
     stance: string | null
     stance_statement: string | null
+    final_reflection: string | null
     is_online: boolean
     is_submitted: boolean
     needs_help: boolean
+    requested_extension: boolean
+    extension_requested_at: string | null
     last_active_at: string
     student_id: string
 }
@@ -426,6 +429,7 @@ Agora 토론 플랫폼에서 생성됨`
     const onlineCount = participants.filter(p => p.is_online).length
     const submittedCount = participants.filter(p => p.is_submitted).length
     const needsHelpCount = participants.filter(p => p.needs_help).length
+    const extensionCount = participants.filter(p => p.requested_extension).length
     const stanceCounts = participants.reduce((acc, p) => {
         if (p.stance) acc[p.stance] = (acc[p.stance] || 0) + 1
         return acc
@@ -578,6 +582,21 @@ Agora 토론 플랫폼에서 생성됨`
                                 <div>
                                     <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest">도움 요청</p>
                                     <p className="font-bold text-amber-500">{needsHelpCount}명</p>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+                    {extensionCount > 0 && (
+                        <>
+                            <div className="h-8 w-px bg-zinc-200" />
+                            <div className="flex items-center gap-4">
+                                <div className="w-11 h-11 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-500">
+                                    <Clock className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-extrabold text-orange-600 uppercase tracking-widest">연장 요청</p>
+                                    <p className="font-bold text-orange-500">{extensionCount}명</p>
                                 </div>
                             </div>
                         </>
@@ -823,9 +842,18 @@ Agora 토론 플랫폼에서 생성됨`
 
                                     {participants.find(p => p.id === selectedParticipant)?.stance_statement && (
                                         <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-200">
-                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">최종 입장문</span>
+                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">입장 설명</span>
                                             <p className="text-sm font-medium leading-relaxed text-zinc-600 italic">
                                                 "{participants.find(p => p.id === selectedParticipant)?.stance_statement}"
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {participants.find(p => p.id === selectedParticipant)?.final_reflection && (
+                                        <div className="bg-purple-50 rounded-2xl p-4 border border-purple-200">
+                                            <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest block mb-2">최종 정리 (Reflection)</span>
+                                            <p className="text-sm font-medium leading-relaxed text-purple-700 italic">
+                                                "{participants.find(p => p.id === selectedParticipant)?.final_reflection}"
                                             </p>
                                         </div>
                                     )}

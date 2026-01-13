@@ -162,7 +162,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
             }, { status: 400 })
         }
 
-        const { stance, stance_statement, is_submitted, needs_help, is_online } = validation.data
+        const { stance, stance_statement, final_reflection, is_submitted, needs_help, is_online, requested_extension } = validation.data
 
         // Get participant record
         const { data: participant } = await supabase
@@ -183,6 +183,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
         if (stance !== undefined) updateData.stance = stance
         if (stance_statement !== undefined) updateData.stance_statement = stance_statement
+        if (final_reflection !== undefined) updateData.final_reflection = final_reflection
         if (is_submitted !== undefined) updateData.is_submitted = is_submitted
         if (needs_help !== undefined) {
             updateData.needs_help = needs_help
@@ -191,6 +192,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
             }
         }
         if (is_online !== undefined) updateData.is_online = is_online
+        if (requested_extension !== undefined) {
+            updateData.requested_extension = requested_extension
+            if (requested_extension) {
+                updateData.extension_requested_at = new Date().toISOString()
+            }
+        }
 
         const { data: updated, error } = await supabase
             .from('discussion_participants')

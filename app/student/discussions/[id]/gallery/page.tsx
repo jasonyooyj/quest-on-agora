@@ -16,6 +16,7 @@ interface Submission {
     display_name: string | null
     stance: string | null
     stance_statement: string | null
+    final_reflection: string | null
     is_submitted: boolean
     created_at: string
     likeCount: number
@@ -156,8 +157,8 @@ export default function GalleryPage() {
                                     key={stance}
                                     onClick={() => setStanceFilter(stance)}
                                     className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${stanceFilter === stance
-                                            ? 'bg-white text-black shadow-sm ring-1 ring-black/5'
-                                            : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
+                                        ? 'bg-white text-black shadow-sm ring-1 ring-black/5'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
                                         }`}
                                 >
                                     {stance === 'all' ? '전체' :
@@ -242,19 +243,35 @@ export default function GalleryPage() {
                                 </div>
 
                                 {/* Statement */}
-                                <div className="px-5 pb-5">
+                                <div className="px-5 pb-4">
                                     <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground/80 font-normal">
                                         {submission.stance_statement || '(입장 설명 없음)'}
                                     </p>
                                 </div>
+
+                                {/* Final Reflection - only show if exists */}
+                                {submission.final_reflection && (
+                                    <div className="px-5 pb-5">
+                                        <div className="border-t border-border/30 pt-4">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider bg-purple-100 px-2 py-0.5 rounded-full">
+                                                    최종 정리
+                                                </span>
+                                            </div>
+                                            <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-muted-foreground italic">
+                                                "{submission.final_reflection}"
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Actions */}
                                 <div className="px-5 py-4 border-t border-border/40 bg-muted/10 flex items-center gap-3">
                                     <button
                                         onClick={() => handleLike(submission.id, submission.hasLiked)}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${submission.hasLiked
-                                                ? 'bg-rose-500/10 text-rose-600 ring-1 ring-rose-500/20'
-                                                : 'hover:bg-black/5 text-muted-foreground hover:text-foreground'
+                                            ? 'bg-rose-500/10 text-rose-600 ring-1 ring-rose-500/20'
+                                            : 'hover:bg-black/5 text-muted-foreground hover:text-foreground'
                                             }`}
                                     >
                                         <Heart className={`w-3.5 h-3.5 ${submission.hasLiked ? 'fill-current' : ''}`} />
@@ -263,8 +280,8 @@ export default function GalleryPage() {
                                     <button
                                         onClick={() => setExpandedId(expandedId === submission.id ? null : submission.id)}
                                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 ${expandedId === submission.id
-                                                ? 'bg-indigo-500/10 text-indigo-600 ring-1 ring-indigo-500/20'
-                                                : 'hover:bg-black/5 text-muted-foreground hover:text-foreground'
+                                            ? 'bg-indigo-500/10 text-indigo-600 ring-1 ring-indigo-500/20'
+                                            : 'hover:bg-black/5 text-muted-foreground hover:text-foreground'
                                             }`}
                                     >
                                         <MessageCircle className="w-3.5 h-3.5" />

@@ -20,7 +20,7 @@ interface DiscussionSettings {
 }
 
 // System prompts for standard modes
-import { getDiscussionPromptTemplate } from '@/lib/prompts'
+import { getDiscussionPromptTemplate, getWrapupPromptTemplate } from '@/lib/prompts'
 
 // System prompts for standard modes
 // Now handling via imported getDiscussionSystemPrompt
@@ -98,7 +98,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const userTurns = history?.filter(m => m.role === 'user').length || 0
         // If duration is null (unlimited), maxTurns should be ignored
         const isUnlimited = settings?.duration === null
-        const maxTurns = settings?.maxTurns || 10
+        const maxTurns = settings?.maxTurns || 15
+        // Wrap-up triggers one turn before maxTurns
         const isClosing = !isUnlimited && userTurns >= maxTurns - 1
 
         // Initialize ChatOpenAI with streaming if requested
@@ -127,7 +128,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                         const isStarting = !userTurns && (!userMessage || userMessage.trim() === '')
                         const inputMessage = userMessage || ''
 
-                        const promptTemplate = getDiscussionPromptTemplate(aiMode, isStarting)
+                        // Use wrap-up prompt if this is the final turn
+                        const promptTemplate = isClosing
+                            ? getWrapupPromptTemplate(aiMode)
+                            : getDiscussionPromptTemplate(aiMode, isStarting)
 
                         const chain = RunnableSequence.from([
                             promptTemplate,
@@ -160,7 +164,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                                 response_id: 'langchain-streamed'
                             })
 
-                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`))
+                        // Include isClosing flag so frontend knows to offer extension option
+                        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true, isClosing })}
+
+`))
                         controller.close()
                     } catch (error) {
                         console.error('Streaming error:', error)
@@ -188,7 +195,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
         // Unified Logic for Non-streaming
         const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
-        const promptTemplate = getDiscussionPromptTemplate(aiMode, isStarting)
+
+        // Use wrap-up prompt if this is the final turn
+        const promptTemplate = isClosing
+            ? getWrapupPromptTemplate(aiMode)
+            : getDiscussionPromptTemplate(aiMode, isStarting)
 
         const chain = RunnableSequence.from([
             promptTemplate,

@@ -319,7 +319,7 @@ export default function NewDiscussionPage() {
       }
 
       const joinCode = generateJoinCode()
-      const maxTurns = duration === null ? null : Math.max(3, Math.round(duration / 3))
+      const maxTurns = duration === null ? null : Math.max(5, duration)
 
       const labels: Record<string, string> = {
         pro: stanceLabels.pro,
@@ -491,16 +491,14 @@ export default function NewDiscussionPage() {
                   <button
                     type="button"
                     onClick={() => setShowTopicGenerator(!showTopicGenerator)}
-                    className={`w-full p-6 rounded-[2rem] border transition-all flex items-center justify-between group/toggle ${
-                      showTopicGenerator
-                        ? 'bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200'
-                        : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100 hover:border-zinc-300'
-                    }`}
+                    className={`w-full p-6 rounded-[2rem] border transition-all flex items-center justify-between group/toggle ${showTopicGenerator
+                      ? 'bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200'
+                      : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100 hover:border-zinc-300'
+                      }`}
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                        showTopicGenerator ? 'bg-violet-500 text-white' : 'bg-zinc-200 text-zinc-500 group-hover/toggle:bg-zinc-300'
-                      }`}>
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${showTopicGenerator ? 'bg-violet-500 text-white' : 'bg-zinc-200 text-zinc-500 group-hover/toggle:bg-zinc-300'
+                        }`}>
                         <Wand2 className="w-5 h-5" />
                       </div>
                       <div className="text-left">
@@ -512,9 +510,8 @@ export default function NewDiscussionPage() {
                         </p>
                       </div>
                     </div>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      showTopicGenerator ? 'bg-violet-200 text-violet-700' : 'bg-zinc-200 text-zinc-500'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${showTopicGenerator ? 'bg-violet-200 text-violet-700' : 'bg-zinc-200 text-zinc-500'
+                      }`}>
                       {showTopicGenerator ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
                   </button>
@@ -590,18 +587,16 @@ export default function NewDiscussionPage() {
                                       animate={{ opacity: 1, x: 0 }}
                                       transition={{ delay: index * 0.1 }}
                                       onClick={() => handleSelectTopic(index)}
-                                      className={`w-full p-5 rounded-xl text-left transition-all group/topic ${
-                                        selectedTopicIndex === index
-                                          ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
-                                          : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
-                                      }`}
+                                      className={`w-full p-5 rounded-xl text-left transition-all group/topic ${selectedTopicIndex === index
+                                        ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
+                                        : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
+                                        }`}
                                     >
                                       <div className="flex items-start gap-4">
-                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
-                                          selectedTopicIndex === index
-                                            ? 'bg-white/20 text-white'
-                                            : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
-                                        }`}>
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${selectedTopicIndex === index
+                                          ? 'bg-white/20 text-white'
+                                          : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
+                                          }`}>
                                           {selectedTopicIndex === index ? (
                                             <Check className="w-4 h-4" />
                                           ) : (
@@ -609,33 +604,28 @@ export default function NewDiscussionPage() {
                                           )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                          <p className={`font-bold text-sm leading-snug mb-2 ${
-                                            selectedTopicIndex === index ? 'text-white' : 'text-zinc-800'
-                                          }`}>
+                                          <p className={`font-bold text-sm leading-snug mb-2 ${selectedTopicIndex === index ? 'text-white' : 'text-zinc-800'
+                                            }`}>
                                             {topic.title}
                                           </p>
-                                          <p className={`text-xs leading-relaxed line-clamp-2 ${
-                                            selectedTopicIndex === index ? 'text-white/80' : 'text-zinc-500'
-                                          }`}>
+                                          <p className={`text-xs leading-relaxed line-clamp-2 ${selectedTopicIndex === index ? 'text-white/80' : 'text-zinc-500'
+                                            }`}>
                                             {topic.description}
                                           </p>
                                           {topic.stances && (
                                             <div className="flex items-center gap-2 mt-3">
-                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                                                selectedTopicIndex === index
-                                                  ? 'bg-emerald-400/30 text-emerald-100'
-                                                  : 'bg-emerald-100 text-emerald-700'
-                                              }`}>
+                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${selectedTopicIndex === index
+                                                ? 'bg-emerald-400/30 text-emerald-100'
+                                                : 'bg-emerald-100 text-emerald-700'
+                                                }`}>
                                                 {topic.stances.pro}
                                               </span>
-                                              <span className={`text-[10px] ${
-                                                selectedTopicIndex === index ? 'text-white/50' : 'text-zinc-400'
-                                              }`}>vs</span>
-                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
-                                                selectedTopicIndex === index
-                                                  ? 'bg-rose-400/30 text-rose-100'
-                                                  : 'bg-rose-100 text-rose-700'
-                                              }`}>
+                                              <span className={`text-[10px] ${selectedTopicIndex === index ? 'text-white/50' : 'text-zinc-400'
+                                                }`}>vs</span>
+                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${selectedTopicIndex === index
+                                                ? 'bg-rose-400/30 text-rose-100'
+                                                : 'bg-rose-100 text-rose-700'
+                                                }`}>
                                                 {topic.stances.con}
                                               </span>
                                             </div>
