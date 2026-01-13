@@ -9,7 +9,7 @@ export function ProblemSolutionSection() {
         <section className="py-24 lg:py-32">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
                 <div className="text-center mb-16">
-                    <span className="tag">아고라인가요?</span>
+                    <span className="tag">왜 아고라인가요?</span>
                     <h2 className="mt-6 text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-600">
                         기존 토론 수업의 <span className="text-primary">한계를 넘어서</span>
                     </h2>

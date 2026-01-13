@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
@@ -22,7 +22,8 @@ import {
   Sparkles,
   Brain,
   Gauge,
-  UserCircle2
+  UserCircle2,
+  Search
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -60,6 +61,9 @@ export default function NewDiscussionPage() {
   const [stanceLabels, setStanceLabels] = useState({ pro: '찬성', con: '반대' })
   const [additionalStances, setAdditionalStances] = useState<string[]>([])
   const [duration, setDuration] = useState(15)
+  const [previews, setPreviews] = useState<Record<string, string>>({})
+  const [isFetchingPreviews, setIsFetchingPreviews] = useState(false)
+  const previewTimeoutRef = useRef<NodeJS.Timeout>(null)
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<DiscussionFormInput>({
     resolver: zodResolver(discussionSchema),
@@ -69,6 +73,42 @@ export default function NewDiscussionPage() {
   })
 
   const selectedAiMode = watch('aiMode')
+  const title = watch('title')
+  const description = watch('description')
+
+  useEffect(() => {
+    if (!title || title.length < 5) {
+      setPreviews({})
+      return
+    }
+
+    if (previewTimeoutRef.current) {
+      clearTimeout(previewTimeoutRef.current)
+    }
+
+    previewTimeoutRef.current = setTimeout(async () => {
+      setIsFetchingPreviews(true)
+      try {
+        const response = await fetch('/api/instructor/discussion-preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description })
+        })
+        const data = await response.json()
+        if (data.previews) {
+          setPreviews(data.previews)
+        }
+      } catch (error) {
+        console.error('Error fetching previews:', error)
+      } finally {
+        setIsFetchingPreviews(false)
+      }
+    }, 1500) // 1.5s debounce to avoid over-calling
+
+    return () => {
+      if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current)
+    }
+  }, [title, description])
 
   const onSubmit = async (data: DiscussionFormInput) => {
     setIsLoading(true)
@@ -281,6 +321,101 @@ export default function NewDiscussionPage() {
                     </label>
                   )
                 })}
+              </div>
+
+              {/* Real-time Preview Section */}
+              <div className="mt-12 pt-12 border-t border-zinc-200">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                      <Search className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-lg font-bold text-zinc-900">AI 모드별 첫 메시지 예시</h3>
+                  </div>
+                  {isFetchingPreviews && (
+                    <div className="flex items-center gap-2 text-primary font-bold text-xs">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      예시 생성 중...
+                    </div>
+                  )}
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {title && title.length >= 2 ? (
+                    <motion.div
+                      key="preview-content"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="grid grid-cols-1 gap-6"
+                    >
+                      <div className="relative p-8 rounded-[2rem] bg-zinc-900 text-zinc-100 shadow-2xl overflow-hidden group/preview">
+                        <div className="absolute top-0 right-0 p-4">
+                          <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedAiMode === 'socratic' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                            selectedAiMode === 'balanced' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' :
+                              selectedAiMode === 'debate' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
+                                'bg-zinc-700 text-zinc-400 border border-zinc-600'
+                            }`}>
+                            {aiModeOptions.find(o => o.value === selectedAiMode)?.label} 모드 활성화됨
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-5">
+                          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${selectedAiMode === 'socratic' ? 'bg-emerald-500 text-white' :
+                            selectedAiMode === 'balanced' ? 'bg-blue-500 text-white' :
+                              selectedAiMode === 'debate' ? 'bg-rose-500 text-white' :
+                                'bg-zinc-700 text-zinc-300'
+                            }`}>
+                            {(() => {
+                              const Icon = aiModeOptions.find(o => o.value === selectedAiMode)?.icon || Brain
+                              return <Icon className="w-6 h-6" />
+                            })()}
+                          </div>
+                          <div className="space-y-4 flex-1">
+                            <div className="space-y-2">
+                              <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest">AI Tutor</p>
+                              {previews[selectedAiMode] ? (
+                                <motion.p
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  className="text-lg font-medium leading-relaxed italic"
+                                >
+                                  "{previews[selectedAiMode]}"
+                                </motion.p>
+                              ) : (
+                                <div className="space-y-3 pt-2">
+                                  <div className="h-4 bg-zinc-800 rounded-full w-3/4 animate-pulse" />
+                                  <div className="h-4 bg-zinc-800 rounded-full w-1/2 animate-pulse" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Background flare */}
+                        <div className={`absolute -bottom-20 -right-20 w-60 h-60 rounded-full blur-[80px] pointer-events-none opacity-20 ${selectedAiMode === 'socratic' ? 'bg-emerald-500' :
+                          selectedAiMode === 'balanced' ? 'bg-blue-500' :
+                            selectedAiMode === 'debate' ? 'bg-rose-500' :
+                              'bg-zinc-500'
+                          }`} />
+                      </div>
+                      <p className="mt-2 text-center text-xs text-zinc-400 font-medium">
+                        주제를 구체적으로 작성할수록 더 정교한 첫 질문을 생성합니다.
+                      </p>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="preview-placeholder"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="p-12 rounded-[2rem] border border-dashed border-zinc-200 flex flex-col items-center justify-center text-zinc-400 gap-4"
+                    >
+                      <Sparkles className="w-8 h-8 opacity-20" />
+                      <p className="text-sm font-medium">토론 주제를 입력하면 AI 모드별 예시를 볼 수 있습니다.</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
