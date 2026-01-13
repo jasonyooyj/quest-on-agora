@@ -14,7 +14,9 @@ import { toast } from 'sonner'
 const registerSchema = z.object({
     name: z.string().min(2, '이름을 입력해주세요'),
     email: z.string().email('올바른 이메일을 입력해주세요'),
-    password: z.string().min(6, '비밀번호는 6자 이상이어야 합니다'),
+    password: z.string()
+        .min(6, '비밀번호는 6자 이상이어야 합니다')
+        .regex(/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/, '비밀번호는 영문, 숫자, 특수문자만 사용 가능합니다'),
     confirmPassword: z.string(),
     role: z.enum(['instructor', 'student']),
     studentNumber: z.string().optional(),
@@ -61,6 +63,12 @@ export default function RegisterPage() {
         },
     })
 
+    // 비밀번호 입력 시 영문, 숫자, 특수문자만 허용
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'password' | 'confirmPassword') => {
+        const filtered = e.target.value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/g, '')
+        setValue(field, filtered)
+    }
+
     const onSubmit = async (data: RegisterForm) => {
         setIsLoading(true)
         try {
@@ -82,7 +90,17 @@ export default function RegisterPage() {
                 return
             }
 
+            // 이미 가입된 이메일인지 확인 (identities가 비어있으면 이미 존재하는 계정)
+            if (authData.user && (!authData.user.identities || authData.user.identities.length === 0)) {
+                toast.error('이미 가입된 이메일입니다. 로그인 페이지에서 로그인하거나 비밀번호를 재설정해주세요.')
+                return
+            }
+
             if (authData.user) {
+                // 이메일 확인 페이지에서 재발송을 위해 이메일 저장
+                localStorage.setItem('pendingConfirmEmail', data.email)
+                localStorage.setItem('lastEmailSentAt', Date.now().toString())
+
                 // Use server-side API route to bypass RLS
                 const profileResponse = await fetch('/api/auth/profile', {
                     method: 'POST',
@@ -320,9 +338,12 @@ export default function RegisterPage() {
                                     type="password"
                                     placeholder="••••••••"
                                     className="ios-input pl-12 h-14"
-                                    {...register('password')}
+                                    {...register('password', {
+                                        onChange: (e) => handlePasswordChange(e, 'password')
+                                    })}
                                 />
                             </div>
+                            <p className="text-[10px] text-zinc-400 ml-1">영문, 숫자, 특수문자만 사용 가능</p>
                             {errors.password && (
                                 <p className="mt-1.5 text-xs text-red-500 font-medium ml-1">{errors.password.message}</p>
                             )}
@@ -339,7 +360,9 @@ export default function RegisterPage() {
                                     type="password"
                                     placeholder="••••••••"
                                     className="ios-input pl-12 h-14"
-                                    {...register('confirmPassword')}
+                                    {...register('confirmPassword', {
+                                        onChange: (e) => handlePasswordChange(e, 'confirmPassword')
+                                    })}
                                 />
                             </div>
                             {errors.confirmPassword && (

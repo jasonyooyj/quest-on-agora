@@ -1,10 +1,88 @@
 'use client'
 
+import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Mail, ArrowRight, Inbox, Search, MousePointer } from 'lucide-react'
+import { Mail, ArrowRight, Inbox, Search, MousePointer, RefreshCw, Loader2, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
+import { getSupabaseClient } from '@/lib/supabase-client'
+import { toast } from 'sonner'
+
+const RESEND_COOLDOWN = 60 // 60초 쿨다운
 
 export default function ConfirmEmailPage() {
+    const [email, setEmail] = useState<string | null>(null)
+    const [cooldown, setCooldown] = useState(0)
+    const [isResending, setIsResending] = useState(false)
+    const [resendSuccess, setResendSuccess] = useState(false)
+
+    // 로컬 스토리지에서 이메일 가져오기
+    useEffect(() => {
+        const savedEmail = localStorage.getItem('pendingConfirmEmail')
+        if (savedEmail) {
+            setEmail(savedEmail)
+        }
+
+        // 마지막 발송 시간 확인하여 쿨다운 계산
+        const lastSent = localStorage.getItem('lastEmailSentAt')
+        if (lastSent) {
+            const elapsed = Math.floor((Date.now() - parseInt(lastSent)) / 1000)
+            const remaining = RESEND_COOLDOWN - elapsed
+            if (remaining > 0) {
+                setCooldown(remaining)
+            }
+        }
+    }, [])
+
+    // 쿨다운 타이머
+    useEffect(() => {
+        if (cooldown <= 0) return
+
+        const timer = setInterval(() => {
+            setCooldown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer)
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+
+        return () => clearInterval(timer)
+    }, [cooldown])
+
+    const handleResendEmail = useCallback(async () => {
+        if (!email || cooldown > 0 || isResending) return
+
+        setIsResending(true)
+        setResendSuccess(false)
+
+        try {
+            const supabase = getSupabaseClient()
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email: email,
+            })
+
+            if (error) {
+                toast.error(error.message)
+                return
+            }
+
+            // 성공 시 쿨다운 시작
+            localStorage.setItem('lastEmailSentAt', Date.now().toString())
+            setCooldown(RESEND_COOLDOWN)
+            setResendSuccess(true)
+            toast.success('확인 이메일을 다시 보냈습니다!')
+
+            // 3초 후 성공 상태 초기화
+            setTimeout(() => setResendSuccess(false), 3000)
+        } catch (error) {
+            toast.error('이메일 재발송 중 오류가 발생했습니다')
+        } finally {
+            setIsResending(false)
+        }
+    }, [email, cooldown, isResending])
+
     return (
         <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
             {/* Background Blobs */}
@@ -37,12 +115,17 @@ export default function ConfirmEmailPage() {
                     </h2>
                     <p className="text-zinc-600 leading-relaxed">
                         회원가입이 거의 완료되었습니다!<br />
-                        입력하신 이메일 주소로 확인 링크를 보내드렸습니다.
+                        {email ? (
+                            <span className="font-medium text-zinc-800">{email}</span>
+                        ) : (
+                            '입력하신 이메일 주소'
+                        )}
+                        로 확인 링크를 보내드렸습니다.
                     </p>
                 </div>
 
                 {/* Steps */}
-                <div className="space-y-4 mb-10">
+                <div className="space-y-4 mb-8">
                     <div className="flex items-center gap-4 p-4 rounded-xl bg-zinc-50 border border-zinc-100">
                         <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
                             <Inbox className="w-5 h-5 text-indigo-600" />
@@ -79,6 +162,42 @@ export default function ConfirmEmailPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Resend Email Button */}
+                {email && (
+                    <div className="mb-6">
+                        <button
+                            onClick={handleResendEmail}
+                            disabled={cooldown > 0 || isResending}
+                            className={`w-full py-3 rounded-lg border font-medium transition-all flex items-center justify-center gap-2 text-sm ${
+                                cooldown > 0 || isResending
+                                    ? 'bg-zinc-50/50 border-zinc-100 text-zinc-300 cursor-not-allowed'
+                                    : resendSuccess
+                                    ? 'bg-green-50 border-green-200 text-green-600'
+                                    : 'bg-white border-zinc-200 text-zinc-500 hover:border-primary hover:text-primary hover:bg-primary/5'
+                            }`}
+                        >
+                            {isResending ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    <span>발송 중...</span>
+                                </>
+                            ) : resendSuccess ? (
+                                <>
+                                    <CheckCircle className="w-4 h-4" />
+                                    <span>발송 완료</span>
+                                </>
+                            ) : cooldown > 0 ? (
+                                <span className="text-xs text-zinc-300">{cooldown}초 후 재발송 가능</span>
+                            ) : (
+                                <>
+                                    <RefreshCw className="w-4 h-4" />
+                                    <span>이메일 다시 보내기</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                )}
 
                 {/* Tips */}
                 <div className="text-center text-sm text-zinc-500 mb-8 p-3 rounded-lg bg-amber-50 border border-amber-100">

@@ -13,7 +13,9 @@ import { toast } from 'sonner'
 
 const loginSchema = z.object({
     email: z.string().email('올바른 이메일을 입력해주세요'),
-    password: z.string().min(6, '비밀번호는 6자 이상이어야 합니다'),
+    password: z.string()
+        .min(6, '비밀번호는 6자 이상이어야 합니다')
+        .regex(/^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]*$/, '비밀번호는 영문, 숫자, 특수문자만 사용 가능합니다'),
 })
 
 type LoginFormData = z.infer<typeof loginSchema>
@@ -25,9 +27,15 @@ function LoginForm() {
     const [oauthLoading, setOauthLoading] = useState<string | null>(null)
     const redirect = searchParams.get('redirect') || '/instructor'
 
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     })
+
+    // 비밀번호 입력 시 영문, 숫자, 특수문자만 허용
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const filtered = e.target.value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/g, '')
+        setValue('password', filtered)
+    }
 
     const onSubmit = async (data: LoginFormData) => {
         setIsLoading(true)
@@ -156,7 +164,9 @@ function LoginForm() {
                                 type="password"
                                 placeholder="••••••••"
                                 className="ios-input pl-12 h-14"
-                                {...register('password')}
+                                {...register('password', {
+                                    onChange: handlePasswordChange
+                                })}
                             />
                         </div>
                         {errors.password && (
