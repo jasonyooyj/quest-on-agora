@@ -23,7 +23,12 @@ import {
   Brain,
   Gauge,
   UserCircle2,
-  Search
+  Search,
+  FileText,
+  Wand2,
+  Check,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -43,6 +48,15 @@ const aiModeOptions = [
   { value: 'debate', label: '디베이트', desc: '도전적이고 예리한 반론', icon: Gauge, color: 'rose' },
   { value: 'minimal', label: '최소 개입', desc: '자율적인 토론 환경', icon: UserCircle2, color: 'zinc' },
 ]
+
+interface GeneratedTopic {
+  title: string
+  description: string
+  stances?: {
+    pro: string
+    con: string
+  }
+}
 
 function generateJoinCode(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -64,6 +78,13 @@ export default function NewDiscussionPage() {
   const [previews, setPreviews] = useState<Record<string, string>>({})
   const [isFetchingPreviews, setIsFetchingPreviews] = useState(false)
   const previewTimeoutRef = useRef<NodeJS.Timeout>(null)
+
+  // AI Topic Generation states
+  const [showTopicGenerator, setShowTopicGenerator] = useState(false)
+  const [learningMaterial, setLearningMaterial] = useState('')
+  const [isGeneratingTopics, setIsGeneratingTopics] = useState(false)
+  const [generatedTopics, setGeneratedTopics] = useState<GeneratedTopic[]>([])
+  const [selectedTopicIndex, setSelectedTopicIndex] = useState<number | null>(null)
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<DiscussionFormInput>({
     resolver: zodResolver(discussionSchema),
@@ -109,6 +130,63 @@ export default function NewDiscussionPage() {
       if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current)
     }
   }, [title, description])
+
+  const handleGenerateTopics = async () => {
+    if (!learningMaterial.trim()) {
+      toast.error('학습 자료를 입력해주세요')
+      return
+    }
+
+    setIsGeneratingTopics(true)
+    setGeneratedTopics([])
+    setSelectedTopicIndex(null)
+
+    try {
+      const response = await fetch('/api/discussion/generate-topics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ context: learningMaterial })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || '주제 생성에 실패했습니다')
+      }
+
+      if (data.topics && data.topics.length > 0) {
+        setGeneratedTopics(data.topics)
+        toast.success(`${data.topics.length}개의 토론 주제가 생성되었습니다`)
+      } else {
+        toast.error('생성된 주제가 없습니다. 다른 자료로 시도해보세요.')
+      }
+    } catch (error) {
+      console.error('Error generating topics:', error)
+      toast.error(error instanceof Error ? error.message : '주제 생성 중 오류가 발생했습니다')
+    } finally {
+      setIsGeneratingTopics(false)
+    }
+  }
+
+  const handleSelectTopic = (index: number) => {
+    const topic = generatedTopics[index]
+    setSelectedTopicIndex(index)
+
+    // Auto-fill the form
+    setValue('title', topic.title)
+    setValue('description', topic.description)
+
+    // If topic has custom stances, enable and set them
+    if (topic.stances) {
+      setUseCustomStances(true)
+      setStanceLabels({
+        pro: topic.stances.pro,
+        con: topic.stances.con
+      })
+    }
+
+    toast.success('선택한 주제가 적용되었습니다')
+  }
 
   const onSubmit = async (data: DiscussionFormInput) => {
     setIsLoading(true)
@@ -240,6 +318,183 @@ export default function NewDiscussionPage() {
               </div>
 
               <div className="space-y-10">
+                {/* AI Topic Generator Toggle */}
+                <div className="space-y-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowTopicGenerator(!showTopicGenerator)}
+                    className={`w-full p-6 rounded-[2rem] border transition-all flex items-center justify-between group/toggle ${
+                      showTopicGenerator
+                        ? 'bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200'
+                        : 'bg-zinc-50 border-zinc-200 hover:bg-zinc-100 hover:border-zinc-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                        showTopicGenerator ? 'bg-violet-500 text-white' : 'bg-zinc-200 text-zinc-500 group-hover/toggle:bg-zinc-300'
+                      }`}>
+                        <Wand2 className="w-5 h-5" />
+                      </div>
+                      <div className="text-left">
+                        <p className={`font-bold ${showTopicGenerator ? 'text-violet-900' : 'text-zinc-700'}`}>
+                          AI 주제 추천받기
+                        </p>
+                        <p className="text-xs text-zinc-500 font-medium">
+                          학습 자료를 입력하면 AI가 토론 주제를 추천해드립니다
+                        </p>
+                      </div>
+                    </div>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                      showTopicGenerator ? 'bg-violet-200 text-violet-700' : 'bg-zinc-200 text-zinc-500'
+                    }`}>
+                      {showTopicGenerator ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </div>
+                  </button>
+
+                  <AnimatePresence>
+                    {showTopicGenerator && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-8 rounded-[2rem] bg-gradient-to-br from-violet-50 via-purple-50 to-indigo-50 border border-violet-200 space-y-6">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-4 h-4 text-violet-600" />
+                              <label className="text-sm font-bold text-violet-700">학습 자료 입력</label>
+                            </div>
+                            <textarea
+                              value={learningMaterial}
+                              onChange={(e) => setLearningMaterial(e.target.value)}
+                              placeholder="강의 노트, 교재 내용, 논문 초록 등 토론 주제 생성에 참고할 자료를 붙여넣으세요..."
+                              className="w-full min-h-[160px] p-5 rounded-xl bg-white/80 border border-violet-200 text-zinc-900 placeholder:text-zinc-400 font-medium text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-violet-300 transition-all resize-none"
+                            />
+                            <p className="text-[10px] text-violet-600 font-medium px-1">
+                              최대 8,000자까지 입력 가능합니다. 더 자세한 내용일수록 정확한 주제가 생성됩니다.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleGenerateTopics}
+                            disabled={isGeneratingTopics || !learningMaterial.trim()}
+                            className="w-full h-14 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold flex items-center justify-center gap-3 hover:from-violet-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-500/20"
+                          >
+                            {isGeneratingTopics ? (
+                              <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                AI가 주제를 분석하고 있습니다...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-5 h-5" />
+                                토론 주제 추천받기
+                              </>
+                            )}
+                          </button>
+
+                          {/* Generated Topics List */}
+                          <AnimatePresence>
+                            {generatedTopics.length > 0 && (
+                              <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="space-y-4 pt-4 border-t border-violet-200"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <p className="text-sm font-bold text-violet-700">
+                                    추천 토론 주제 ({generatedTopics.length}개)
+                                  </p>
+                                  <p className="text-[10px] text-violet-500 font-medium">
+                                    클릭하여 선택하세요
+                                  </p>
+                                </div>
+
+                                <div className="space-y-3">
+                                  {generatedTopics.map((topic, index) => (
+                                    <motion.button
+                                      key={index}
+                                      type="button"
+                                      initial={{ opacity: 0, x: -20 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      onClick={() => handleSelectTopic(index)}
+                                      className={`w-full p-5 rounded-xl text-left transition-all group/topic ${
+                                        selectedTopicIndex === index
+                                          ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
+                                          : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
+                                      }`}
+                                    >
+                                      <div className="flex items-start gap-4">
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${
+                                          selectedTopicIndex === index
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
+                                        }`}>
+                                          {selectedTopicIndex === index ? (
+                                            <Check className="w-4 h-4" />
+                                          ) : (
+                                            <span className="text-sm font-bold">{index + 1}</span>
+                                          )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className={`font-bold text-sm leading-snug mb-2 ${
+                                            selectedTopicIndex === index ? 'text-white' : 'text-zinc-800'
+                                          }`}>
+                                            {topic.title}
+                                          </p>
+                                          <p className={`text-xs leading-relaxed line-clamp-2 ${
+                                            selectedTopicIndex === index ? 'text-white/80' : 'text-zinc-500'
+                                          }`}>
+                                            {topic.description}
+                                          </p>
+                                          {topic.stances && (
+                                            <div className="flex items-center gap-2 mt-3">
+                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                                                selectedTopicIndex === index
+                                                  ? 'bg-emerald-400/30 text-emerald-100'
+                                                  : 'bg-emerald-100 text-emerald-700'
+                                              }`}>
+                                                {topic.stances.pro}
+                                              </span>
+                                              <span className={`text-[10px] ${
+                                                selectedTopicIndex === index ? 'text-white/50' : 'text-zinc-400'
+                                              }`}>vs</span>
+                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                                                selectedTopicIndex === index
+                                                  ? 'bg-rose-400/30 text-rose-100'
+                                                  : 'bg-rose-100 text-rose-700'
+                                              }`}>
+                                                {topic.stances.con}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </motion.button>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Divider */}
+                {showTopicGenerator && (
+                  <div className="flex items-center gap-4 py-2">
+                    <div className="flex-1 h-px bg-zinc-200" />
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">또는 직접 입력</span>
+                    <div className="flex-1 h-px bg-zinc-200" />
+                  </div>
+                )}
+
                 <div className="space-y-4">
                   <label className="text-sm font-black text-zinc-500 uppercase tracking-widest block px-1">토론 주제 <span className="text-primary">*</span></label>
                   <div className="relative group/input">

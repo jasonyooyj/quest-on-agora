@@ -9,7 +9,7 @@
 ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5-412991?style=for-the-badge&logo=openai)
 ![Playwright](https://img.shields.io/badge/Playwright-E2E-45ba4b?style=for-the-badge&logo=playwright)
 
-**AI 소크라테스 대화로 학생의 비판적 사고를 이끌어내는 현대적인 토론 플랫폼**
+**AI와의 깊이 있는 대화로 학생의 비판적 사고를 이끌어내는 현대적인 토론 플랫폼**
 
 [데모 보기](https://your-demo-url.vercel.app) • [이슈 보고](https://github.com/your-repo/issues)
 
@@ -101,10 +101,10 @@
 - 언제든 입장 변경 가능
 
 #### 🤖 AI 맞춤형 토론 모드
-- **소크라테스 산파술 (Socratic)**: AI가 학생의 무의식적 믿음에 대해 "왜?"라고 질문하며 스스로 모순을 발견하도록 유도
-- **악마의 변호인 (Debate)**: LangChain 기반의 **Chain of Thought (CoT)** 알고리즘을 사용하여 학생과 논리적으로 치열하게 논쟁
-- **균형 지원 (Balanced)**: 학생의 의견에 공감하며 부드럽게 다른 관점을 제시하여 사고의 확장을 유도
-- **최소 개입 (Minimal)**: 학생의 발언을 요약하고 확인하며 토론의 흐름을 방해하지 않고 촉진
+- **소크라테스 산파술 (Socratic)**: **Chain of Thought (CoT)** 기반. 학생의 전제를 분석하고 "왜?"라고 질문하여 심층적인 사고를 유도하는 '지적 조력자'
+- **악마의 변호인 (Debate)**: **Chain of Thought (CoT)** 기반. 학생의 논리적 약점을 파악하고 치열하게 반박하는 '악마의 변호인'
+- **균형 지원 (Balanced)**: **Chain of Thought (CoT)** 기반. 학생의 입장을 공감하고 다양한 관점을 제안하는 '토론 파트너'
+- **최소 개입 (Minimal)**: **Chain of Thought (CoT)** 기반. 학생의 발언을 경청하고 자유로운 발언을 지지하는 '리스너'
 
 #### ✍️ 근거 작성 및 관리
 - 리치 텍스트 에디터로 근거 작성

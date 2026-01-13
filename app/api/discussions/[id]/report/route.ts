@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { openai, AI_MODEL } from '@/lib/openai'
+import { DISCUSSION_REPORT_SYSTEM_PROMPT } from '@/lib/prompts'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -164,8 +165,7 @@ async function generateAISummary(
       messages: [
         {
           role: 'system',
-          content: `당신은 교육 토론 분석 전문가입니다. 주어진 토론 데이터를 바탕으로 간결하고 통찰력 있는 요약을 작성해주세요.
-응답은 한국어로 해주세요.`
+          content: DISCUSSION_REPORT_SYSTEM_PROMPT
         },
         {
           role: 'user',

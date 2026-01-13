@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Agora - 대학 토론 플랫폼",
-  description: "AI 소크라테스 대화를 통한 대학 토론 플랫폼. 교수와 학생이 함께하는 깊이 있는 토론 경험.",
+  description: "AI 기반 대학 토론 플랫폼. 교수와 학생이 함께하는 깊이 있는 토론 경험.",
   icons: {
     icon: "/favicon.ico",
   },

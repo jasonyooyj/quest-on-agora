@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { decompressData } from "@/lib/compression";
 import { getCurrentUser } from "@/lib/auth";
 import { openai, AI_MODEL } from "@/lib/openai";
+import { EXAM_SUMMARY_SYSTEM_PROMPT } from "@/lib/prompts";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -87,22 +88,21 @@ export async function POST(request: NextRequest) {
     const questionsText = (exam.questions as Record<string, unknown>[])
       .map((q: Record<string, unknown>, i: number) => {
         const sub = processedSubmissions.find((s) => s.q_idx === (q.idx ?? i));
-        return `문제 ${i + 1}: ${q.prompt || q.text}\n학생 답안: ${
-          sub ? sub.answer : "답안 없음"
-        }`;
+        return `문제 ${i + 1}: ${q.prompt || q.text}\n학생 답안: ${sub ? sub.answer : "답안 없음"
+          }`;
       })
       .join("\n\n");
 
     const rubricText = Array.isArray(exam.rubric)
       ? exam.rubric
-          .map(
-            (r: Record<string, unknown>) =>
-              `- ${r.evaluationArea}: ${r.detailedCriteria}`
-          )
-          .join("\n")
+        .map(
+          (r: Record<string, unknown>) =>
+            `- ${r.evaluationArea}: ${r.detailedCriteria}`
+        )
+        .join("\n")
       : "별도의 루브릭 없음";
 
-    const systemPrompt = `당신은 학생의 시험 답안을 깊이 있게 평가하는 전문 교육가 AI입니다. 학생의 답안을 상세하게 분석하여 강점과 약점을 파악하고, 실질적인 조언을 제공해야 합니다. 단순한 나열이 아닌, 논리적 흐름과 근거를 바탕으로 분석해주세요.`;
+    const systemPrompt = EXAM_SUMMARY_SYSTEM_PROMPT;
     const userPrompt = `
 시험 제목: ${exam.title}
 

@@ -20,49 +20,10 @@ interface DiscussionSettings {
 }
 
 // System prompts for standard modes
-const getSystemPrompt = (
-    mode: string,
-    discussionTitle: string,
-    discussionDescription: string | null,
-    stanceLabel?: string,
-    isClosing?: boolean
-) => {
-    const baseContext = `
-당신의 역할은 "${discussionTitle}" 주제에 대한 토론을 안내하는 AI 튜터입니다.
-${discussionDescription ? `토론 설명: ${discussionDescription}` : ''}
-${stanceLabel ? `현재 대화 중인 학생의 입장: "${stanceLabel}"` : ''}
-학생이 비판적 사고를 발전시키고 자신의 주장을 명확히 표현할 수 있도록 도와주세요.
-응답은 한국어로 해주세요. 응답은 간결하고 명확하게 2-4문장으로 작성하세요.
-${isClosing ? '중요: 이제 토론을 마무리할 시간입니다. 학생의 의견을 정리해주거나, 마지막으로 깊이 생각해볼 만한 질문을 던지며 대화를 정중히 종료하세요.' : ''}
-`
+import { getDiscussionPromptTemplate } from '@/lib/prompts'
 
-    switch (mode) {
-        case 'socratic':
-            return `${baseContext}
-당신의 역할은 소크라테스입니다. 학생의 내면에 있는 무의식적인 전제와 믿음을 스스로 발견하도록 이끄는 '산파술(Maieutics)'을 수행하세요:
-- 학생이 당연하게 여기는 가정에 대해 "왜?"라고 끊임없이 물으세요.
-- 표면적인 답변 너머에 있는 근본적인 가치관이나 신념을 탐구하세요.
-- 절대 정답을 주지 말고, 오직 질문을 통해서만 대화를 이끌어가세요.
-- 학생이 자신의 논리에 숨어있는 모순을 스스로 깨닫게 하여, 더 깊은 차원의 앎에 도달하도록 도우세요.`
-
-        case 'balanced':
-            return `${baseContext}
-당신의 역할은 균형 잡힌 토론 파트너입니다:
-- 학생의 의견에 공감을 표하고 좋은 점을 인정하세요
-- 부드럽게 다른 관점도 소개해주세요
-- 질문과 정보 제공의 균형을 유지하세요`
-
-        case 'minimal':
-            return `${baseContext}
-당신의 역할은 최소한의 개입으로 토론을 촉진하는 것입니다:
-- 학생의 발언을 요약하고 확인해주세요
-- 직접적인 피드백이나 정보 제공은 최소화하세요`
-
-        default: // debate will be handled separately w/ Chain of Thought, but fallback here if needed
-            return `${baseContext}
-학생이 자신의 생각을 정리하고 발전시킬 수 있도록 도와주세요.`
-    }
-}
+// System prompts for standard modes
+// Now handling via imported getDiscussionSystemPrompt
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
     try {
@@ -138,60 +99,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                     try {
                         let aiStream: IterableReadableStream<string>
 
-                        if (aiMode === 'debate') {
-                            const debatePrompt = PromptTemplate.fromTemplate(`
-당신은 "{discussionTitle}" 주제에 대해 학생과 치열하게 논쟁하는 '악마의 변호인(Devil's Advocate)'입니다.
-학생의 입장: "{studentStance}" (만약 학생의 입장이 불분명하다면, 그들의 발언을 통해 추론하고 반대 입장을 취하십시오)
+                        // Unified LinkChain Logic for ALL modes
+                        const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
 
-현재 대화 내역:
-{history}
+                        const promptTemplate = getDiscussionPromptTemplate(aiMode)
 
-학생의 마지막 발언: "{input}"
+                        const chain = RunnableSequence.from([
+                            promptTemplate,
+                            chat,
+                            new StringOutputParser()
+                        ])
 
-다음 단계에 따라 논리적으로 사고한 후 답변하십시오 (Chain of Thought):
-1. [주장 분석]: 학생의 핵심 주장과 논거가 무엇인지 파악하십시오.
-2. [약점 포착]: 논리적 비약, 근거 부족, 편향된 시각 등 공격할 지점을 찾으십시오.
-3. [반론 구성]: 학생의 입장과 정반대되는 강력한 반론을 구성하십시오.
-4. [답변 생성]: 예의를 갖추되 절대 물러서지 말고, 날카로운 질문이나 반박으로 응수하십시오.
-   - 학생의 말에 쉽게 동의하거나 "좋은 의견입니다"라고 하지 마십시오.
-   - "하지만", "그렇다면", "간과하고 있는 점은" 등의 표현을 사용하십시오.
-
-최종 답변만 한국어로 출력하십시오. (사고 과정은 내부적으로만 수행하고 출력하지 마십시오)
-`)
-                            const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
-
-                            const chain = RunnableSequence.from([
-                                debatePrompt,
-                                chat,
-                                new StringOutputParser()
-                            ])
-
-                            aiStream = await chain.stream({
-                                discussionTitle: discussion.title,
-                                studentStance: stanceLabel || 'Unknown',
-                                history: historyText,
-                                input: userMessage
-                            })
-                        } else {
-                            const systemPrompt = getSystemPrompt(aiMode, discussion.title, discussion.description, stanceLabel, isClosing)
-                            const messages = [
-                                new SystemMessage(systemPrompt),
-                                ...(history?.map(m =>
-                                    m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
-                                ) || []),
-                                new HumanMessage(userMessage)
-                            ]
-
-                            const messageStream = await chat.stream(messages)
-                            // Convert AIMessageChunk stream to string stream
-                            aiStream = {
-                                [Symbol.asyncIterator]: async function* () {
-                                    for await (const chunk of messageStream) {
-                                        yield chunk.content as string
-                                    }
-                                }
-                            } as IterableReadableStream<string>
-                        }
+                        aiStream = await chain.stream({
+                            discussionTitle: discussion.title,
+                            description: discussion.description || '', // Added description
+                            studentStance: stanceLabel || 'Unknown',
+                            history: historyText,
+                            input: userMessage
+                        })
 
                         for await (const chunk of aiStream) {
                             fullResponse += chunk
@@ -232,56 +157,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Non-streaming response (original behavior)
         let aiResponse = ''
 
-        if (aiMode === 'debate') {
-            const debatePrompt = PromptTemplate.fromTemplate(`
-당신은 "{discussionTitle}" 주제에 대해 학생과 치열하게 논쟁하는 '악마의 변호인(Devil's Advocate)'입니다.
-학생의 입장: "{studentStance}" (만약 학생의 입장이 불분명하다면, 그들의 발언을 통해 추론하고 반대 입장을 취하십시오)
+        // Unified Logic for Non-streaming
+        const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
+        const promptTemplate = getDiscussionPromptTemplate(aiMode)
 
-현재 대화 내역:
-{history}
+        const chain = RunnableSequence.from([
+            promptTemplate,
+            chat,
+            new StringOutputParser()
+        ])
 
-학생의 마지막 발언: "{input}"
-
-다음 단계에 따라 논리적으로 사고한 후 답변하십시오 (Chain of Thought):
-1. [주장 분석]: 학생의 핵심 주장과 논거가 무엇인지 파악하십시오.
-2. [약점 포착]: 논리적 비약, 근거 부족, 편향된 시각 등 공격할 지점을 찾으십시오.
-3. [반론 구성]: 학생의 입장과 정반대되는 강력한 반론을 구성하십시오.
-4. [답변 생성]: 예의를 갖추되 절대 물러서지 말고, 날카로운 질문이나 반박으로 응수하십시오.
-   - 학생의 말에 쉽게 동의하거나 "좋은 의견입니다"라고 하지 마십시오.
-   - "하지만", "그렇다면", "간과하고 있는 점은" 등의 표현을 사용하십시오.
-
-최종 답변만 한국어로 출력하십시오. (사고 과정은 내부적으로만 수행하고 출력하지 마십시오)
-`)
-
-            const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
-
-            const chain = RunnableSequence.from([
-                debatePrompt,
-                chat,
-                new StringOutputParser()
-            ])
-
-            aiResponse = await chain.invoke({
-                discussionTitle: discussion.title,
-                studentStance: stanceLabel || 'Unknown',
-                history: historyText,
-                input: userMessage
-            })
-
-        } else {
-            const systemPrompt = getSystemPrompt(aiMode, discussion.title, discussion.description, stanceLabel, isClosing)
-
-            const messages = [
-                new SystemMessage(systemPrompt),
-                ...(history?.map(m =>
-                    m.role === 'user' ? new HumanMessage(m.content) : new AIMessage(m.content)
-                ) || []),
-                new HumanMessage(userMessage)
-            ]
-
-            const response = await chat.invoke(messages)
-            aiResponse = response.content as string
-        }
+        aiResponse = await chain.invoke({
+            discussionTitle: discussion.title,
+            description: discussion.description || '',
+            studentStance: stanceLabel || 'Unknown',
+            history: historyText,
+            input: userMessage
+        })
 
         // Save AI response to database
         const { data: aiMessage, error: saveError } = await supabase

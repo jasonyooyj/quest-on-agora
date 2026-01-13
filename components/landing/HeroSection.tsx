@@ -6,17 +6,21 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import { HERO_CONTENT } from "@/lib/constants/landing-content";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function HeroSection() {
     const [isDemoOpen, setIsDemoOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const isMobile = useIsMobile();
+
     const { scrollYProgress } = useScroll({
         target: containerRef,
         offset: ["start start", "end start"],
     });
 
-    const heroOpacity = useTransform(scrollYProgress, [0, 0.9], [1, 0]);
-    const heroScale = useTransform(scrollYProgress, [0, 0.9], [1, 0.95]);
+    // Disable scroll-triggered transforms on mobile for performance
+    const heroOpacity = useTransform(scrollYProgress, [0, 0.9], isMobile ? [1, 1] : [1, 0]);
+    const heroScale = useTransform(scrollYProgress, [0, 0.9], isMobile ? [1, 1] : [1, 0.95]);
 
     return (
         <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -169,14 +173,18 @@ export function HeroSection() {
                                     </div>
                                 </div>
                                 <div className="space-y-4">
-                                    {[1, 2, 3].map((i) => (
+                                    {[
+                                        { student: 4, action: "AI 소크라테스 대화 응답 완료", time: "방금 전" },
+                                        { student: 8, action: "논증 심화 질문 생성 완료", time: "1분 전" },
+                                        { student: 12, action: "입장 변화 감지 및 분석 완료", time: "2분 전" },
+                                    ].map((log, i) => (
                                         <div key={i} className="flex items-center gap-5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200 hover:bg-white hover:border-zinc-300 transition-all duration-300 cursor-default group hover:scale-[1.02]">
                                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                                 <CheckCircle2 size={18} />
                                             </div>
                                             <div className="flex-1">
-                                                <div className="text-sm text-zinc-700 font-medium group-hover:text-zinc-900 transition-colors">학생 {i * 4}의 논리적 오류 지적 완료</div>
-                                                <div className="text-xs text-zinc-400 mt-1">방금 전</div>
+                                                <div className="text-sm text-zinc-700 font-medium group-hover:text-zinc-900 transition-colors">학생 {log.student}의 {log.action}</div>
+                                                <div className="text-xs text-zinc-400 mt-1">{log.time}</div>
                                             </div>
                                             <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 group-hover:bg-primary transition-colors" />
                                         </div>
