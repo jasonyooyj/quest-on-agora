@@ -68,6 +68,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       .single()
 
     if (discussionError || !discussion) {
+      console.error('Join code lookup failed:', {
+        joinCode,
+        error: discussionError?.message,
+        code: discussionError?.code,
+        details: discussionError?.details,
+      })
       return NextResponse.json(
         { error: '존재하지 않는 참여 코드입니다' },
         { status: 404 }
