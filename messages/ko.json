@@ -376,7 +376,7 @@
     "Errors": {
       "security": "보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)",
       "rateLimit": "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
-      "invalidCredentials": "이메일 또는 비밀번호가 올바르지 않습니다",
+      "invalidCredentials": "이메일 또는 비밀번호가 올바르지 않습니다. (혹은 이메일 인증이 완료되지 않았을 수 있습니다)",
       "emailNotConfirmed": "📬 이메일 인증을 완료해주세요. 받은편지함을 확인하세요!",
       "socialLoginError": "소셜 로그인 중 오류가 발생했습니다"
     }

@@ -378,7 +378,7 @@
     "Errors": {
       "security": "For security purposes, please try again later. (Wait about 1 min)",
       "rateLimit": "Too many requests. Please try again later.",
-      "invalidCredentials": "Invalid email or password",
+      "invalidCredentials": "Invalid email or password (or email verification might be pending)",
       "emailNotConfirmed": "📬 Please complete email verification. Check your inbox!",
       "socialLoginError": "An error occurred during social login"
     }
