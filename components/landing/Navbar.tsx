@@ -6,6 +6,7 @@ import { useScroll, useMotionValueEvent, motion, AnimatePresence } from "framer-
 import { useState } from "react";
 import { Menu, X, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 export function Navbar() {
     const t = useTranslations('Navbar');
@@ -60,7 +61,7 @@ export function Navbar() {
                 </nav>
 
                 {/* Action Buttons */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-3">
                     <Link
                         href="/login"
                         className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
@@ -72,6 +73,8 @@ export function Navbar() {
                             {t('getStarted')}
                         </Button>
                     </Link>
+                    <div className="w-px h-5 bg-zinc-200 mx-1" />
+                    <LocaleSwitcher />
                 </div>
 
                 {/* Mobile Menu Toggle */}
@@ -104,6 +107,10 @@ export function Navbar() {
                                 </Link>
                             ))}
                             <hr className="border-zinc-200 my-2" />
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-zinc-500">Language</span>
+                                <LocaleSwitcher />
+                            </div>
                             <Link
                                 href="/login"
                                 className="text-lg font-medium text-zinc-600 hover:text-zinc-900"
