@@ -354,44 +354,7 @@
       "description": "이메일이 성공적으로 확인되었습니다.\n이제 로그인하여 아고라를 시작할 수 있습니다.",
       "welcome": "가입을 환영합니다! 토론의 새로운 장을 열어보세요.",
       "loginButton": "로그인하기"
-    }
-  },
-  "Join": {
-    "title": "Agora",
-    "loading": "인증 확인 중...",
-    "unauthorized": {
-      "title": "로그인이 필요합니다",
-      "redirect": "로그인 페이지로 이동합니다..."
     },
-    "joining": {
-      "title": "토론 참여 중",
-      "code": "참여 코드:"
-    },
-    "draft": {
-      "title": "토론 대기 중",
-      "dashboard": "대시보드로 이동"
-    },
-    "closed": {
-      "title": "토론 종료",
-      "dashboard": "대시보드로 이동"
-    },
-    "error": {
-      "title": "참여 실패",
-      "dashboard": "대시보드로 이동",
-      "default": "토론 참여 중 오류가 발생했습니다",
-      "invalidCode": "유효하지 않은 참여 코드입니다",
-      "studentOnly": "학생만 토론에 참여할 수 있습니다",
-      "notFound": "존재하지 않는 참여 코드입니다",
-      "draft": "아직 시작되지 않은 토론입니다",
-      "closed": "종료된 토론입니다"
-    },
-    "footer": "AI 기반 토론 플랫폼",
-    "toasts": {
-        "instructorForbidden": "교수자는 학생으로 참여할 수 없습니다.",
-        "alreadyJoined": "이미 참여 중인 토론입니다",
-        "success": "토론에 참여했습니다!"
-    }
-  },
     "AuthError": {
       "tag": "인증 오류",
       "title": "인증에 실패했습니다",
