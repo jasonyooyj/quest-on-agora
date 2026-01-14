@@ -323,7 +323,7 @@ export default function StudentDashboard() {
           </div>
           <h1 className="text-5xl md:text-6xl font-black tracking-tight text-zinc-900 mb-6 font-display">
             {t.rich('greeting', {
-              name: user?.name,
+              name: user?.name || '',
               span: (chunks) => <span className="text-primary">{chunks}</span>
             })}
           </h1>

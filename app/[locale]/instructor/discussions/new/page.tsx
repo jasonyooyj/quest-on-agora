@@ -780,7 +780,7 @@ export default function NewDiscussionPage() {
                               selectedAiMode === 'debate' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
                                 'bg-zinc-700 text-zinc-400 border border-zinc-600'
                             }`}>
-                            {t('phases.aiTutor.preview.active', { mode: aiModeOptions.find(o => o.value === selectedAiMode)?.label })}
+                            {t('phases.aiTutor.preview.active', { mode: aiModeOptions.find(o => o.value === selectedAiMode)?.label || '' })}
                           </div>
                         </div>
 
