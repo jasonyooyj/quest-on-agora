@@ -108,7 +108,7 @@ export default function StudentDiscussionPage() {
     }
 
     const handleConfirmStance = async () => {
-        if (!participant || !tempStance) return
+        if (!participant || !tempStance || !discussion) return
 
         setIsConfirmingStance(true)
         try {
