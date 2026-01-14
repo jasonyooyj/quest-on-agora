@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function Footer() {
+    const t = useTranslations('Footer');
+
     return (
         <footer className="border-t border-zinc-200 py-12 bg-zinc-50">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -20,19 +23,19 @@ export function Footer() {
                             href="/terms"
                             className="hover:text-zinc-900 transition-colors"
                         >
-                            이용약관
+                            {t('terms')}
                         </Link>
                         <Link
                             href="/privacy"
                             className="hover:text-zinc-900 transition-colors"
                         >
-                            개인정보처리방침
+                            {t('privacy')}
                         </Link>
                         <a
                             href="mailto:questonkr@gmail.com"
                             className="hover:text-zinc-900 transition-colors"
                         >
-                            문의하기
+                            {t('contact')}
                         </a>
                     </div>
 

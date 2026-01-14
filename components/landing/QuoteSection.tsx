@@ -3,28 +3,36 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Quote, ChevronLeft, ChevronRight, GraduationCap, User } from "lucide-react";
-import { TESTIMONIALS } from "@/lib/constants/landing-content";
+import { useTranslations } from "next-intl";
 
 export function QuoteSection() {
+    const t = useTranslations('Quote');
     const [currentIndex, setCurrentIndex] = useState(0);
     const [direction, setDirection] = useState(0);
+
+    const testimonials = Array.from({ length: 3 }, (_, i) => ({
+        text: t(`items.${i}.text`),
+        author: t(`items.${i}.author`),
+        affiliation: t(`items.${i}.affiliation`),
+        role: i === 1 ? "student" : "instructor"
+    }));
 
     useEffect(() => {
         const timer = setInterval(() => {
             setDirection(1);
-            setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+            setCurrentIndex((prev) => (prev + 1) % testimonials.length);
         }, 6000);
         return () => clearInterval(timer);
-    }, []);
+    }, [testimonials.length]);
 
     const handlePrev = () => {
         setDirection(-1);
-        setCurrentIndex((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+        setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
     };
 
     const handleNext = () => {
         setDirection(1);
-        setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+        setCurrentIndex((prev) => (prev + 1) % testimonials.length);
     };
 
     const variants = {
@@ -42,7 +50,7 @@ export function QuoteSection() {
         }),
     };
 
-    const currentTestimonial = TESTIMONIALS[currentIndex];
+    const currentTestimonial = testimonials[currentIndex];
 
     return (
         <section className="py-24 lg:py-40 relative">
@@ -88,7 +96,7 @@ export function QuoteSection() {
                                                     : "bg-primary/10 border-primary/20 text-primary"
                                                 }`}
                                             >
-                                                {currentTestimonial.role === "instructor" ? "PROFESSOR" : "STUDENT"}
+                                                {currentTestimonial.role === "instructor" ? t('professor') : t('student')}
                                             </span>
                                         </div>
                                         <div className="text-zinc-500 font-medium mt-1">
@@ -103,7 +111,7 @@ export function QuoteSection() {
                     {/* Navigation */}
                     <div className="flex flex-col md:flex-row items-center justify-between mt-12 gap-8 pt-10 border-t border-zinc-200">
                         <div className="flex gap-3">
-                            {TESTIMONIALS.map((_, index) => (
+                            {testimonials.map((_, index) => (
                                 <button
                                     key={index}
                                     onClick={() => {

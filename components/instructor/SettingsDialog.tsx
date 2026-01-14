@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Save, Loader2, Sparkles, UserCircle2, Brain, Gauge, Clock } from 'lucide-react'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 interface DiscussionSettings {
   anonymous: boolean
@@ -22,33 +23,6 @@ interface SettingsDialogProps {
   onSettingsUpdated: (settings: DiscussionSettings) => void
 }
 
-const aiModeDescriptions: Record<string, { label: string; description: string; icon: any; color: string }> = {
-  socratic: {
-    label: '소크라테스 산파술',
-    description: '무의식적 전제와 근본 가치를 탐구합니다',
-    icon: Brain,
-    color: 'emerald'
-  },
-  balanced: {
-    label: '균형 잡힌',
-    description: '양측 관점을 균형있게 제시합니다',
-    icon: Sparkles,
-    color: 'blue'
-  },
-  debate: {
-    label: '토론',
-    description: '적극적인 반론으로 논쟁을 촉진합니다',
-    icon: Gauge,
-    color: 'rose'
-  },
-  minimal: {
-    label: '최소 개입',
-    description: '필요할 때만 개입합니다',
-    icon: UserCircle2,
-    color: 'zinc'
-  }
-}
-
 export function SettingsDialog({
   isOpen,
   onClose,
@@ -56,8 +30,28 @@ export function SettingsDialog({
   currentSettings,
   onSettingsUpdated
 }: SettingsDialogProps) {
+  const t = useTranslations('Instructor.SettingsDialog')
   const [settings, setSettings] = useState<DiscussionSettings>(currentSettings)
   const [saving, setSaving] = useState(false)
+
+  const aiModeDescriptions: Record<string, { icon: any; color: string }> = {
+    socratic: {
+      icon: Brain,
+      color: 'emerald'
+    },
+    balanced: {
+      icon: Sparkles,
+      color: 'blue'
+    },
+    debate: {
+      icon: Gauge,
+      color: 'rose'
+    },
+    minimal: {
+      icon: UserCircle2,
+      color: 'zinc'
+    }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -73,11 +67,11 @@ export function SettingsDialog({
       }
 
       onSettingsUpdated(settings)
-      toast.success('설정이 저장되었습니다')
+      toast.success(t('toasts.saveSuccess'))
       onClose()
     } catch (error) {
       console.error('Error saving settings:', error)
-      toast.error('설정 저장에 실패했습니다')
+      toast.error(t('toasts.saveFail'))
     } finally {
       setSaving(false)
     }
@@ -106,8 +100,8 @@ export function SettingsDialog({
 
             <div className="flex items-center justify-between mb-8 relative z-10">
               <div>
-                <h2 className="text-2xl font-black tracking-tight text-white">토론 설정</h2>
-                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mt-1">Discussion Settings</p>
+                <h2 className="text-2xl font-black tracking-tight text-white">{t('title')}</h2>
+                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-500 mt-1">{t('subtitle')}</p>
               </div>
               <button
                 onClick={onClose}
@@ -126,8 +120,8 @@ export function SettingsDialog({
                       <UserCircle2 className="w-5 h-5" />
                     </div>
                     <div>
-                      <span className="font-bold text-white">익명 모드</span>
-                      <p className="text-xs text-zinc-500 font-medium">실명 대신 익명으로 표시</p>
+                      <span className="font-bold text-white">{t('anonymous.label')}</span>
+                      <p className="text-xs text-zinc-500 font-medium">{t('anonymous.description')}</p>
                     </div>
                   </div>
                   <div className="relative inline-flex items-center cursor-pointer">
@@ -146,10 +140,10 @@ export function SettingsDialog({
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.6)]" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">AI 튜터 모드 선택</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{t('aiMode.label')}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  {Object.entries(aiModeDescriptions).map(([mode, { label, description, icon: Icon, color }]) => (
+                  {Object.entries(aiModeDescriptions).map(([mode, { icon: Icon }]) => (
                     <button
                       key={mode}
                       onClick={() => setSettings({ ...settings, aiMode: mode })}
@@ -165,8 +159,12 @@ export function SettingsDialog({
                         }`}>
                         <Icon className="w-4 h-4" />
                       </div>
-                      <div className={`font-bold text-sm mb-1 ${settings.aiMode === mode ? 'text-white' : 'text-zinc-400'}`}>{label}</div>
-                      <div className="text-[10px] text-zinc-500 font-medium leading-tight">{description}</div>
+                      <div className={`font-bold text-sm mb-1 ${settings.aiMode === mode ? 'text-white' : 'text-zinc-400'}`}>
+                        {t(`aiMode.modes.${mode}.label`)}
+                      </div>
+                      <div className="text-[10px] text-zinc-500 font-medium leading-tight">
+                        {t(`aiMode.modes.${mode}.description`)}
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -177,10 +175,10 @@ export function SettingsDialog({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">토론 시간</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{t('duration.label')}</span>
                   </div>
                   <span className="text-sm font-black text-primary">
-                    {settings.duration === null ? '∞ UNLIMITED' : `${settings.duration ?? 15} MIN`}
+                    {settings.duration === null ? `∞ ${t('duration.unlimited')}` : `${settings.duration ?? 15} ${t('duration.minutes')}`}
                   </span>
                 </div>
                 <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/5">
@@ -199,15 +197,15 @@ export function SettingsDialog({
                     className="w-full h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-primary"
                   />
                   <div className="flex justify-between mt-3 text-[10px] font-black text-zinc-600 uppercase tracking-widest">
-                    <span>3분</span>
-                    <span>30분</span>
-                    <span>무제한</span>
+                    <span>{t('duration.labels.short')}</span>
+                    <span>{t('duration.labels.medium')}</span>
+                    <span>{t('duration.labels.unlimited')}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 px-1 pt-2">
                   <Clock className="w-4 h-4 text-zinc-500" />
                   <span className="text-xs text-zinc-500">
-                    예상 대화 턴: {settings.duration === null ? '무제한' : `${Math.max(3, Math.round((settings.duration ?? 15) / 3))}회`}
+                    {t('duration.expectedTurns', { count: settings.duration === null ? t('duration.labels.unlimited') : Math.max(3, Math.round((settings.duration ?? 15) / 3)) })}
                   </span>
                 </div>
               </div>
@@ -220,7 +218,7 @@ export function SettingsDialog({
                 className="flex-1 h-14 rounded-full border border-white/10 text-white font-bold hover:bg-white/5 transition-all active:scale-95"
                 disabled={saving}
               >
-                취소
+                {t('actions.cancel')}
               </button>
               <button
                 onClick={handleSave}
@@ -230,12 +228,12 @@ export function SettingsDialog({
                 {saving ? (
                   <>
                     <Loader2 className="w-6 h-6 animate-spin" />
-                    저장 중...
+                    {t('actions.saving')}
                   </>
                 ) : (
                   <>
                     <Save className="w-5 h-5" />
-                    설정 저장하기
+                    {t('actions.save')}
                   </>
                 )}
               </button>

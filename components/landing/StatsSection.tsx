@@ -1,15 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { STATS_CONTENT } from "@/lib/constants/landing-content";
+import { useTranslations } from "next-intl";
 
 export function StatsSection() {
+    const t = useTranslations('Stats');
+
+    const stats = Array.from({ length: 3 }, (_, i) => ({
+        value: t(`${i}.value`),
+        label: t(`${i}.label`)
+    }));
+
     return (
         <section className="py-24 relative overflow-hidden bg-zinc-50/50">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
             <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                    {STATS_CONTENT.map((stat, index) => (
+                    {stats.map((stat, index) => (
                         <motion.div
                             key={stat.label}
                             initial={{ opacity: 0, scale: 0.9 }}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createDiscussionSchema } from '@/lib/validations/discussion'
+import { checkLimitAccess, incrementUsage } from '@/lib/subscription'
 
 // Types for Supabase responses
 interface DiscussionSession {
@@ -122,6 +123,29 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
+        // Check subscription limits before creating discussion
+        const discussionLimit = await checkLimitAccess(user.id, 'discussion')
+        if (!discussionLimit.allowed) {
+            return NextResponse.json({
+                error: discussionLimit.message || '월간 토론 생성 한도에 도달했습니다.',
+                code: 'DISCUSSION_LIMIT_REACHED',
+                limit: discussionLimit.limit,
+                current: discussionLimit.current,
+                upgradeUrl: '/pricing'
+            }, { status: 403 })
+        }
+
+        const activeLimit = await checkLimitAccess(user.id, 'activeDiscussions')
+        if (!activeLimit.allowed) {
+            return NextResponse.json({
+                error: activeLimit.message || '동시 진행 가능한 토론 수를 초과했습니다.',
+                code: 'ACTIVE_DISCUSSION_LIMIT_REACHED',
+                limit: activeLimit.limit,
+                current: activeLimit.current,
+                upgradeUrl: '/pricing'
+            }, { status: 403 })
+        }
+
         const body = await request.json()
         const validation = createDiscussionSchema.safeParse(body)
 
@@ -155,6 +179,10 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (error) throw error
+
+        // Increment usage counters after successful creation
+        await incrementUsage(user.id, 'discussions_created')
+        // Note: active_discussions is incremented when discussion status changes to 'active'
 
         return NextResponse.json({ discussion }, { status: 201 })
     } catch (error) {

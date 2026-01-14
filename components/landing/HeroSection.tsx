@@ -7,8 +7,10 @@ import { ArrowRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import { HERO_CONTENT } from "@/lib/constants/landing-content";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslations } from "next-intl";
 
 export function HeroSection() {
+    const t = useTranslations('Hero');
     const [isDemoOpen, setIsDemoOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const isMobile = useIsMobile();
@@ -21,6 +23,12 @@ export function HeroSection() {
     // Disable scroll-triggered transforms on mobile for performance
     const heroOpacity = useTransform(scrollYProgress, [0, 0.9], isMobile ? [1, 1] : [1, 0]);
     const heroScale = useTransform(scrollYProgress, [0, 0.9], isMobile ? [1, 1] : [1, 0.95]);
+
+    const logs = [
+        { student: 4, action: t('dashboard.logs.0.action'), time: t('dashboard.logs.0.time') },
+        { student: 8, action: t('dashboard.logs.1.action'), time: t('dashboard.logs.1.time') },
+        { student: 12, action: t('dashboard.logs.2.action'), time: t('dashboard.logs.2.time') },
+    ];
 
     return (
         <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
@@ -51,7 +59,7 @@ export function HeroSection() {
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                     </span>
                     <span className="text-xs font-medium text-zinc-600 tracking-wide uppercase">
-                        {HERO_CONTENT.tag}
+                        {t('tag')}
                     </span>
                 </motion.div>
 
@@ -62,8 +70,8 @@ export function HeroSection() {
                     transition={{ duration: 0.5, delay: 0.1 }}
                     className="text-5xl md:text-7xl font-bold tracking-tight mb-6 max-w-4xl mx-auto leading-[1.1]"
                 >
-                    <span className="block text-zinc-900">{HERO_CONTENT.titlePrefix}</span>
-                    <span className="block text-gradient-brand pb-2">{HERO_CONTENT.titleSuffix}</span>
+                    <span className="block text-zinc-900">{t('titlePrefix')}</span>
+                    <span className="block text-gradient-brand pb-2">{t('titleSuffix')}</span>
                 </motion.h1>
 
                 {/* Description */}
@@ -73,7 +81,7 @@ export function HeroSection() {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="text-lg md:text-xl text-zinc-600 max-w-2xl mx-auto mb-10 leading-relaxed"
                 >
-                    {HERO_CONTENT.description}
+                    {t('description')}
                 </motion.p>
 
                 {/* CTA Buttons */}
@@ -86,7 +94,7 @@ export function HeroSection() {
                     <Link href="/register">
                         <button className="group relative px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-full overflow-hidden shadow-[0_4px_20px_rgba(99,102,241,0.3)] transition-all hover:shadow-[0_4px_30px_rgba(99,102,241,0.5)] hover:-translate-y-1">
                             <span className="relative z-10 flex items-center gap-2">
-                                {HERO_CONTENT.ctaPrimary}
+                                {t('ctaPrimary')}
                                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                             </span>
                             <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -97,7 +105,7 @@ export function HeroSection() {
                         className="group px-8 py-4 glass-panel text-zinc-700 font-semibold rounded-full transition-all hover:bg-zinc-100 hover:-translate-y-1"
                     >
                         <span className="flex items-center gap-2">
-                            {HERO_CONTENT.ctaSecondary}
+                            {t('ctaSecondary')}
                             <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </span>
                     </button>
@@ -126,7 +134,7 @@ export function HeroSection() {
                             <div className="flex-1 text-center">
                                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200">
                                     <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                                    <span className="text-xs text-zinc-600 font-medium tracking-wide">아고라 스페셜</span>
+                                    <span className="text-xs text-zinc-600 font-medium tracking-wide">{t('dashboard.badge')}</span>
                                 </div>
                             </div>
                             <div className="w-16" /> {/* Spacer for centering */}
@@ -136,7 +144,7 @@ export function HeroSection() {
                         <div className="p-8 md:p-10 min-h-[450px] flex flex-col gap-6 bg-gradient-to-b from-white/50 to-zinc-50/80">
                             <div className="grid md:grid-cols-2 gap-6">
                                 <div className="p-8 rounded-3xl bg-white border border-zinc-200 hover:bg-zinc-50 transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl">
-                                    <div className="text-sm text-zinc-500 mb-3 group-hover:text-zinc-700 transition-colors">실시간 참여율</div>
+                                    <div className="text-sm text-zinc-500 mb-3 group-hover:text-zinc-700 transition-colors">{t('dashboard.participationRate')}</div>
                                     <div className="text-5xl font-bold text-zinc-900 mb-6 tracking-tight">87<span className="text-2xl text-zinc-400 font-normal">%</span></div>
                                     <div className="h-4 bg-zinc-100 rounded-full overflow-hidden p-0.5 border border-zinc-200">
                                         <div className="h-full w-[87%] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full relative overflow-hidden shadow-[0_2px_8px_rgba(168,85,247,0.3)]">
@@ -145,14 +153,14 @@ export function HeroSection() {
                                     </div>
                                 </div>
                                 <div className="p-8 rounded-3xl bg-white border border-zinc-200 hover:bg-zinc-50 transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl">
-                                    <div className="text-sm text-zinc-500 mb-3 group-hover:text-zinc-700 transition-colors">활성 토론 세션</div>
-                                    <div className="text-5xl font-bold text-zinc-900 mb-6 tracking-tight">12<span className="text-2xl text-zinc-400 font-normal">개</span></div>
+                                    <div className="text-sm text-zinc-500 mb-3 group-hover:text-zinc-700 transition-colors">{t('dashboard.activeSessions')}</div>
+                                    <div className="text-5xl font-bold text-zinc-900 mb-6 tracking-tight">12<span className="text-2xl text-zinc-400 font-normal">{t('dashboard.countUnit')}</span></div>
                                     <div className="flex -space-x-4 pl-2">
                                         {HERO_CONTENT.avatars.map((src, i) => (
                                             <div key={i} className={`w-12 h-12 rounded-full border-2 border-white relative overflow-hidden z-${(i + 1) * 10} shadow-lg transform group-hover:translate-x-2 transition-transform duration-300 bg-zinc-100`}>
                                                 <img
                                                     src={src}
-                                                    alt={`학생 ${i + 1}`}
+                                                    alt={`Student ${i + 1}`}
                                                     className="w-full h-full object-cover"
                                                 />
                                             </div>
@@ -163,27 +171,25 @@ export function HeroSection() {
 
                             <div className="flex-1 p-8 rounded-3xl bg-white border border-zinc-200 flex flex-col hover:bg-zinc-50 transition-all duration-300 hover:shadow-xl">
                                 <div className="flex justify-between items-center mb-8">
-                                    <div className="text-sm text-zinc-500">최근 AI 분석 로그</div>
+                                    <div className="text-sm text-zinc-500">{t('dashboard.logTitle')}</div>
                                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20">
                                         <span className="relative flex h-2 w-2">
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                                             <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                                         </span>
-                                        <span className="text-xs text-primary font-bold tracking-wide">실시간 분석중</span>
+                                        <span className="text-xs text-primary font-bold tracking-wide">{t('dashboard.logStatus')}</span>
                                     </div>
                                 </div>
                                 <div className="space-y-4">
-                                    {[
-                                        { student: 4, action: "AI 소크라테스 대화 응답 완료", time: "방금 전" },
-                                        { student: 8, action: "논증 심화 질문 생성 완료", time: "1분 전" },
-                                        { student: 12, action: "입장 변화 감지 및 분석 완료", time: "2분 전" },
-                                    ].map((log, i) => (
+                                    {logs.map((log, i) => (
                                         <div key={i} className="flex items-center gap-5 p-4 rounded-2xl bg-zinc-50 border border-zinc-200 hover:bg-white hover:border-zinc-300 transition-all duration-300 cursor-default group hover:scale-[1.02]">
                                             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                                                 <CheckCircle2 size={18} />
                                             </div>
                                             <div className="flex-1">
-                                                <div className="text-sm text-zinc-700 font-medium group-hover:text-zinc-900 transition-colors">학생 {log.student}의 {log.action}</div>
+                                                <div className="text-sm text-zinc-700 font-medium group-hover:text-zinc-900 transition-colors">
+                                                    {t('dashboard.logItem', { student: log.student, action: log.action })}
+                                                </div>
                                                 <div className="text-xs text-zinc-400 mt-1">{log.time}</div>
                                             </div>
                                             <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 group-hover:bg-primary transition-colors" />

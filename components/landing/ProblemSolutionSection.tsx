@@ -2,16 +2,28 @@
 
 import { motion } from "framer-motion";
 import { X, Check, ArrowRight } from "lucide-react";
-import { PROBLEMS_SOLUTIONS } from "@/lib/constants/landing-content";
+import { useTranslations } from "next-intl";
 
 export function ProblemSolutionSection() {
+    const t = useTranslations('ProblemSolution');
+
+    const problems = Array.from({ length: 3 }, (_, i) => ({
+        title: t(`problems.${i}.title`),
+        description: t(`problems.${i}.description`)
+    }));
+
+    const solutions = Array.from({ length: 3 }, (_, i) => ({
+        title: t(`solutions.${i}.title`),
+        description: t(`solutions.${i}.description`)
+    }));
+
     return (
         <section className="py-24 lg:py-32">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
                 <div className="text-center mb-16">
-                    <span className="tag">왜 아고라인가요?</span>
+                    <span className="tag">{t('tag')}</span>
                     <h2 className="mt-6 text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-600">
-                        기존 토론 수업의 <span className="text-primary">한계를 넘어서</span>
+                        {t('titlePrefix')} <span className="text-primary">{t('titleSuffix')}</span>
                     </h2>
                 </div>
 
@@ -23,11 +35,11 @@ export function ProblemSolutionSection() {
                                 <X className="w-5 h-5 text-destructive" />
                             </div>
                             <h3 className="text-xl font-semibold text-muted-foreground/80">
-                                기존 방식의 문제점
+                                {t('problemsTitle')}
                             </h3>
                         </div>
                         <div className="space-y-6">
-                            {PROBLEMS_SOLUTIONS.problems.map((problem, index) => (
+                            {problems.map((problem, index) => (
                                 <motion.div
                                     key={problem.title}
                                     initial={{ opacity: 0, x: -20 }}
@@ -58,11 +70,11 @@ export function ProblemSolutionSection() {
                                 <Check className="w-5 h-5 text-primary" />
                             </div>
                             <h3 className="text-xl font-semibold text-primary">
-                                Agora의 솔루션
+                                {t('solutionsTitle')}
                             </h3>
                         </div>
                         <div className="space-y-6">
-                            {PROBLEMS_SOLUTIONS.solutions.map((solution, index) => (
+                            {solutions.map((solution, index) => (
                                 <motion.div
                                     key={solution.title}
                                     initial={{ opacity: 0, x: 20 }}
@@ -96,7 +108,7 @@ export function ProblemSolutionSection() {
                         className="flex items-center gap-4 text-primary"
                     >
                         <span className="text-sm font-medium uppercase tracking-wider">
-                            문제를 해결로
+                            {t('connector')}
                         </span>
                         <ArrowRight className="w-6 h-6" />
                     </motion.div>

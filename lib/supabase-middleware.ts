@@ -7,8 +7,8 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
     .map(e => e.trim().toLowerCase())
     .filter(e => e.length > 0)
 
-export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
+export async function updateSession(request: NextRequest, response?: NextResponse) {
+    let supabaseResponse = response || NextResponse.next({
         request,
     })
 
@@ -22,9 +22,7 @@ export async function updateSession(request: NextRequest) {
                 },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    })
+                    
                     cookiesToSet.forEach(({ name, value, options }) =>
                         supabaseResponse.cookies.set(name, value, options)
                     )
@@ -38,22 +36,56 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
+    // Helper to preserve cookies for redirects
+    const withCookies = (res: NextResponse) => {
+        supabaseResponse.cookies.getAll().forEach(cookie => {
+            res.cookies.set(cookie)
+        })
+        return res
+    }
+
+    // Normalize path by removing locale
+    let pathname = request.nextUrl.pathname
+    const locales = ['ko', 'en']
+    for (const locale of locales) {
+        if (pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`) {
+            pathname = pathname.replace(`/${locale}`, '') || '/'
+            break
+        }
+    }
+
     // Protected routes
     const protectedPaths = ['/instructor', '/student']
     const adminPaths = ['/admin']
-    const authPaths = ['/login', '/register']
+    const authPaths = ['/login', '/register', '/forgot-password', '/update-password', '/confirm-email']
     const onboardingPath = '/onboarding'
-    const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
-    const isAdminPath = adminPaths.some(path => request.nextUrl.pathname.startsWith(path))
-    const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path))
-    const isOnboardingPath = request.nextUrl.pathname.startsWith(onboardingPath)
+    
+    const isProtectedPath = protectedPaths.some(path => pathname.startsWith(path))
+    const isAdminPath = adminPaths.some(path => pathname.startsWith(path))
+    const isAuthPath = authPaths.some(path => pathname.startsWith(path))
+    const isOnboardingPath = pathname.startsWith(onboardingPath)
 
     // Redirect to login if not authenticated and trying to access protected route
     if (!user && isProtectedPath) {
         const url = request.nextUrl.clone()
-        url.pathname = '/login'
-        url.searchParams.set('redirect', request.nextUrl.pathname)
-        return NextResponse.redirect(url)
+        // Ensure we keep the locale in the redirect URL
+        // But request.nextUrl.pathname already has the locale if it was present
+        // We just need to change the path segment
+        // If the original path was /en/instructor, we want /en/login
+        // We can use Next-Intl's Link or just construct it manually
+        // But since we are in middleware, we don't have access to routing context easily
+        // We can just construct the URL.
+        
+        // Simple approach: construct /login, and let next-intl middleware handle locale on next request?
+        // No, we are AFTER next-intl middleware here.
+        // We should try to preserve the locale if possible.
+        
+        const currentLocale = request.nextUrl.pathname.split('/')[1]
+        const localePrefix = locales.includes(currentLocale) ? `/${currentLocale}` : ''
+        
+        url.pathname = `${localePrefix}/login`
+        url.searchParams.set('redirect', pathname) // Store the clean path as redirect
+        return withCookies(NextResponse.redirect(url))
     }
 
     // Check if authenticated user has completed onboarding (has profile)
@@ -67,8 +99,11 @@ export async function updateSession(request: NextRequest) {
         if (!profile) {
             // User hasn't completed onboarding - redirect to onboarding
             const url = request.nextUrl.clone()
-            url.pathname = '/onboarding'
-            return NextResponse.redirect(url)
+            const currentLocale = request.nextUrl.pathname.split('/')[1]
+            const localePrefix = locales.includes(currentLocale) ? `/${currentLocale}` : ''
+            
+            url.pathname = `${localePrefix}/onboarding`
+            return withCookies(NextResponse.redirect(url))
         }
     }
 
@@ -78,31 +113,36 @@ export async function updateSession(request: NextRequest) {
         if (!user) {
             console.log('[Admin] No user, redirecting to login')
             const url = request.nextUrl.clone()
-            url.pathname = '/login'
-            url.searchParams.set('redirect', request.nextUrl.pathname)
+            const currentLocale = request.nextUrl.pathname.split('/')[1]
+            const localePrefix = locales.includes(currentLocale) ? `/${currentLocale}` : ''
+            
+            url.pathname = `${localePrefix}/login`
+            url.searchParams.set('redirect', pathname)
             return NextResponse.redirect(url)
         }
         // Authenticated but not admin - redirect to home
         const userEmail = user.email?.toLowerCase() || ''
-        console.log('[Admin] User email:', userEmail)
-        console.log('[Admin] Admin emails:', ADMIN_EMAILS)
-        console.log('[Admin] Is admin:', ADMIN_EMAILS.includes(userEmail))
-
+        
         if (!ADMIN_EMAILS.includes(userEmail)) {
             console.log('[Admin] Not admin, redirecting to home')
             const url = request.nextUrl.clone()
-            url.pathname = '/'
+            const currentLocale = request.nextUrl.pathname.split('/')[1]
+            const localePrefix = locales.includes(currentLocale) ? `/${currentLocale}` : ''
+            
+            url.pathname = `${localePrefix}/`
             return NextResponse.redirect(url)
         }
-        console.log('[Admin] Access granted')
     }
 
     // Redirect to dashboard if authenticated and trying to access auth pages
     if (user && isAuthPath) {
         const url = request.nextUrl.clone()
         // Redirect based on user role (we'll check profile in the page)
-        url.pathname = '/instructor'
-        return NextResponse.redirect(url)
+        const currentLocale = request.nextUrl.pathname.split('/')[1]
+        const localePrefix = locales.includes(currentLocale) ? `/${currentLocale}` : ''
+        
+        url.pathname = `${localePrefix}/instructor`
+        return withCookies(NextResponse.redirect(url))
     }
 
     return supabaseResponse

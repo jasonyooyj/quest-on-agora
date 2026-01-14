@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { MARQUEE_ITEMS } from "@/lib/constants/landing-content";
+import { useTranslations } from "next-intl";
 
 export function MarqueeSection() {
+    const t = useTranslations('Marquee');
     const [isPaused, setIsPaused] = useState(false);
+    
+    // Create an array of 6 items (0 to 5)
+    const items = Array.from({ length: 6 }, (_, i) => t(`items.${i}`));
 
     return (
         <section
@@ -20,7 +24,7 @@ export function MarqueeSection() {
             >
                 {[...Array(2)].map((_, i) => (
                     <div key={i} className="flex">
-                        {MARQUEE_ITEMS.map((item, j) => (
+                        {items.map((item, j) => (
                             <span
                                 key={`${i}-${j}`}
                                 className="flex items-center gap-10 px-10 text-xl font-bold uppercase tracking-[0.3em] text-zinc-400 hover:text-zinc-900 group transition-colors duration-500"

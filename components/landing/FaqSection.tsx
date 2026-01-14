@@ -7,9 +7,16 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { FAQ_CONTENT } from "@/lib/constants/landing-content";
+import { useTranslations } from "next-intl";
 
 export function FaqSection() {
+    const t = useTranslations('Faq');
+
+    const items = Array.from({ length: 5 }, (_, i) => ({
+        question: t(`items.${i}.question`),
+        answer: t(`items.${i}.answer`)
+    }));
+
     return (
         <section className="py-24 lg:py-32">
             <div className="max-w-3xl mx-auto px-6 lg:px-12">
@@ -21,10 +28,10 @@ export function FaqSection() {
                     className="text-center mb-12"
                 >
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4 bg-primary/10 text-primary border border-primary/20">
-                        {FAQ_CONTENT.tag}
+                        {t('tag')}
                     </span>
                     <h2 className="mt-6 text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-600">
-                        {FAQ_CONTENT.title}
+                        {t('title')}
                     </h2>
                 </motion.div>
 
@@ -35,7 +42,7 @@ export function FaqSection() {
                     transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                 >
                     <Accordion type="single" collapsible className="w-full space-y-4">
-                        {FAQ_CONTENT.items.map((item, index) => (
+                        {items.map((item, index) => (
                             <AccordionItem
                                 key={index}
                                 value={`item-${index}`}
@@ -60,12 +67,12 @@ export function FaqSection() {
                     className="text-center mt-12"
                 >
                     <p className="text-zinc-500">
-                        더 궁금한 점이 있으신가요?{" "}
+                        {t('moreQuestions')}{" "}
                         <a
                             href="mailto:questonkr@gmail.com"
                             className="text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
                         >
-                            문의하기
+                            {t('contact')}
                         </a>
                     </p>
                 </motion.div>

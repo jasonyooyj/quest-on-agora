@@ -1,39 +1,32 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import createMiddleware from 'next-intl/middleware';
+import {routing} from './i18n/routing';
+import { updateSession } from '@/lib/supabase-middleware';
+
+const intlMiddleware = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+  // 1. Run Supabase Auth first to handle session refresh and protected routes
+  // We pass only 'request' so it creates a default response internally.
+  const supabaseResponse = await updateSession(request);
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
-          )
-          supabaseResponse = NextResponse.next({
-            request,
-          })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
+  // 2. If Supabase logic returned a redirect, we must respect it immediately.
+  // The redirect response already contains the necessary Set-Cookie headers (handled in updateSession).
+  if (supabaseResponse.headers.has('location')) {
+    return supabaseResponse;
+  }
 
-  // Refresh the session - this is the key part that was missing
-  // This will use the refresh token to get a new access token if needed
-  await supabase.auth.getUser()
+  // 3. Run intlMiddleware to handle routing/locale
+  // Note: updateSession has updated request.cookies in place, so intlMiddleware sees the fresh session if needed.
+  const intlResponse = intlMiddleware(request);
 
-  return supabaseResponse
+  // 4. Merge cookies from supabaseResponse (which might have session refresh headers) into intlResponse
+  // We iterate over all cookies in supabaseResponse and set them on intlResponse
+  supabaseResponse.cookies.getAll().forEach((cookie) => {
+    intlResponse.cookies.set(cookie);
+  });
+
+  return intlResponse;
 }
 
 export const config = {

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { BookOpen, Briefcase, Scale } from "lucide-react";
-import { USE_CASES } from "@/lib/constants/landing-content";
+import { useTranslations } from "next-intl";
 
 const icons = {
     Philosophy: BookOpen,
@@ -10,22 +10,33 @@ const icons = {
     Law: Scale,
 };
 
+const subjects = ["Philosophy", "Business", "Law"];
+
 export function UseCasesSection() {
+    const t = useTranslations('UseCases');
+
+    const useCases = Array.from({ length: 3 }, (_, i) => ({
+        title: t(`items.${i}.title`),
+        description: t(`items.${i}.description`),
+        metric: t(`items.${i}.metric`),
+        subject: subjects[i]
+    }));
+
     return (
         <section className="py-24 lg:py-32">
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
                 <div className="text-center mb-16">
-                    <span className="tag">활용 사례</span>
+                    <span className="tag">{t('tag')}</span>
                     <h2 className="mt-6 text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-600">
-                        다양한 분야에서 활용되는 <span className="text-primary">Agora</span>
+                        {t('titlePrefix')} <span className="text-primary">{t('titleSuffix')}</span>
                     </h2>
                     <p className="mt-4 text-zinc-600 text-lg max-w-2xl mx-auto leading-relaxed">
-                        철학부터 법학까지, 모든 토론 수업에서 효과적으로 사용할 수 있습니다.
+                        {t('description')}
                     </p>
                 </div>
 
                 <div className="grid md:grid-cols-3 gap-8">
-                    {USE_CASES.map((useCase, index) => {
+                    {useCases.map((useCase, index) => {
                         const Icon = icons[useCase.subject as keyof typeof icons];
                         return (
                             <motion.div
@@ -50,7 +61,7 @@ export function UseCasesSection() {
                                     {useCase.description}
                                 </p>
                                 <div className="pt-6 border-t border-zinc-200 flex flex-col gap-1">
-                                    <div className="text-xs font-bold uppercase tracking-wider text-zinc-500">성과</div>
+                                    <div className="text-xs font-bold uppercase tracking-wider text-zinc-500">{t('metricLabel')}</div>
                                     <div className="text-2xl font-bold text-zinc-900 tracking-tight">
                                         {useCase.metric}
                                     </div>

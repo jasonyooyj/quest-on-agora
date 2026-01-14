@@ -20,7 +20,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // Validate join code format
     if (!/^[A-Z0-9]{6}$/.test(joinCode)) {
       return NextResponse.json(
-        { error: '유효하지 않은 참여 코드입니다' },
+        { error: 'Invalid join code', code: 'INVALID_CODE' },
         { status: 400 }
       )
     }
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 })
     }
 
     // Get user profile and verify role
@@ -46,14 +46,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (!profile) {
       return NextResponse.json(
-        { error: '프로필을 찾을 수 없습니다', needsOnboarding: true },
+        { error: 'Profile not found', code: 'PROFILE_NOT_FOUND', needsOnboarding: true },
         { status: 403 }
       )
     }
 
     if (profile.role !== 'student') {
       return NextResponse.json(
-        { error: '학생만 토론에 참여할 수 있습니다' },
+        { error: 'Only students can join', code: 'STUDENT_ONLY' },
         { status: 403 }
       )
     }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     if (discussionError || !discussion) {
       return NextResponse.json(
-        { error: '존재하지 않는 참여 코드입니다' },
+        { error: 'Discussion not found', code: 'NOT_FOUND' },
         { status: 404 }
       )
     }

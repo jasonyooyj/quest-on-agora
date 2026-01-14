@@ -5,8 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useScroll, useMotionValueEvent, motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { Menu, X, MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function Navbar() {
+    const t = useTranslations('Navbar');
     const { scrollY } = useScroll();
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -14,6 +16,13 @@ export function Navbar() {
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolled(latest > 20);
     });
+
+    const navItems = [
+        { name: t('features'), href: "#features" },
+        { name: t('useCases'), href: "#use-cases" },
+        { name: t('pricing'), href: "#pricing" },
+        { name: t('about'), href: "#about" },
+    ];
 
     return (
         <motion.header
@@ -38,12 +47,7 @@ export function Navbar() {
 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-8">
-                    {[
-                        { name: "주요 기능", href: "#features" },
-                        { name: "활용 사례", href: "#use-cases" },
-                        { name: "요금제", href: "#pricing" },
-                        { name: "소개", href: "#about" },
-                    ].map((item) => (
+                    {navItems.map((item) => (
                         <Link
                             key={item.name}
                             href={item.href}
@@ -61,11 +65,11 @@ export function Navbar() {
                         href="/login"
                         className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
                     >
-                        로그인
+                        {t('login')}
                     </Link>
                     <Link href="/register">
                         <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 border-none rounded-full px-6 font-medium shadow-[0_4px_14px_rgba(99,102,241,0.3)] hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] transition-all duration-300 transform hover:-translate-y-0.5">
-                            무료로 시작하기
+                            {t('getStarted')}
                         </Button>
                     </Link>
                 </div>
@@ -89,12 +93,7 @@ export function Navbar() {
                         className="md:hidden glass-panel border-b border-zinc-200 overflow-hidden"
                     >
                         <div className="flex flex-col p-6 gap-4">
-                            {[
-                                { name: "주요 기능", href: "#features" },
-                                { name: "활용 사례", href: "#use-cases" },
-                                { name: "요금제", href: "#pricing" },
-                                { name: "소개", href: "#about" },
-                            ].map((item) => (
+                            {navItems.map((item) => (
                                 <Link
                                     key={item.name}
                                     href={item.href}
@@ -110,11 +109,11 @@ export function Navbar() {
                                 className="text-lg font-medium text-zinc-600 hover:text-zinc-900"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                로그인
+                                {t('login')}
                             </Link>
                             <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
                                 <Button className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700 rounded-full mt-2">
-                                    무료로 시작하기
+                                    {t('getStarted')}
                                 </Button>
                             </Link>
                         </div>

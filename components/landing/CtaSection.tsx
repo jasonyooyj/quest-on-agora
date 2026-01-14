@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { CTA_CONTENT } from "@/lib/constants/landing-content";
+import { useTranslations } from "next-intl";
 
 export function CtaSection() {
+    const t = useTranslations('Cta');
+
     return (
         <section className="py-24 relative overflow-hidden">
             {/* Background Glows */}
@@ -16,15 +18,15 @@ export function CtaSection() {
 
                     <div className="relative z-10 flex flex-col items-center text-center max-w-3xl mx-auto">
                         <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-zinc-900 to-zinc-600">
-                            {CTA_CONTENT.title}
+                            {t('title')}
                         </h2>
                         <p className="text-zinc-600 text-lg md:text-xl mb-10 leading-relaxed max-w-xl">
-                            {CTA_CONTENT.description}
+                            {t('description')}
                         </p>
                         <Link href="/register">
                             <button className="group relative px-10 py-5 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-full overflow-hidden shadow-[0_4px_20px_rgba(99,102,241,0.3)] transition-all hover:shadow-[0_4px_30px_rgba(99,102,241,0.5)] hover:-translate-y-1">
                                 <span className="relative z-10 flex items-center gap-3">
-                                    {CTA_CONTENT.buttonText}
+                                    {t('buttonText')}
                                     <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                                 </span>
                                 <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity" />
