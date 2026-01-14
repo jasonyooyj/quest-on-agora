@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { Brain, Sparkles, Gauge, UserCircle2, EyeOff, Clock } from 'lucide-react'
-import { DEMO_MOCK } from './mockData'
 
 const icons = {
   socratic: Brain,
@@ -12,36 +12,45 @@ const icons = {
   minimal: UserCircle2
 }
 
+const modeKeys = ['socratic', 'balanced', 'debate', 'minimal'] as const
+const modeColors = {
+  socratic: 'emerald',
+  balanced: 'blue',
+  debate: 'rose',
+  minimal: 'zinc'
+}
+
 export default function DemoStep1Creation() {
-  const [selectedMode, setSelectedMode] = useState('socratic')
+  const [selectedMode, setSelectedMode] = useState<typeof modeKeys[number]>('socratic')
   const [anonymous, setAnonymous] = useState(true)
   const [duration, setDuration] = useState(15)
+  const t = useTranslations('Demo')
 
-  const currentMode = DEMO_MOCK.aiModes.find(m => m.value === selectedMode)
   const maxTurns = Math.max(5, duration)
 
   return (
     <div className="w-full h-full bg-white p-5 flex flex-col overflow-hidden">
       {/* Topic Preview */}
       <div className="mb-4">
-        <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">Phase 01: 토론 주제</div>
+        <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">{t('step1.phase1')}</div>
         <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200">
-          <div className="text-base font-bold text-zinc-900 leading-snug">{DEMO_MOCK.topic.title}</div>
+          <div className="text-base font-bold text-zinc-900 leading-snug">{t('mockData.topic.title')}</div>
         </div>
       </div>
 
       {/* AI Mode Selector */}
       <div className="mb-4">
-        <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">Phase 02: AI 튜터 모드</div>
+        <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">{t('step1.phase2')}</div>
         <div className="grid grid-cols-4 gap-2">
-          {DEMO_MOCK.aiModes.map((mode) => {
-            const Icon = icons[mode.value as keyof typeof icons]
-            const isSelected = selectedMode === mode.value
+          {modeKeys.map((modeKey) => {
+            const Icon = icons[modeKey]
+            const isSelected = selectedMode === modeKey
+            const color = modeColors[modeKey]
 
             return (
               <motion.button
-                key={mode.value}
-                onClick={() => setSelectedMode(mode.value)}
+                key={modeKey}
+                onClick={() => setSelectedMode(modeKey)}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className={`p-3 rounded-xl border transition-all text-center ${isSelected
@@ -50,16 +59,16 @@ export default function DemoStep1Creation() {
                   }`}
               >
                 <div className={`w-10 h-10 rounded-xl mx-auto mb-2 flex items-center justify-center ${isSelected
-                  ? mode.color === 'emerald' ? 'bg-emerald-500 text-white'
-                    : mode.color === 'blue' ? 'bg-blue-500 text-white'
-                      : mode.color === 'rose' ? 'bg-rose-500 text-white'
+                  ? color === 'emerald' ? 'bg-emerald-500 text-white'
+                    : color === 'blue' ? 'bg-blue-500 text-white'
+                      : color === 'rose' ? 'bg-rose-500 text-white'
                         : 'bg-zinc-600 text-white'
                   : 'bg-zinc-200 text-zinc-500'
                   }`}>
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className={`text-sm font-bold ${isSelected ? 'text-zinc-900' : 'text-zinc-600'}`}>
-                  {mode.label}
+                  {t(`mockData.aiModes.${modeKey}.label`)}
                 </div>
               </motion.button>
             )
@@ -75,20 +84,20 @@ export default function DemoStep1Creation() {
         className="p-4 rounded-xl bg-zinc-900 text-zinc-100 mb-4"
       >
         <div className="flex items-start gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${currentMode?.color === 'emerald' ? 'bg-emerald-500'
-            : currentMode?.color === 'blue' ? 'bg-blue-500'
-              : currentMode?.color === 'rose' ? 'bg-rose-500'
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${modeColors[selectedMode] === 'emerald' ? 'bg-emerald-500'
+            : modeColors[selectedMode] === 'blue' ? 'bg-blue-500'
+              : modeColors[selectedMode] === 'rose' ? 'bg-rose-500'
                 : 'bg-zinc-700'
             }`}>
-            {currentMode && (() => {
-              const Icon = icons[currentMode.value as keyof typeof icons]
+            {(() => {
+              const Icon = icons[selectedMode]
               return <Icon className="w-5 h-5" />
             })()}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-zinc-400 font-bold uppercase tracking-wide mb-1">AI Tutor</p>
             <p className="text-sm font-medium leading-relaxed line-clamp-2 text-zinc-200">
-              "{currentMode?.preview}"
+              &quot;{t(`mockData.aiModes.${selectedMode}.preview`)}&quot;
             </p>
           </div>
         </div>
@@ -96,7 +105,7 @@ export default function DemoStep1Creation() {
 
       {/* Phase 3: Settings */}
       <div className="flex-1 min-h-0">
-        <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">Phase 03: 환경 설정</div>
+        <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-3">{t('step1.phase3')}</div>
 
         <div className="space-y-3">
           {/* Anonymous Toggle */}
@@ -106,8 +115,8 @@ export default function DemoStep1Creation() {
                 <EyeOff className="w-5 h-5 text-zinc-500" />
               </div>
               <div>
-                <p className="text-sm font-bold text-zinc-900">익명 모드</p>
-                <p className="text-xs text-zinc-500">참여자 실명 숨김</p>
+                <p className="text-sm font-bold text-zinc-900">{t('step1.anonymous')}</p>
+                <p className="text-xs text-zinc-500">{t('step1.anonymousDesc')}</p>
               </div>
             </div>
             <button
@@ -128,13 +137,13 @@ export default function DemoStep1Creation() {
                   <Clock className="w-5 h-5 text-zinc-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-zinc-900">토론 시간</p>
-                  <p className="text-xs text-zinc-500">참여자당 평균 시간</p>
+                  <p className="text-sm font-bold text-zinc-900">{t('step1.duration')}</p>
+                  <p className="text-xs text-zinc-500">{t('step1.durationDesc')}</p>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-2xl font-black text-zinc-900">{duration}</div>
-                <div className="text-xs font-bold text-zinc-400 uppercase">분</div>
+                <div className="text-xs font-bold text-zinc-400 uppercase">{t('step1.minutes')}</div>
               </div>
             </div>
             <input
@@ -148,11 +157,11 @@ export default function DemoStep1Creation() {
             />
             <div className="flex justify-between mt-3 gap-3">
               <div className="flex-1 px-3 py-2 rounded-lg bg-white border border-zinc-200 text-center">
-                <p className="text-xs font-bold text-zinc-400 uppercase">예상 턴</p>
+                <p className="text-xs font-bold text-zinc-400 uppercase">{t('step1.expectedTurns')}</p>
                 <p className="text-lg font-black text-zinc-900">{maxTurns}</p>
               </div>
               <div className="flex-1 px-3 py-2 rounded-lg bg-white border border-zinc-200 text-center">
-                <p className="text-xs font-bold text-zinc-400 uppercase">분석</p>
+                <p className="text-xs font-bold text-zinc-400 uppercase">{t('step1.analysis')}</p>
                 <p className="text-lg font-black text-zinc-900">{duration >= 30 ? 'HIGH' : 'MID'}</p>
               </div>
             </div>

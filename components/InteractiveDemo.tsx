@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import {
     ChevronRight,
     ChevronLeft,
@@ -25,39 +26,11 @@ import {
     DemoStep4Dashboard
 } from '@/components/demo'
 
-const steps = [
-    {
-        id: 1,
-        title: "토론 생성",
-        subtitle: "Instructor Setup",
-        description: "교수님은 토론 주제를 설정하고, AI 튜터 모드를 선택합니다. 단 몇 번의 클릭으로 스마트한 토론의 장이 열립니다.",
-        icon: Settings,
-        component: DemoStep1Creation
-    },
-    {
-        id: 2,
-        title: "학생 참여",
-        subtitle: "Student Participation",
-        description: "학생들은 링크를 통해 입장하여 자신의 입장을 정하고 토론에 참여합니다.",
-        icon: UserPlus,
-        component: DemoStep2Participation
-    },
-    {
-        id: 3,
-        title: "AI 소크라테스",
-        subtitle: "AI Intervention",
-        description: "AI가 학생의 논리적 허점을 짚어주는 질문을 던져 비판적 사고를 확장시킵니다.",
-        icon: MessageSquare,
-        component: DemoStep3Socratic
-    },
-    {
-        id: 4,
-        title: "실시간 분석",
-        subtitle: "Analysis & Feedback",
-        description: "교수님은 학생들의 논리 발전 과정과 참여도를 한눈에 파악합니다.",
-        icon: BarChart2,
-        component: DemoStep4Dashboard
-    }
+const stepComponents = [
+    { id: 1, icon: Settings, component: DemoStep1Creation },
+    { id: 2, icon: UserPlus, component: DemoStep2Participation },
+    { id: 3, icon: MessageSquare, component: DemoStep3Socratic },
+    { id: 4, icon: BarChart2, component: DemoStep4Dashboard }
 ]
 
 interface InteractiveDemoProps {
@@ -67,9 +40,10 @@ interface InteractiveDemoProps {
 
 export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDemoProps) {
     const [currentStep, setCurrentStep] = useState(0)
+    const t = useTranslations('Demo')
 
     const handleNext = () => {
-        if (currentStep < steps.length - 1) {
+        if (currentStep < stepComponents.length - 1) {
             setCurrentStep(prev => prev + 1)
         } else {
             onOpenChange(false)
@@ -83,7 +57,16 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
         }
     }
 
-    const step = steps[currentStep]
+    const stepConfig = stepComponents[currentStep]
+    const stepId = stepConfig.id.toString() as '1' | '2' | '3' | '4'
+    const step = {
+        id: stepConfig.id,
+        title: t(`steps.${stepId}.title`),
+        subtitle: t(`steps.${stepId}.subtitle`),
+        description: t(`steps.${stepId}.description`),
+        icon: stepConfig.icon,
+        component: stepConfig.component
+    }
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -102,7 +85,7 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
                                     {step.id}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    {steps.map((_, i) => (
+                                    {stepComponents.map((_, i) => (
                                         <button
                                             key={i}
                                             onClick={() => setCurrentStep(i)}
@@ -117,7 +100,7 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
                                     ))}
                                 </div>
                                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest ml-auto">
-                                    {step.id} / {steps.length}
+                                    {step.id} / {stepComponents.length}
                                 </span>
                             </div>
 
@@ -166,14 +149,14 @@ export default function InteractiveDemo({ isOpen, onOpenChange }: InteractiveDem
                                 onClick={handleNext}
                                 className="flex-1 h-12 px-6 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold text-sm flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/25 active:scale-[0.98] transition-all"
                             >
-                                {currentStep === steps.length - 1 ? (
+                                {currentStep === stepComponents.length - 1 ? (
                                     <>
-                                        시작하기
+                                        {t('navigation.start')}
                                         <CheckCircle2 className="w-4 h-4" />
                                     </>
                                 ) : (
                                     <>
-                                        다음 단계
+                                        {t('navigation.next')}
                                         <ChevronRight className="w-4 h-4" />
                                     </>
                                 )}

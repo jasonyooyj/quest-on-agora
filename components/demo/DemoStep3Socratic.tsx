@@ -2,15 +2,21 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { Send, Loader2, ThumbsDown } from 'lucide-react'
-import { DEMO_MOCK } from './mockData'
 
 export default function DemoStep3Socratic() {
+  const t = useTranslations('Demo')
   const [isTyping, setIsTyping] = useState(true)
   const [displayedText, setDisplayedText] = useState('')
-  const [thinkingMessage, setThinkingMessage] = useState('답변을 분석하고 있어요...')
+  const [thinkingMessageIdx, setThinkingMessageIdx] = useState(0)
 
-  const aiResponse = DEMO_MOCK.conversation[1].content
+  const aiResponse = t('mockData.conversation.ai')
+  const thinkingMessages = [
+    t('step3.thinking.1'),
+    t('step3.thinking.2'),
+    t('step3.thinking.3')
+  ]
 
   // Simulate typing effect
   useEffect(() => {
@@ -34,15 +40,8 @@ export default function DemoStep3Socratic() {
     }, 1500)
 
     // Rotate thinking messages
-    const messages = [
-      '답변을 분석하고 있어요...',
-      '논리적 허점을 찾고 있습니다...',
-      '적절한 질문을 고르고 있어요...'
-    ]
-    let msgIndex = 0
     const messageInterval = setInterval(() => {
-      msgIndex = (msgIndex + 1) % messages.length
-      setThinkingMessage(messages[msgIndex])
+      setThinkingMessageIdx((prev) => (prev + 1) % 3)
     }, 500)
 
     return () => {
@@ -58,9 +57,9 @@ export default function DemoStep3Socratic() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-50 border border-rose-200">
             <ThumbsDown className="w-5 h-5 text-rose-500" />
-            <span className="text-sm font-bold text-rose-600">반대</span>
+            <span className="text-sm font-bold text-rose-600">{t('step3.stance')}</span>
           </div>
-          <span className="text-sm text-zinc-500">입장으로 토론 중</span>
+          <span className="text-sm text-zinc-500">{t('step3.debating')}</span>
         </div>
         <div className="text-xs font-bold text-zinc-400 uppercase tracking-wide">Turn 2/10</div>
       </div>
@@ -76,11 +75,11 @@ export default function DemoStep3Socratic() {
         >
           <div className="max-w-[85%] p-4 rounded-2xl rounded-tr-none bg-primary text-white shadow-lg">
             <div className="flex items-center gap-2 mb-2 opacity-70">
-              <span className="text-xs font-bold uppercase tracking-wide">나</span>
-              <span className="text-xs">{DEMO_MOCK.conversation[0].time}</span>
+              <span className="text-xs font-bold uppercase tracking-wide">{t('step3.me')}</span>
+              <span className="text-xs">14:32</span>
             </div>
             <p className="text-base leading-relaxed">
-              {DEMO_MOCK.conversation[0].content}
+              {t('mockData.conversation.user')}
             </p>
           </div>
         </motion.div>
@@ -95,7 +94,7 @@ export default function DemoStep3Socratic() {
             <div className="p-4 rounded-2xl rounded-tl-none bg-primary/10 border border-primary/20">
               <div className="flex items-center gap-3">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                <span className="text-base font-bold text-primary animate-pulse">{thinkingMessage}</span>
+                <span className="text-base font-bold text-primary animate-pulse">{thinkingMessages[thinkingMessageIdx]}</span>
               </div>
             </div>
           </motion.div>
@@ -107,8 +106,8 @@ export default function DemoStep3Socratic() {
           >
             <div className="max-w-[85%] p-4 rounded-2xl rounded-tl-none bg-zinc-50 border border-zinc-200">
               <div className="flex items-center gap-2 mb-2 text-zinc-500">
-                <span className="text-xs font-bold uppercase tracking-wide">AI 튜터</span>
-                <span className="text-xs">{DEMO_MOCK.conversation[1].time}</span>
+                <span className="text-xs font-bold uppercase tracking-wide">{t('step3.aiTutor')}</span>
+                <span className="text-xs">14:32</span>
               </div>
               <p className="text-base leading-relaxed text-zinc-900">
                 {displayedText}
@@ -127,7 +126,7 @@ export default function DemoStep3Socratic() {
           <div className="flex-1 relative">
             <input
               type="text"
-              placeholder="자신의 논리를 입력하세요..."
+              placeholder={t('step3.inputPlaceholder')}
               disabled
               className="w-full h-14 px-5 rounded-xl bg-white border border-zinc-200 text-base placeholder:text-zinc-400 disabled:opacity-50"
             />

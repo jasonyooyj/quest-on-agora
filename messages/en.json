@@ -414,16 +414,16 @@
     },
     "footer": "AI-based Discussion Platform",
     "toasts": {
-        "instructorForbidden": "Instructors cannot join as students.",
-        "alreadyJoined": "You have already joined this discussion.",
-        "success": "Joined successfully!"
+      "instructorForbidden": "Instructors cannot join as students.",
+      "alreadyJoined": "You have already joined this discussion.",
+      "success": "Joined successfully!"
     }
   },
   "Instructor": {
     "Dashboard": {
       "tag": "Instructor Platform",
       "greeting": "Hello, <spanClass>{name}</spanClass>",
-      "description": "Design new discussion topics that lead students' critical thinking <brClass />and analyze them in real-time.",
+      "description": "Design new discussion topics that lead students' critical thinking <brClass></brClass>and analyze them in real-time.",
       "stats": {
         "totalSessions": "Total Discussion Sessions",
         "activeSessions": "Active Sessions",
@@ -474,7 +474,7 @@
     "NewDiscussion": {
       "header": "Create Discussion",
       "title": "Start New Discussion",
-      "description": "Set engaging topics to stimulate student thinking, <brClass />and design deep conversations with custom AI tutors.",
+      "description": "Set engaging topics to stimulate student thinking, <brClass></brClass>and design deep conversations with custom AI tutors.",
       "phases": {
         "topic": {
           "title": "Topic Settings",
@@ -500,10 +500,22 @@
           "title": "AI Tutor Tuning",
           "subtitle": "Phase 02: AI Intelligence",
           "modes": {
-            "socratic": { "label": "Socratic", "desc": "Deep inquiry based on maieutics" },
-            "balanced": { "label": "Balanced", "desc": "Harmony of multiple perspectives" },
-            "debate": { "label": "Debate", "desc": "Challenging and sharp counterarguments" },
-            "minimal": { "label": "Minimal", "desc": "Autonomous discussion environment" }
+            "socratic": {
+              "label": "Socratic",
+              "desc": "Deep inquiry based on maieutics"
+            },
+            "balanced": {
+              "label": "Balanced",
+              "desc": "Harmony of multiple perspectives"
+            },
+            "debate": {
+              "label": "Debate",
+              "desc": "Challenging and sharp counterarguments"
+            },
+            "minimal": {
+              "label": "Minimal",
+              "desc": "Autonomous discussion environment"
+            }
           },
           "preview": {
             "title": "First Message Preview by AI Mode",
@@ -560,24 +572,24 @@
         "cancel": "Create Later (Cancel)"
       },
       "draft": {
-          "saved": "Draft saved · {time}",
-          "loaded": "Draft loaded",
-          "cleared": "Draft deleted",
-          "deleteTooltip": "Delete draft"
+        "saved": "Draft saved · {time}",
+        "loaded": "Draft loaded",
+        "cleared": "Draft deleted",
+        "deleteTooltip": "Delete draft"
       },
       "toasts": {
-          "enterMaterial": "Please enter learning materials",
-          "generated": "{count} topics generated",
-          "noTopics": "No topics generated. Try different materials.",
-          "errorGenerating": "Error generating topics",
-          "topicSelected": "Topic selected",
-          "createError": "Failed to create discussion",
-          "success": "Discussion created!"
+        "enterMaterial": "Please enter learning materials",
+        "generated": "{count} topics generated",
+        "noTopics": "No topics generated. Try different materials.",
+        "errorGenerating": "Error generating topics",
+        "topicSelected": "Topic selected",
+        "createError": "Failed to create discussion",
+        "success": "Discussion created!"
       },
       "validation": {
-          "titleMin": "Please enter at least 2 characters",
-          "titleMax": "Please enter less than 100 characters",
-          "descMax": "Please enter less than 500 characters"
+        "titleMin": "Please enter at least 2 characters",
+        "titleMax": "Please enter less than 100 characters",
+        "descMax": "Please enter less than 500 characters"
       }
     },
     "DiscussionDetail": {
@@ -766,207 +778,6 @@
       "toasts": {
         "codeCopied": "Join code copied"
       }
-    },
-    "NewDiscussion": {
-      "header": "NEW DISCUSSION",
-      "title": "Create New Discussion",
-      "description": "Design a discussion environment where AI tutors facilitate deep learning.",
-      "phases": {
-        "topic": {
-          "title": "Topic & Context",
-          "subtitle": "Phase 01: Core Content",
-          "aiGenerator": {
-            "button": "AI Topic Generator",
-            "subtitle": "Generate optimized topics from learning materials",
-            "label": "Learning Material / Keywords",
-            "placeholder": "Paste your lecture notes, article summary, or key concepts here...",
-            "hint": "AI will analyze the content and suggest debate topics.",
-            "generateButton": "Generate Topics",
-            "generating": "Analyzing...",
-            "results": "Generated Topics ({count})",
-            "selectHint": "Click to select"
-          }
-        },
-        "aiTutor": {
-          "title": "AI Tutor Tuning",
-          "subtitle": "Phase 02: AI Intelligence",
-          "modes": {
-            "socratic": { "label": "Socratic", "desc": "Asks critical questions" },
-            "balanced": { "label": "Balanced", "desc": "Supportive & Critical" },
-            "debate": { "label": "Devil's Advocate", "desc": "Strong counter-arguments" },
-            "minimal": { "label": "Listener", "desc": "Minimal intervention" }
-          },
-          "preview": {
-            "title": "Real-time Persona Preview",
-            "generating": "Simulating...",
-            "active": "ACTIVE: {mode}",
-            "aiTutor": "AI TUTOR",
-            "hint": "This is how the AI will introduce itself to students.",
-            "placeholder": "Enter a topic to see how the AI responds."
-          }
-        },
-        "environment": {
-          "title": "Environment Settings",
-          "subtitle": "Phase 03: Environment",
-          "anonymous": {
-            "title": "Anonymous Mode",
-            "desc": "Hide real names during discussion."
-          },
-          "stances": {
-            "title": "Custom Stances",
-            "desc": "Define custom teams beyond Pro/Con.",
-            "pro": "Pro",
-            "con": "Con",
-            "add": "Add New Stance"
-          },
-          "duration": {
-            "title": "Duration Limit",
-            "desc": "Set average activity time per student.",
-            "stat": "Est. Interactions",
-            "precision": "Analysis Depth"
-          }
-        }
-      },
-      "guideline": {
-        "title": "Operation Guidelines",
-        "desc": "Sessions are saved as **Drafts**. You must click **Start** in the dashboard to activate the code."
-      },
-      "buttons": {
-        "create": "Create Session",
-        "creating": "Creating...",
-        "cancel": "Cancel"
-      },
-      "draft": {
-        "saved": "Draft saved · {time}",
-        "loaded": "Draft loaded",
-        "cleared": "Draft cleared"
-      },
-      "validation": {
-        "titleMin": "Title must be at least 2 characters",
-        "titleMax": "Title cannot exceed 100 characters",
-        "descMax": "Description cannot exceed 500 characters"
-      },
-      "toasts": {
-        "enterMaterial": "Please enter learning material",
-        "errorGenerating": "Failed to generate topics",
-        "generated": "{count} topics generated",
-        "noTopics": "No topics generated",
-        "createError": "Failed to create discussion",
-        "success": "Discussion created!"
-      }
-    },
-    "DiscussionDetail": {
-      "status": {
-        "draft": "DRAFT",
-        "active": "LIVE",
-        "closed": "CLOSED"
-      },
-      "actions": {
-        "start": "Start Discussion",
-        "end": "End Discussion",
-        "report": "Report",
-        "generating": "Generating...",
-        "copyUrl": "Copy URL",
-        "pin": "Pin to Board",
-        "sendInstruction": "Send Message",
-        "sendWarning": "Send Warning"
-      },
-      "stats": {
-        "participants": "Participants",
-        "online": "Online",
-        "submissions": "Submissions",
-        "helpRequests": "Help Needed",
-        "extensionRequests": "Time Ext."
-      },
-      "participants": {
-        "title": "Student List",
-        "count": "{count} Students",
-        "online": "ONLINE",
-        "offline": "OFFLINE",
-        "empty": "No participants yet",
-        "emptyDesc": "Waiting for students to join...",
-        "details": {
-          "title": "Participant Details",
-          "selected": "SELECTED",
-          "currentStance": "CURRENT STANCE",
-          "noSelection": "Not selected",
-          "stanceStatement": "STANCE STATEMENT",
-          "finalReflection": "FINAL REFLECTION"
-        },
-        "stance": {
-          "undefined": "UNDEFINED",
-          "pro": "Pro",
-          "con": "Con",
-          "neutral": "Neutral"
-        }
-      },
-      "chat": {
-        "individualTitle": "Chat with {name}",
-        "individualDesc": "Monitoring real-time interaction",
-        "allTitle": "All Messages",
-        "allDesc": "Select a student to see details",
-        "viewAll": "View All",
-        "empty": "No messages yet",
-        "emptyDesc": "Discussion will appear here once started.",
-        "roles": {
-          "user": "Student",
-          "ai": "AI Tutor",
-          "instructor": "Professor",
-          "system": "System"
-        }
-      },
-      "sessionInfo": {
-        "title": "Session Overview",
-        "subtitle": "Settings & Configuration",
-        "topic": "DISCUSSION TOPIC",
-        "noDescription": "No description provided.",
-        "aiMode": "AI MODE",
-        "anonymous": "ANONYMOUS",
-        "on": "ON",
-        "off": "OFF"
-      },
-      "pins": {
-        "title": "Insight Board",
-        "empty": "Pin meaningful quotes<br/>from the discussion."
-      },
-      "prompts": {
-        "instruction": "Enter message to send to student:",
-        "warningContent": "Please focus on the discussion topic."
-      },
-      "report": {
-        "title": "Agora Discussion Report: {title}",
-        "generatedDate": "Generated: {date}",
-        "status": "Status: {status}",
-        "statsTitle": "[Statistics]",
-        "totalParticipants": "- Total Participants: {count}",
-        "submitted": "- Submitted: {count} (Rate: {rate}%)",
-        "stanceDist": "- Stance Distribution: {dist}",
-        "totalMessages": "- Total Messages: {count}",
-        "avgMessages": "- Avg Messages/Participant: {count}",
-        "aiSummary": "[AI Summary]",
-        "footer": "Report generated by Agora"
-      },
-      "toasts": {
-        "loadError": "Failed to load discussion",
-        "statusChangeFail": "Failed to change status",
-        "started": "Discussion started",
-        "ended": "Discussion ended",
-        "codeCopied": "Join code copied",
-        "urlCopied": "URL copied",
-        "reportFail": "Failed to generate report",
-        "reportCopied": "Report copied to clipboard",
-        "pinSuccess": "Pinned successfully",
-        "pinFail": "Failed to pin",
-        "unpinSuccess": "Unpinned successfully",
-        "unpinFail": "Failed to unpin",
-        "instructionSent": "Message sent",
-        "instructionFail": "Failed to send message",
-        "warningSent": "Warning sent",
-        "warningFail": "Failed to send warning"
-      },
-      "draftBanner": {
-        "text": "This session is currently <strong>Draft</strong>. Click {startBtn} to activate."
-      }
     }
   },
   "Student": {
@@ -996,6 +807,7 @@
         },
         "status": {
           "live": "LIVE",
+          "active": "LIVE",
           "closed": "CLOSED",
           "draft": "DRAFT"
         },
@@ -1188,7 +1000,121 @@
         "meta": "{instructor} · {count} participants"
       },
       "toast": {
-          "fetchError": "Failed to fetch stats"
+        "fetchError": "Failed to fetch stats"
+      }
+    }
+  },
+  "Demo": {
+    "steps": {
+      "1": {
+        "title": "Create Discussion",
+        "subtitle": "Instructor Setup",
+        "description": "Instructors set discussion topics and select AI tutor modes. In just a few clicks, a smart discussion space is ready."
+      },
+      "2": {
+        "title": "Student Participation",
+        "subtitle": "Student Participation",
+        "description": "Students join via link, choose their stance, and participate in the discussion."
+      },
+      "3": {
+        "title": "AI Socrates",
+        "subtitle": "AI Intervention",
+        "description": "AI asks questions that point out logical gaps in students' arguments, expanding critical thinking."
+      },
+      "4": {
+        "title": "Real-time Analysis",
+        "subtitle": "Analysis & Feedback",
+        "description": "Instructors can monitor students' logical development and engagement at a glance."
+      }
+    },
+    "navigation": {
+      "next": "Next Step",
+      "start": "Get Started"
+    },
+    "step1": {
+      "phase1": "Phase 01: Discussion Topic",
+      "phase2": "Phase 02: AI Tutor Mode",
+      "phase3": "Phase 03: Settings",
+      "anonymous": "Anonymous Mode",
+      "anonymousDesc": "Hide participant names",
+      "duration": "Discussion Duration",
+      "durationDesc": "Average time per participant",
+      "minutes": "MIN",
+      "expectedTurns": "Expected Turns",
+      "analysis": "Analysis"
+    },
+    "step2": {
+      "joinDiscussion": "Join the discussion",
+      "startAiDiscussion": "Start your discussion with AI Tutor",
+      "aiTutorIntro": "AI Tutor will ask critical questions based on your chosen stance.",
+      "selectStance": "Select Your Stance",
+      "stances": {
+        "pro": "Pro",
+        "con": "Con",
+        "neutral": "Neutral",
+        "custom": "Add Stance"
+      }
+    },
+    "step3": {
+      "stance": "Con",
+      "debating": "debating",
+      "me": "ME",
+      "aiTutor": "AI TUTOR",
+      "inputPlaceholder": "Enter your argument...",
+      "thinking": {
+        "1": "Analyzing your response...",
+        "2": "Finding logical gaps...",
+        "3": "Selecting appropriate question..."
+      }
+    },
+    "step4": {
+      "liveParticipation": "Live Participation Status",
+      "online": "{count} online",
+      "pro": "Pro",
+      "con": "Con",
+      "neutral": "Neutral",
+      "submissionStatus": "Submission Status",
+      "participantList": "Participant List",
+      "needsHelp": "{count} need help"
+    },
+    "mockData": {
+      "topic": {
+        "title": "Can Artificial Intelligence Replace Human Creativity?",
+        "description": "Discuss the advancements and limitations of AI in art, music, and writing. Explore the essence of creativity and the role of machines."
+      },
+      "aiModes": {
+        "socratic": {
+          "label": "Socratic",
+          "desc": "Deep inquiry based on maieutics",
+          "preview": "Interesting perspective. So what do you think is the essence of 'creativity'? Is it something only humans can possess?"
+        },
+        "balanced": {
+          "label": "Balanced",
+          "desc": "Harmony of multiple perspectives",
+          "preview": "There are various perspectives on AI creativity. Proponents point to new pattern generation, while critics argue the absence of true intention."
+        },
+        "debate": {
+          "label": "Debate",
+          "desc": "Challenging counterarguments",
+          "preview": "That argument has logical gaps. How would you explain that AI has already created artworks that surpass human work?"
+        },
+        "minimal": {
+          "label": "Minimal",
+          "desc": "Autonomous discussion environment",
+          "preview": "Please proceed with your discussion freely. I'll ask questions when needed."
+        }
+      },
+      "conversation": {
+        "user": "AI ultimately follows programmed patterns, so true creativity is impossible. Creativity stems from consciousness and emotion.",
+        "ai": "Interesting perspective. Where do you think human creativity comes from? Don't humans also draw inspiration from patterns of experience and learning? If so, what is the essential difference between AI and human creative processes?"
+      },
+      "participants": {
+        "1": "Minji K.",
+        "2": "Junhyuk L.",
+        "3": "Seoyeon P.",
+        "4": "Daeun C.",
+        "5": "Woojin J.",
+        "6": "Sohee H."
       }
     }
   }

@@ -298,6 +298,8 @@
       "welcome": "거의 다 왔습니다!",
       "description": "원활한 서비스 이용을 위해 몇 가지 정보를 알려주세요",
       "roleLabel": "본인의 역할은 무엇인가요?",
+      "instructor": "교수 / 강사",
+      "student": "학생",
       "nameLabel": "성함",
       "studentNumberLabel": "학번",
       "schoolLabel": "학교",
@@ -407,16 +409,16 @@
     },
     "footer": "AI 기반 토론 플랫폼",
     "toasts": {
-        "instructorForbidden": "교수자는 학생으로 참여할 수 없습니다.",
-        "alreadyJoined": "이미 참여 중인 토론입니다",
-        "success": "토론에 참여했습니다!"
+      "instructorForbidden": "교수자는 학생으로 참여할 수 없습니다.",
+      "alreadyJoined": "이미 참여 중인 토론입니다",
+      "success": "토론에 참여했습니다!"
     }
   },
   "Instructor": {
     "Dashboard": {
       "tag": "교수자 플랫폼",
       "greeting": "안녕하세요, <spanClass>{name}</spanClass>님",
-      "description": "학생들의 비판적 사고를 이끄는 새로운 토론 주제를 <brClass />지금 바로 설계하고 실시간으로 분석해보세요.",
+      "description": "학생들의 비판적 사고를 이끄는 새로운 토론 주제를 <brClass></brClass>지금 바로 설계하고 실시간으로 분석해보세요.",
       "stats": {
         "totalSessions": "전체 토론 세션",
         "activeSessions": "실시간 진행 중",
@@ -467,7 +469,7 @@
     "NewDiscussion": {
       "header": "Create Discussion",
       "title": "새로운 토론 시작하기",
-      "description": "학생들의 사고를 자극할 매력적인 주제를 설정하고, <brClass />맞춤형 AI 튜터와 함께 깊이 있는 대화를 설계하세요.",
+      "description": "학생들의 사고를 자극할 매력적인 주제를 설정하고, <brClass></brClass>맞춤형 AI 튜터와 함께 깊이 있는 대화를 설계하세요.",
       "phases": {
         "topic": {
           "title": "토론 주제 설정",
@@ -493,10 +495,22 @@
           "title": "AI 튜터 튜닝",
           "subtitle": "Phase 02: AI Intelligence",
           "modes": {
-            "socratic": { "label": "소크라테스", "desc": "산파술 기반 깊은 탐구" },
-            "balanced": { "label": "균형잡힌", "desc": "다각도 관점의 조화" },
-            "debate": { "label": "디베이트", "desc": "도전적이고 예리한 반론" },
-            "minimal": { "label": "최소 개입", "desc": "자율적인 토론 환경" }
+            "socratic": {
+              "label": "소크라테스",
+              "desc": "산파술 기반 깊은 탐구"
+            },
+            "balanced": {
+              "label": "균형잡힌",
+              "desc": "다각도 관점의 조화"
+            },
+            "debate": {
+              "label": "디베이트",
+              "desc": "도전적이고 예리한 반론"
+            },
+            "minimal": {
+              "label": "최소 개입",
+              "desc": "자율적인 토론 환경"
+            }
           },
           "preview": {
             "title": "AI 모드별 첫 메시지 예시",
@@ -553,24 +567,24 @@
         "cancel": "나중에 만들기 (취소)"
       },
       "draft": {
-          "saved": "임시저장됨 · {time}",
-          "loaded": "임시저장된 내용을 불러왔습니다",
-          "cleared": "임시저장이 삭제되었습니다",
-          "deleteTooltip": "임시저장 삭제"
+        "saved": "임시저장됨 · {time}",
+        "loaded": "임시저장된 내용을 불러왔습니다",
+        "cleared": "임시저장이 삭제되었습니다",
+        "deleteTooltip": "임시저장 삭제"
       },
       "toasts": {
-          "enterMaterial": "학습 자료를 입력해주세요",
-          "generated": "{count}개의 토론 주제가 생성되었습니다",
-          "noTopics": "생성된 주제가 없습니다. 다른 자료로 시도해보세요.",
-          "errorGenerating": "주제 생성 중 오류가 발생했습니다",
-          "topicSelected": "선택한 주제가 적용되었습니다",
-          "createError": "토론 생성에 실패했습니다",
-          "success": "토론이 생성되었습니다!"
+        "enterMaterial": "학습 자료를 입력해주세요",
+        "generated": "{count}개의 토론 주제가 생성되었습니다",
+        "noTopics": "생성된 주제가 없습니다. 다른 자료로 시도해보세요.",
+        "errorGenerating": "주제 생성 중 오류가 발생했습니다",
+        "topicSelected": "선택한 주제가 적용되었습니다",
+        "createError": "토론 생성에 실패했습니다",
+        "success": "토론이 생성되었습니다!"
       },
       "validation": {
-          "titleMin": "제목을 2자 이상 입력해주세요",
-          "titleMax": "제목은 100자 이하로 입력해주세요",
-          "descMax": "설명은 500자 이하로 입력해주세요"
+        "titleMin": "제목을 2자 이상 입력해주세요",
+        "titleMax": "제목은 100자 이하로 입력해주세요",
+        "descMax": "설명은 500자 이하로 입력해주세요"
       }
     },
     "DiscussionDetail": {
@@ -759,207 +773,6 @@
       "toasts": {
         "codeCopied": "참여 코드가 복사되었습니다"
       }
-    },
-    "NewDiscussion": {
-      "header": "새 토론 생성",
-      "title": "새로운 토론 세션 만들기",
-      "description": "AI 튜터가 진행하는 토론 환경을 설계하세요.",
-      "phases": {
-        "topic": {
-          "title": "토론 주제 및 설명",
-          "subtitle": "Phase 01: Core Content",
-          "aiGenerator": {
-            "button": "AI 주제 생성기",
-            "subtitle": "학습 자료를 기반으로 최적화된 주제를 제안받으세요",
-            "label": "학습 자료 / 키워드",
-            "placeholder": "강의 노트, 기사 요약, 또는 핵심 개념을 여기에 붙여넣으세요...",
-            "hint": "AI가 내용을 분석하여 토론 주제를 제안합니다.",
-            "generateButton": "주제 생성하기",
-            "generating": "분석 중...",
-            "results": "제안된 주제 ({count})",
-            "selectHint": "클릭하여 선택"
-          }
-        },
-        "aiTutor": {
-          "title": "AI 튜터 튜닝",
-          "subtitle": "Phase 02: AI Intelligence",
-          "modes": {
-            "socratic": { "label": "소크라테스", "desc": "비판적 질문 중심" },
-            "balanced": { "label": "균형잡힘", "desc": "균형 잡힌 피드백" },
-            "debate": { "label": "악마의 변호인", "desc": "강력한 반론 제기" },
-            "minimal": { "label": "리스너", "desc": "최소 개입 리스너" }
-          },
-          "preview": {
-            "title": "실시간 페르소나 미리보기",
-            "generating": "시뮬레이션 중...",
-            "active": "활성: {mode}",
-            "aiTutor": "AI 튜터",
-            "hint": "AI가 학생들에게 자신을 소개하는 방식입니다.",
-            "placeholder": "주제를 입력하면 AI의 반응을 미리 볼 수 있습니다."
-          }
-        },
-        "environment": {
-          "title": "토론 환경 전문 설정",
-          "subtitle": "Phase 03: Environment",
-          "anonymous": {
-            "title": "익명 모드 활성화",
-            "desc": "참여자들의 실명을 숨기고 익명으로 토론을 진행합니다."
-          },
-          "stances": {
-            "title": "커스텀 입장 & 팀 설정",
-            "desc": "기본 찬반 외에 추가적인 팀이나 관점을 정의할 수 있습니다.",
-            "pro": "찬성",
-            "con": "반대",
-            "add": "새로운 입장 추가하기"
-          },
-          "duration": {
-            "title": "토론 유효 시간",
-            "desc": "참여자 개개인의 평균 활동 시간을 설정합니다.",
-            "stat": "예상 상호작용",
-            "precision": "분석 정밀도"
-          }
-        }
-      },
-      "guideline": {
-        "title": "운영 가이드라인",
-        "desc": "토론 세션은 생성 완료 후 **대기 상태**로 저장됩니다. 대시보드에서 **토론 시작** 버튼을 눌러야 활성화됩니다."
-      },
-      "buttons": {
-        "create": "토론 공간 개설하기",
-        "creating": "저장 중...",
-        "cancel": "나중에 만들기 (취소)"
-      },
-      "draft": {
-        "saved": "임시저장됨 · {time}",
-        "loaded": "임시저장된 내용을 불러왔습니다",
-        "cleared": "임시저장이 삭제되었습니다"
-      },
-      "validation": {
-        "titleMin": "제목은 2자 이상이어야 합니다",
-        "titleMax": "제목은 100자를 초과할 수 없습니다",
-        "descMax": "설명은 500자를 초과할 수 없습니다"
-      },
-      "toasts": {
-        "enterMaterial": "학습 자료를 입력해주세요",
-        "errorGenerating": "주제 생성에 실패했습니다",
-        "generated": "{count}개의 주제가 생성되었습니다",
-        "noTopics": "생성된 주제가 없습니다",
-        "createError": "토론 생성에 실패했습니다",
-        "success": "토론이 생성되었습니다!"
-      }
-    },
-    "DiscussionDetail": {
-      "status": {
-        "draft": "대기 중",
-        "active": "진행 중",
-        "closed": "종료됨"
-      },
-      "actions": {
-        "start": "토론 시작",
-        "end": "토론 종료",
-        "report": "리포트",
-        "generating": "생성 중...",
-        "copyUrl": "URL 복사",
-        "pin": "보드에 고정",
-        "sendInstruction": "메시지 보내기",
-        "sendWarning": "경고 보내기"
-      },
-      "stats": {
-        "participants": "참여자",
-        "online": "접속 중",
-        "submissions": "제출 완료",
-        "helpRequests": "도움 요청",
-        "extensionRequests": "시간 연장"
-      },
-      "participants": {
-        "title": "참여자 목록",
-        "count": "{count}명",
-        "online": "온라인",
-        "offline": "오프라인",
-        "empty": "아직 참여자가 없습니다",
-        "emptyDesc": "학생들의 입장을 기다리는 중입니다...",
-        "details": {
-          "title": "참여자 상세 정보",
-          "selected": "선택됨",
-          "currentStance": "현재 입장",
-          "noSelection": "미선택",
-          "stanceStatement": "입장문",
-          "finalReflection": "최종 에세이"
-        },
-        "stance": {
-          "undefined": "미정",
-          "pro": "찬성",
-          "con": "반대",
-          "neutral": "중립"
-        }
-      },
-      "chat": {
-        "individualTitle": "{name}님과의 대화",
-        "individualDesc": "실시간 상호작용 모니터링",
-        "allTitle": "전체 대화 로그",
-        "allDesc": "학생을 선택하여 상세 내용을 확인하세요",
-        "viewAll": "전체 보기",
-        "empty": "아직 대화가 없습니다",
-        "emptyDesc": "토론이 시작되면 대화 내용이 이곳에 표시됩니다.",
-        "roles": {
-          "user": "학생",
-          "ai": "AI 튜터",
-          "instructor": "교수님",
-          "system": "시스템"
-        }
-      },
-      "sessionInfo": {
-        "title": "세션 개요",
-        "subtitle": "설정 및 구성",
-        "topic": "토론 주제",
-        "noDescription": "설명이 없습니다.",
-        "aiMode": "AI 모드",
-        "anonymous": "익명 여부",
-        "on": "켜짐",
-        "off": "꺼짐"
-      },
-      "pins": {
-        "title": "인사이트 보드",
-        "empty": "토론 중 의미 있는 문장을<br/>이곳에 고정하세요."
-      },
-      "prompts": {
-        "instruction": "학생에게 보낼 메시지를 입력하세요:",
-        "warningContent": "토론 주제에 집중해주세요."
-      },
-      "report": {
-        "title": "Agora 토론 리포트: {title}",
-        "generatedDate": "생성일: {date}",
-        "status": "상태: {status}",
-        "statsTitle": "[통계]",
-        "totalParticipants": "- 총 참여자: {count}명",
-        "submitted": "- 제출 완료: {count}명 (제출율: {rate}%)",
-        "stanceDist": "- 입장 분포: {dist}",
-        "totalMessages": "- 총 메시지: {count}개",
-        "avgMessages": "- 인당 평균 메시지: {count}개",
-        "aiSummary": "[AI 요약]",
-        "footer": "Report generated by Agora"
-      },
-      "toasts": {
-        "loadError": "토론 정보를 불러오는데 실패했습니다",
-        "statusChangeFail": "상태 변경에 실패했습니다",
-        "started": "토론이 시작되었습니다",
-        "ended": "토론이 종료되었습니다",
-        "codeCopied": "참여 코드가 복사되었습니다",
-        "urlCopied": "URL이 복사되었습니다",
-        "reportFail": "리포트 생성에 실패했습니다",
-        "reportCopied": "리포트가 클립보드에 복사되었습니다",
-        "pinSuccess": "메시지가 고정되었습니다",
-        "pinFail": "고정에 실패했습니다",
-        "unpinSuccess": "고정이 해제되었습니다",
-        "unpinFail": "해제에 실패했습니다",
-        "instructionSent": "메시지가 전송되었습니다",
-        "instructionFail": "전송에 실패했습니다",
-        "warningSent": "경고가 전송되었습니다",
-        "warningFail": "전송에 실패했습니다"
-      },
-      "draftBanner": {
-        "text": "현재 이 세션은 <strong>대기 상태</strong>입니다. {startBtn}을 눌러 활성화하세요."
-      }
     }
   },
   "Student": {
@@ -989,6 +802,7 @@
         },
         "status": {
           "live": "LIVE",
+          "active": "LIVE",
           "closed": "CLOSED",
           "draft": "DRAFT"
         },
@@ -1181,7 +995,121 @@
         "meta": "{instructor} · {count}명 참여"
       },
       "toast": {
-          "fetchError": "통계 데이터를 불러오는데 실패했습니다"
+        "fetchError": "통계 데이터를 불러오는데 실패했습니다"
+      }
+    }
+  },
+  "Demo": {
+    "steps": {
+      "1": {
+        "title": "토론 생성",
+        "subtitle": "Instructor Setup",
+        "description": "교수님은 토론 주제를 설정하고, AI 튜터 모드를 선택합니다. 단 몇 번의 클릭으로 스마트한 토론의 장이 열립니다."
+      },
+      "2": {
+        "title": "학생 참여",
+        "subtitle": "Student Participation",
+        "description": "학생들은 링크를 통해 입장하여 자신의 입장을 정하고 토론에 참여합니다."
+      },
+      "3": {
+        "title": "AI 소크라테스",
+        "subtitle": "AI Intervention",
+        "description": "AI가 학생의 논리적 허점을 짚어주는 질문을 던져 비판적 사고를 확장시킵니다."
+      },
+      "4": {
+        "title": "실시간 분석",
+        "subtitle": "Analysis & Feedback",
+        "description": "교수님은 학생들의 논리 발전 과정과 참여도를 한눈에 파악합니다."
+      }
+    },
+    "navigation": {
+      "next": "다음 단계",
+      "start": "시작하기"
+    },
+    "step1": {
+      "phase1": "Phase 01: 토론 주제",
+      "phase2": "Phase 02: AI 튜터 모드",
+      "phase3": "Phase 03: 환경 설정",
+      "anonymous": "익명 모드",
+      "anonymousDesc": "참여자 실명 숨김",
+      "duration": "토론 시간",
+      "durationDesc": "참여자당 평균 시간",
+      "minutes": "분",
+      "expectedTurns": "예상 턴",
+      "analysis": "분석"
+    },
+    "step2": {
+      "joinDiscussion": "토론에 참여하세요",
+      "startAiDiscussion": "AI 튜터와 토론을 시작하세요",
+      "aiTutorIntro": "선택하신 입장을 바탕으로 AI 튜터가 비판적 질문을 던집니다.",
+      "selectStance": "입장을 선택하세요",
+      "stances": {
+        "pro": "찬성",
+        "con": "반대",
+        "neutral": "중립",
+        "custom": "입장 추가"
+      }
+    },
+    "step3": {
+      "stance": "반대",
+      "debating": "입장으로 토론 중",
+      "me": "나",
+      "aiTutor": "AI 튜터",
+      "inputPlaceholder": "자신의 논리를 입력하세요...",
+      "thinking": {
+        "1": "답변을 분석하고 있어요...",
+        "2": "논리적 허점을 찾고 있습니다...",
+        "3": "적절한 질문을 고르고 있어요..."
+      }
+    },
+    "step4": {
+      "liveParticipation": "실시간 참여 현황",
+      "online": "{count}명 접속 중",
+      "pro": "찬성",
+      "con": "반대",
+      "neutral": "중립",
+      "submissionStatus": "제출 현황",
+      "participantList": "참여자 목록",
+      "needsHelp": "{count}명 도움 필요"
+    },
+    "mockData": {
+      "topic": {
+        "title": "인공지능이 인간의 창의성을 대체할 수 있는가?",
+        "description": "AI 예술, 음악, 글쓰기의 발전과 한계에 대해 토론합니다. 창의성의 본질과 기계의 역할을 탐구하세요."
+      },
+      "aiModes": {
+        "socratic": {
+          "label": "소크라테스",
+          "desc": "산파술 기반 깊은 탐구",
+          "preview": "흥미로운 관점이군요. 그렇다면 '창의성'의 본질은 무엇이라고 생각하시나요? 인간만이 가질 수 있는 특별한 것인가요?"
+        },
+        "balanced": {
+          "label": "균형잡힌",
+          "desc": "다각도 관점의 조화",
+          "preview": "AI 창의성에 대한 여러 관점이 있습니다. 찬성 측은 새로운 패턴 생성을, 반대 측은 진정한 의도의 부재를 주장합니다."
+        },
+        "debate": {
+          "label": "디베이트",
+          "desc": "도전적이고 예리한 반론",
+          "preview": "그 주장은 논리적 허점이 있습니다. AI가 이미 인간을 능가하는 예술 작품을 만들었다는 점을 어떻게 설명하시겠습니까?"
+        },
+        "minimal": {
+          "label": "최소 개입",
+          "desc": "자율적인 토론 환경",
+          "preview": "자유롭게 토론을 진행해주세요. 필요할 때 질문드리겠습니다."
+        }
+      },
+      "conversation": {
+        "user": "AI는 결국 프로그래밍된 패턴을 따르기 때문에 진정한 창의성은 불가능합니다. 창의성은 의식과 감정에서 비롯되는 것입니다.",
+        "ai": "흥미로운 관점이군요. 그렇다면 인간의 창의성은 어디에서 비롯된다고 생각하시나요? 인간 역시 경험과 학습의 패턴에서 영감을 얻지 않나요? 만약 그렇다면, AI와 인간의 창의적 과정은 어떤 본질적 차이가 있을까요?"
+      },
+      "participants": {
+        "1": "김민지",
+        "2": "이준혁",
+        "3": "박서연",
+        "4": "최다은",
+        "5": "정우진",
+        "6": "한소희"
       }
     }
   }

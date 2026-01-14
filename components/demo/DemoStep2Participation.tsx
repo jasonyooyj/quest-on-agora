@@ -2,19 +2,27 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import { ThumbsUp, ThumbsDown, Minus, ArrowRight, MessageSquare, AlertCircle, Plus } from 'lucide-react'
-import { DEMO_MOCK } from './mockData'
 
-const stanceConfig = [
-  { value: 'pro', label: '찬성', icon: ThumbsUp, color: 'emerald' },
-  { value: 'con', label: '반대', icon: ThumbsDown, color: 'rose' },
-  { value: 'neutral', label: '중립', icon: Minus, color: 'zinc' },
-  { value: 'custom', label: '입장 추가', icon: Plus, color: 'purple' }
-]
+const stanceKeys = ['pro', 'con', 'neutral', 'custom'] as const
+const stanceIcons = {
+  pro: ThumbsUp,
+  con: ThumbsDown,
+  neutral: Minus,
+  custom: Plus
+}
+const stanceColors = {
+  pro: 'emerald',
+  con: 'rose',
+  neutral: 'zinc',
+  custom: 'purple'
+}
 
 export default function DemoStep2Participation() {
   const [showModal, setShowModal] = useState(true)
   const [hoveredStance, setHoveredStance] = useState<string | null>(null)
+  const t = useTranslations('Demo')
 
   return (
     <div className="w-full h-full bg-white relative overflow-hidden">
@@ -26,8 +34,8 @@ export default function DemoStep2Participation() {
             <MessageSquare className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <div className="text-base font-bold text-zinc-900 line-clamp-1">{DEMO_MOCK.topic.title}</div>
-            <div className="text-sm text-zinc-500">토론에 참여하세요</div>
+            <div className="text-base font-bold text-zinc-900 line-clamp-1">{t('mockData.topic.title')}</div>
+            <div className="text-sm text-zinc-500">{t('step2.joinDiscussion')}</div>
           </div>
         </div>
 
@@ -36,9 +44,9 @@ export default function DemoStep2Participation() {
           <div className="w-20 h-20 bg-zinc-100 border border-zinc-200 rounded-2xl flex items-center justify-center mb-6">
             <MessageSquare className="w-10 h-10 text-primary" />
           </div>
-          <p className="text-xl font-bold text-zinc-900 mb-3">AI 튜터와 토론을 시작하세요</p>
+          <p className="text-xl font-bold text-zinc-900 mb-3">{t('step2.startAiDiscussion')}</p>
           <p className="text-base text-zinc-500 leading-relaxed max-w-[280px]">
-            선택하신 입장을 바탕으로 AI 튜터가 비판적 질문을 던집니다.
+            {t('step2.aiTutorIntro')}
           </p>
         </div>
       </div>
@@ -65,44 +73,45 @@ export default function DemoStep2Participation() {
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-primary/20">
                   <AlertCircle className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="text-lg font-bold text-zinc-900">입장을 선택하세요</h2>
+                <h2 className="text-lg font-bold text-zinc-900">{t('step2.selectStance')}</h2>
               </div>
 
               <div className="flex flex-col gap-1.5 flex-shrink-0">
-                {stanceConfig.map((stance) => {
-                  const Icon = stance.icon
-                  const isHovered = hoveredStance === stance.value
+                {stanceKeys.map((stanceKey) => {
+                  const Icon = stanceIcons[stanceKey]
+                  const color = stanceColors[stanceKey]
+                  const isHovered = hoveredStance === stanceKey
 
                   return (
                     <motion.button
-                      key={stance.value}
-                      onMouseEnter={() => setHoveredStance(stance.value)}
+                      key={stanceKey}
+                      onMouseEnter={() => setHoveredStance(stanceKey)}
                       onMouseLeave={() => setHoveredStance(null)}
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       className={`flex items-center gap-3 py-2.5 px-3 rounded-xl border transition-all ${
-                        stance.color === 'emerald'
+                        color === 'emerald'
                           ? 'border-emerald-200 bg-emerald-50/80 text-emerald-700 hover:shadow-lg hover:shadow-emerald-100'
-                          : stance.color === 'rose'
+                          : color === 'rose'
                             ? 'border-rose-200 bg-rose-50/80 text-rose-700 hover:shadow-lg hover:shadow-rose-100'
-                            : stance.color === 'purple'
+                            : color === 'purple'
                               ? 'border-purple-200 bg-purple-50/80 text-purple-700 hover:shadow-lg hover:shadow-purple-100'
                               : 'border-zinc-200 bg-zinc-50/80 text-zinc-700 hover:shadow-lg hover:shadow-zinc-100'
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center border flex-shrink-0 ${
-                        stance.color === 'emerald'
+                        color === 'emerald'
                           ? 'bg-emerald-100 border-emerald-200'
-                          : stance.color === 'rose'
+                          : color === 'rose'
                             ? 'bg-rose-100 border-rose-200'
-                            : stance.color === 'purple'
+                            : color === 'purple'
                               ? 'bg-purple-100 border-purple-200'
                               : 'bg-zinc-100 border-zinc-200'
                       }`}>
                         <Icon className="w-5 h-5" />
                       </div>
                       <div className="flex-1 text-left min-w-0">
-                        <div className="font-bold text-base">{stance.label}</div>
+                        <div className="font-bold text-base">{t(`step2.stances.${stanceKey}`)}</div>
                       </div>
                       <motion.div
                         initial={{ opacity: 0, x: -10 }}

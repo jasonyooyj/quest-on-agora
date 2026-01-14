@@ -37,14 +37,16 @@ export function Navbar() {
         >
             <div className={`flex items-center justify-between ${isScrolled ? "w-full" : "container mx-auto px-4 md:px-6"}`}>
                 {/* Logo */}
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-[0_4px_12px_rgba(99,102,241,0.3)] group-hover:shadow-[0_4px_20px_rgba(168,85,247,0.4)] transition-all duration-300">
-                        <MessageCircle className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-lg font-semibold tracking-tight text-zinc-900 group-hover:text-zinc-700 transition-colors">
-                        Agora
-                    </span>
-                </Link>
+                <div className="flex flex-1 justify-start">
+                    <Link href="/" className="flex items-center gap-2 group">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-[0_4px_12px_rgba(99,102,241,0.3)] group-hover:shadow-[0_4px_20px_rgba(168,85,247,0.4)] transition-all duration-300">
+                            <MessageCircle className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-lg font-semibold tracking-tight text-zinc-900 group-hover:text-zinc-700 transition-colors">
+                            Agora
+                        </span>
+                    </Link>
+                </div>
 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-8">
@@ -61,7 +63,7 @@ export function Navbar() {
                 </nav>
 
                 {/* Action Buttons */}
-                <div className="hidden md:flex items-center gap-3">
+                <div className="hidden md:flex flex-1 items-center justify-end gap-3">
                     <Link
                         href="/login"
                         className="text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
@@ -78,12 +80,14 @@ export function Navbar() {
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <button
-                    className="md:hidden text-zinc-600 hover:text-zinc-900"
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                >
-                    {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                <div className="flex flex-1 justify-end md:hidden">
+                    <button
+                        className="text-zinc-600 hover:text-zinc-900"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    >
+                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                    </button>
+                </div>
             </div>
 
             {/* Mobile Menu */}

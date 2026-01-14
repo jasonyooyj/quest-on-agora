@@ -41,7 +41,8 @@ function getKoreanErrorMessage(errorMessage: string): string {
     return '인증 과정에서 오류가 발생했습니다.'
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
     const next = requestUrl.searchParams.get('next')
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
     if (errorParam || errorDescription) {
         const message = getKoreanErrorMessage(errorDescription || errorParam || '')
         return NextResponse.redirect(
-            new URL(`/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
+            new URL(`/${locale}/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )
     }
 
@@ -64,7 +65,13 @@ export async function GET(request: NextRequest) {
         if (!error) {
             // 1. Check for specific redirect content (e.g. password recovery)
             if (next && next.startsWith('/')) {
-                return NextResponse.redirect(new URL(next, requestUrl.origin))
+                // Ensure next path includes locale if not present
+                // Avoid double prefixing if next already contains the locale
+                let nextPath = next
+                if (!next.startsWith(`/${locale}`)) {
+                    nextPath = `/${locale}${next.startsWith('/') ? next : '/' + next}`
+                }
+                return NextResponse.redirect(new URL(nextPath, requestUrl.origin))
             }
 
             // 2. Fallback to role-based redirect
@@ -81,27 +88,27 @@ export async function GET(request: NextRequest) {
                 if (profile) {
                     // User has a profile, redirect based on role
                     if (profile.role === 'instructor') {
-                        return NextResponse.redirect(new URL('/instructor', requestUrl.origin))
+                        return NextResponse.redirect(new URL(`/${locale}/instructor`, requestUrl.origin))
                     } else if (profile.role === 'student') {
-                        return NextResponse.redirect(new URL('/student', requestUrl.origin))
+                        return NextResponse.redirect(new URL(`/${locale}/student`, requestUrl.origin))
                     }
                 } else {
                     // No profile found (first time OAuth), redirect to onboarding
-                    return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
+                    return NextResponse.redirect(new URL(`/${locale}/onboarding`, requestUrl.origin))
                 }
             }
 
             // Fallback default
-            return NextResponse.redirect(new URL('/instructor', requestUrl.origin))
+            return NextResponse.redirect(new URL(`/${locale}/instructor`, requestUrl.origin))
         }
 
         // If there was an error, redirect to error page with Korean message
         const message = getKoreanErrorMessage(error.message)
         return NextResponse.redirect(
-            new URL(`/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
+            new URL(`/${locale}/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )
     }
 
     // No code present, redirect to login
-    return NextResponse.redirect(new URL('/login', requestUrl.origin))
+    return NextResponse.redirect(new URL(`/${locale}/login`, requestUrl.origin))
 }
