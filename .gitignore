@@ -50,3 +50,10 @@ next-env.d.ts
 
 # Local env files
 .env*.local
+
+# AI Agent configs (personal settings)
+.claude/settings.local.json
+.claude/plans/
+.agent/
+.cursor/
+.vscode/
