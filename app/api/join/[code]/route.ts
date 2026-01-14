@@ -83,7 +83,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     if (discussion.status === 'draft') {
       return NextResponse.json(
         {
-          error: '이 토론은 아직 시작되지 않았습니다. 강사가 시작할 때까지 기다려주세요.',
+          error: '토론이 아직 시작되지 않았습니다. 교수자에게 토론 시작을 요청해주세요.',
           code: 'DRAFT_MODE'
         },
         { status: 403 } // Forbidden

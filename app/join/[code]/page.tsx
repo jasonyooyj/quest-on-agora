@@ -149,8 +149,13 @@ export default function JoinPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-100 mb-4">
                 <Clock className="w-6 h-6 text-amber-600" />
               </div>
-              <p className="text-zinc-900 font-medium mb-2">토론 대기 중</p>
-              <p className="text-zinc-500 text-sm mb-6">{errorMessage}</p>
+              <p className="text-zinc-900 font-medium mb-2">토론이 아직 시작되지 않았습니다</p>
+              <p className="text-zinc-500 text-sm mb-2">
+                참여 코드: <span className="font-mono font-bold">{code}</span>
+              </p>
+              <p className="text-amber-600 text-sm font-medium mb-6">
+                교수자에게 토론 시작을 요청해주세요
+              </p>
               <button
                 onClick={() => router.push('/student')}
                 className="px-6 py-2.5 bg-zinc-100 text-zinc-600 hover:bg-zinc-200 rounded-lg font-medium transition-colors"
