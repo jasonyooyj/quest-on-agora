@@ -21,6 +21,26 @@ function getSafeRedirectPath(redirect: string | null): string {
     return redirect
 }
 
+// Supabase 에러 메시지를 한글로 변환
+function getKoreanErrorMessage(errorMessage: string): string {
+    const msg = errorMessage.toLowerCase()
+
+    if (msg.includes('expired') || msg.includes('invalid')) {
+        return '인증 링크가 만료되었거나 유효하지 않습니다. 새로운 인증 메일을 요청해주세요.'
+    }
+    if (msg.includes('already been used') || msg.includes('already confirmed')) {
+        return '이미 인증이 완료된 이메일입니다. 로그인해주세요.'
+    }
+    if (msg.includes('token')) {
+        return '인증 토큰이 유효하지 않습니다. 새로운 인증 메일을 요청해주세요.'
+    }
+    if (msg.includes('access_denied')) {
+        return '접근이 거부되었습니다.'
+    }
+
+    return '인증 과정에서 오류가 발생했습니다.'
+}
+
 export async function GET(request: NextRequest) {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
@@ -29,9 +49,10 @@ export async function GET(request: NextRequest) {
     const errorDescription = requestUrl.searchParams.get('error_description')
 
     // Handle errors from Supabase (e.g. invalid link, expired link)
-    if (errorParam) {
+    if (errorParam || errorDescription) {
+        const message = getKoreanErrorMessage(errorDescription || errorParam || '')
         return NextResponse.redirect(
-            new URL(`/auth/error?message=${encodeURIComponent(errorDescription || '인증 과정에서 오류가 발생했습니다')}`, requestUrl.origin)
+            new URL(`/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )
     }
 
@@ -74,9 +95,10 @@ export async function GET(request: NextRequest) {
             return NextResponse.redirect(new URL('/instructor', requestUrl.origin))
         }
 
-        // If there was an error, redirect to error page
+        // If there was an error, redirect to error page with Korean message
+        const message = getKoreanErrorMessage(error.message)
         return NextResponse.redirect(
-            new URL(`/auth/error?message=${encodeURIComponent(error.message)}`, requestUrl.origin)
+            new URL(`/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )
     }
 
