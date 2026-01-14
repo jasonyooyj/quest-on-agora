@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-0.5.1-brightgreen?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-0.6.1-brightgreen?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-16.0.7-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)
@@ -122,6 +122,27 @@
 - 교수 피드백 알림
 - 토론 시간 관련 알림
 - 새로운 반론 알림
+
+### 🔧 관리자(Admin) 기능
+
+> 관리자 권한은 `ADMIN_EMAILS` 환경변수에 등록된 이메일로 로그인한 사용자에게 부여됩니다.
+
+#### 📊 관리자 대시보드 (`/admin`)
+- 전체 플랫폼 통계 (사용자 수, 토론 수, 활성 세션)
+- 시스템 상태 모니터링
+
+#### 👥 사용자 관리 (`/admin/users`)
+- 전체 사용자 목록 조회
+- 사용자 상세 정보 확인 및 수정
+- 역할(교수/학생) 관리
+
+#### 📋 토론 관리 (`/admin/discussions`)
+- 모든 토론 목록 조회 (교수별, 상태별 필터링)
+- 토론 상세 정보 확인
+- 문제 있는 토론 관리
+
+#### ⚙️ 설정 (`/admin/settings`)
+- 플랫폼 전역 설정 관리
 
 ---
 
@@ -410,11 +431,26 @@ OPENAI_API_KEY=sk-xxxxx
 
 ## 🧪 테스트
 
+### Unit 테스트 (Vitest)
+
+핵심 유틸리티 함수에 대한 단위 테스트를 [Vitest](https://vitest.dev/)로 실행합니다.
+
+```bash
+# Unit 테스트 실행
+npm test
+
+# Watch 모드로 테스트 실행
+npm run test:watch
+```
+
+| 테스트 파일 | 설명 |
+|-------------|------|
+| `lib/__tests__/compression.test.ts` | 데이터 압축/해제 유틸리티 테스트 |
+| `lib/__tests__/admin.test.ts` | 관리자 권한 검증 테스트 |
+
 ### E2E 테스트 (Playwright)
 
 프로젝트는 [Playwright](https://playwright.dev/)를 사용하여 End-to-End 테스트를 수행합니다.
-
-#### 테스트 실행
 
 ```bash
 # 전체 E2E 테스트 실행
