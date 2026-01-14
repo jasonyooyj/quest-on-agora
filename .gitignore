@@ -41,10 +41,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-#sql
+# SQL files (except migrations)
 *.sql
-# SQL files in database directory (can be committed if needed)
-# database/*.sql
+!database/migrations/*.sql
 
 # npm cache
 .npm-cache/
