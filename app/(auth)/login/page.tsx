@@ -49,7 +49,14 @@ function LoginForm() {
             })
 
             if (error) {
-                toast.error(error.message)
+                // Rate limiting 및 일반 에러 메시지 한글화
+                if (error.message.includes('security purposes') || error.message.includes('after') && error.message.includes('seconds')) {
+                    toast.error('보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)')
+                } else if (error.message.includes('Invalid login credentials')) {
+                    toast.error('이메일 또는 비밀번호가 올바르지 않습니다')
+                } else {
+                    toast.error(error.message)
+                }
                 return
             }
 

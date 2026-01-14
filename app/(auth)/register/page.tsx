@@ -91,7 +91,12 @@ function RegisterContent() {
             })
 
             if (authError) {
-                toast.error(authError.message)
+                // Rate limiting 에러 메시지 한글화
+                if (authError.message.includes('security purposes') || authError.message.includes('after') && authError.message.includes('seconds')) {
+                    toast.error('보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)')
+                } else {
+                    toast.error(authError.message)
+                }
                 return
             }
 
