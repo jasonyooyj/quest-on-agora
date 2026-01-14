@@ -51,11 +51,36 @@ export default function AdminLayout({
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
-        router.push('/login')
+        router.push('/login?redirect=/admin')
         return
       }
 
-      // Get profile
+      // Verify admin access via API
+      const verifyResponse = await fetch('/api/admin/stats')
+      if (verifyResponse.status === 401) {
+        router.push('/login?redirect=/admin')
+        return
+      }
+      if (verifyResponse.status === 403) {
+        toast.error('관리자 권한이 없습니다')
+        // Redirect to appropriate dashboard based on role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        if (profile?.role === 'instructor') {
+          router.push('/instructor')
+        } else if (profile?.role === 'student') {
+          router.push('/student')
+        } else {
+          router.push('/')
+        }
+        return
+      }
+
+      // Get profile for display
       const { data: profile } = await supabase
         .from('profiles')
         .select('name')

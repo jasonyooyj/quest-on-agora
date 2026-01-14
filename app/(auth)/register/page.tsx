@@ -51,7 +51,15 @@ function RegisterContent() {
             })
 
             if (error) {
-                toast.error(error.message)
+                // OAuth 에러 메시지 한글화
+                const msg = error.message.toLowerCase()
+                if (msg.includes('security purposes') || (msg.includes('after') && msg.includes('seconds'))) {
+                    toast.error('보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)')
+                } else if (msg.includes('rate limit')) {
+                    toast.error('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
+                } else {
+                    toast.error(error.message)
+                }
                 setOauthLoading(null)
             }
         } catch (error) {
@@ -91,9 +99,14 @@ function RegisterContent() {
             })
 
             if (authError) {
-                // Rate limiting 에러 메시지 한글화
-                if (authError.message.includes('security purposes') || authError.message.includes('after') && authError.message.includes('seconds')) {
+                // Rate limiting 에러 메시지 한글화 (대소문자 무시)
+                const msg = authError.message.toLowerCase()
+                if (msg.includes('security purposes') || (msg.includes('after') && msg.includes('seconds'))) {
                     toast.error('보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)')
+                } else if (msg.includes('rate limit')) {
+                    toast.error('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
+                } else if (msg.includes('email not confirmed')) {
+                    toast.info('📬 이메일 인증을 완료해주세요. 받은편지함을 확인하세요!')
                 } else {
                     toast.error(authError.message)
                 }
@@ -102,7 +115,8 @@ function RegisterContent() {
 
             // 이미 가입된 이메일인지 확인 (identities가 비어있으면 이미 존재하는 계정)
             if (authData.user && (!authData.user.identities || authData.user.identities.length === 0)) {
-                toast.error('이미 가입된 이메일입니다. 로그인 페이지에서 로그인하거나 비밀번호를 재설정해주세요.')
+                toast.warning('이미 가입된 이메일입니다. 로그인 페이지에서 로그인해주세요.')
+                router.push('/login')
                 return
             }
 
@@ -129,12 +143,11 @@ function RegisterContent() {
                 if (!profileResponse.ok) {
                     const errorData = await profileResponse.json()
                     console.error('Profile creation error:', errorData)
-                    toast.error(`프로필 생성 오류: ${errorData.error || '알 수 없는 오류'}`)
-                    return
+                    // 프로필 오류는 무시하고 진행 (upsert 실패 시에도 이메일 확인 안내)
                 }
             }
 
-            toast.success('회원가입이 완료되었습니다! 이메일을 확인해주세요.')
+            toast.success('📧 인증 메일을 발송했습니다! 받은편지함을 확인해주세요.')
             router.push('/confirm-email')
         } catch (error) {
             toast.error('회원가입 중 오류가 발생했습니다')

@@ -32,9 +32,10 @@ export async function POST(request: NextRequest) {
 
         const supabaseAdmin = getSupabaseAdmin()
 
+        // upsert를 사용하여 이미 존재하는 프로필은 업데이트
         const { data, error } = await supabaseAdmin
             .from('profiles')
-            .insert({
+            .upsert({
                 id,
                 email,
                 name,
@@ -42,6 +43,8 @@ export async function POST(request: NextRequest) {
                 student_number: student_number || null,
                 school: school || null,
                 department: department || null,
+            }, {
+                onConflict: 'id',
             })
             .select()
             .single()

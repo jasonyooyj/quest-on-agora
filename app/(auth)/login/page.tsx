@@ -49,11 +49,16 @@ function LoginForm() {
             })
 
             if (error) {
-                // Rate limiting 및 일반 에러 메시지 한글화
-                if (error.message.includes('security purposes') || error.message.includes('after') && error.message.includes('seconds')) {
+                // Rate limiting 및 일반 에러 메시지 한글화 (대소문자 무시)
+                const msg = error.message.toLowerCase()
+                if (msg.includes('security purposes') || (msg.includes('after') && msg.includes('seconds'))) {
                     toast.error('보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)')
-                } else if (error.message.includes('Invalid login credentials')) {
+                } else if (msg.includes('rate limit')) {
+                    toast.error('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
+                } else if (msg.includes('invalid login credentials')) {
                     toast.error('이메일 또는 비밀번호가 올바르지 않습니다')
+                } else if (msg.includes('email not confirmed')) {
+                    toast.info('📬 이메일 인증을 완료해주세요. 받은편지함을 확인하세요!')
                 } else {
                     toast.error(error.message)
                 }
@@ -82,7 +87,15 @@ function LoginForm() {
             })
 
             if (error) {
-                toast.error(error.message)
+                // OAuth 에러 메시지 한글화
+                const msg = error.message.toLowerCase()
+                if (msg.includes('security purposes') || (msg.includes('after') && msg.includes('seconds'))) {
+                    toast.error('보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)')
+                } else if (msg.includes('rate limit')) {
+                    toast.error('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
+                } else {
+                    toast.error(error.message)
+                }
                 setOauthLoading(null)
             }
         } catch (error) {

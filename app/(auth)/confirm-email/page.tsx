@@ -64,7 +64,15 @@ export default function ConfirmEmailPage() {
             })
 
             if (error) {
-                toast.error(error.message)
+                // Rate limiting 에러 메시지 한글화
+                const msg = error.message.toLowerCase()
+                if (msg.includes('security purposes') || (msg.includes('after') && msg.includes('seconds'))) {
+                    toast.error('보안을 위해 잠시 후 다시 시도해주세요. (약 1분 대기)')
+                } else if (msg.includes('rate limit')) {
+                    toast.error('요청이 너무 많습니다. 잠시 후 다시 시도해주세요.')
+                } else {
+                    toast.error(error.message)
+                }
                 return
             }
 
