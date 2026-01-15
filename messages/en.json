@@ -1,0 +1,1473 @@
+{
+  "Hero": {
+    "tag": "University Discussion Platform",
+    "titlePrefix": "A New Chapter of",
+    "titleSuffix": "Discussion",
+    "description": "Engage students in deep critical thinking conversations with AI, and monitor discussions in real-time.",
+    "ctaPrimary": "Get Started for Free",
+    "ctaSecondary": "View Demo",
+    "dashboard": {
+      "badge": "Agora Spatial",
+      "participationRate": "Real-time Participation",
+      "activeSessions": "Active Sessions",
+      "countUnit": "sessions",
+      "logTitle": "Recent AI Analysis Log",
+      "logStatus": "Analyzing",
+      "logItem": "Student {student}: {action}",
+      "logs": {
+        "0": {
+          "action": "AI Socrates Response Completed",
+          "time": "Just now"
+        },
+        "1": {
+          "action": "Argument Deepening Question Generated",
+          "time": "1 min ago"
+        },
+        "2": {
+          "action": "Stance Change Detected & Analyzed",
+          "time": "2 mins ago"
+        }
+      }
+    }
+  },
+  "Navbar": {
+    "features": "Features",
+    "useCases": "Use Cases",
+    "pricing": "Pricing",
+    "about": "About",
+    "login": "Login",
+    "getStarted": "Get Started",
+    "loggedIn": "Logged in",
+    "dashboard": "My dashboard",
+    "account": "My account",
+    "roleInstructor": "Instructor",
+    "roleStudent": "Student",
+    "roleMember": "Member",
+    "settings": "Settings",
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "Error": {
+    "title": "Something went wrong",
+    "description": "An error occurred while processing your request. Please try again later.",
+    "retry": "Try again",
+    "home": "Go home"
+  },
+  "Settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and default preferences.",
+    "back": "Back to dashboard",
+    "sections": {
+      "account": "Account",
+      "preferences": "Preferences"
+    },
+    "loading": "Loading settings...",
+    "comingSoon": "This section is coming soon."
+  },
+  "Marquee": {
+    "items": {
+      "0": "AI Socratic Dialogue",
+      "1": "Expansion of Critical Thinking",
+      "2": "Real-time Logic Analysis",
+      "3": "Practical Discussion Data",
+      "4": "Customized Instructor Feedback",
+      "5": "Argumentation Improvement"
+    }
+  },
+  "ProblemSolution": {
+    "tag": "Why Agora?",
+    "titlePrefix": "Beyond the Limits of",
+    "titleSuffix": "Traditional Discussion",
+    "problemsTitle": "Problems with Traditional Methods",
+    "solutionsTitle": "Agora's Solution",
+    "connector": "Problem to Solution",
+    "problems": {
+      "0": {
+        "title": "Participation by a Few",
+        "description": "In large lectures, only a few students speak. The rest just listen passively."
+      },
+      "1": {
+        "title": "Superficial Opinions",
+        "description": "Discussions with emotional claims without evidence. Lack of deep analysis and logical thinking."
+      },
+      "2": {
+        "title": "Difficulty in Real-time Tracking",
+        "description": "Impossible to check the thought process of 30 students individually. Hard to know who is struggling."
+      }
+    },
+    "solutions": {
+      "0": {
+        "title": "Simultaneous Participation",
+        "description": "All students share their stances and evidence in real-time. No need to wait for a turn to speak."
+      },
+      "1": {
+        "title": "AI-based Customized Discussion",
+        "description": "AI asks 'Why do you think so?' to induce logical evidence writing. Deepens thinking."
+      },
+      "2": {
+        "title": "Dashboard Monitoring",
+        "description": "Grasp stance distribution, AI conversation status, and help requests at a glance. Intervene at the right time."
+      }
+    }
+  },
+  "Features": {
+    "tag": "Features",
+    "title": "Tools to Innovate Discussion",
+    "description": "Provides a smart discussion environment for both instructors and students.",
+    "items": {
+      "0": {
+        "title": "Real-time Monitoring",
+        "description": "Track student stance changes, AI conversation status, and evidence writing at a glance. Know immediately who needs help."
+      },
+      "1": {
+        "title": "AI Socrates",
+        "description": "AI asks students 'Why?'. Leads conversations that develop simple claims into logical grounds."
+      },
+      "2": {
+        "title": "Stance Analysis",
+        "description": "Visualize the distribution of pros/cons/neutral and key grounds for each stance. Read the flow of the discussion."
+      },
+      "3": {
+        "title": "Instructor Intervention",
+        "description": "Send hints, counterexamples, and encouragement at the right time. Deepen discussion with personalized feedback."
+      }
+    }
+  },
+  "AiModes": {
+    "tag": "4 AI Modes",
+    "title": "Choose the AI that fits your class goal",
+    "description": "Instructors can directly set how to lead student thinking.",
+    "close": "Close",
+    "viewExample": "View Dialogue Example",
+    "exampleTitle": "Dialogue Example",
+    "student": "Student",
+    "ai": "AI",
+    "note": "You can select the AI mode when creating a discussion, and change it during the session.",
+    "items": {
+      "socratic": {
+        "label": "Socratic Method",
+        "title": "Questions Awakening the Unconscious",
+        "description": "AI becomes a 'midwife' and draws out unconscious premises and beliefs hidden within the student. It persistently asks questions to explore fundamental values rather than superficial logic.",
+        "example": {
+          "student": "Laws must be strict for a just society.",
+          "ai": "You believe strictness guarantees justice. Then, what is the essence of 'justice' you think of? Is it punishment or rehabilitation?"
+        }
+      },
+      "balanced": {
+        "label": "Balanced",
+        "title": "Balanced Perspectives",
+        "description": "Sympathizes with the student's opinion while gently introducing other perspectives. Helps explore various viewpoints without being biased.",
+        "example": {
+          "student": "I think working from home increases work efficiency.",
+          "ai": "There are advantages such as improved concentration and saved commuting time. At the same time, what do you think about difficulties in team collaboration or onboarding new employees?"
+        }
+      },
+      "debate": {
+        "label": "Debate",
+        "title": "Argument with Sharp Counterarguments",
+        "description": "AI takes the role of 'Devil's Advocate' and actively argues against the student's claim. It digs into logical loopholes to stimulate the creation of stronger arguments.",
+        "example": {
+          "student": "Artificial intelligence will replace many jobs.",
+          "ai": "But there were similar concerns during the Industrial Revolution, yet new job categories were created. What areas are difficult for AI to replace, and how would you explain historical precedents?"
+        }
+      },
+      "minimal": {
+        "label": "Minimal Intervention",
+        "title": "Promoting Autonomous Thinking",
+        "description": "AI only summarizes and confirms the student's remarks. Provides minimal intervention so students can organize and develop their thoughts on their own.",
+        "example": {
+          "student": "I think social media has a negative impact on teenagers.",
+          "ai": "You gave an opinion on the negative impact of social media. do you have specific evidence to support this claim?"
+        }
+      }
+    }
+  },
+  "Stats": {
+    "0": {
+      "value": "47%",
+      "label": "Critical Thinking Improvement"
+    },
+    "1": {
+      "value": "2.3x",
+      "label": "Participation Increase"
+    },
+    "2": {
+      "value": "89%",
+      "label": "Instructor Satisfaction"
+    }
+  },
+  "UseCases": {
+    "tag": "Use Cases",
+    "titlePrefix": "Used in Various Fields",
+    "titleSuffix": "Agora",
+    "description": "Effective for all discussion classes, from philosophy to law.",
+    "metricLabel": "Outcome",
+    "items": {
+      "0": {
+        "title": "Philosophy Class",
+        "description": "Develop critical thinking through discussions on ethical dilemmas. Students view problems from various perspectives.",
+        "metric": "Participation Increased by 180%"
+      },
+      "1": {
+        "title": "Business Case Study",
+        "description": "Analyze real corporate cases and discuss decision-making. Improve data-based argumentation skills.",
+        "metric": "Evidence-based Argumentation Improved by 47%"
+      },
+      "2": {
+        "title": "Law Mock Trial",
+        "description": "Develop legal logic from pros/cons perspectives. Make persuasive arguments based on precedents and laws.",
+        "metric": "Student Satisfaction 92%"
+      }
+    }
+  },
+  "Quote": {
+    "professor": "PROFESSOR",
+    "student": "STUDENT",
+    "items": {
+      "0": {
+        "text": "\"After introducing Agora, student participation in discussions has noticeably increased. Since AI asks good questions, students also think more deeply.\"",
+        "author": "Prof. Kim",
+        "affiliation": "Seoul National University, Dept. of Philosophy"
+      },
+      "1": {
+        "text": "\"AI pointed out the loopholes in my logic, so I thought more deeply. I was flustered at first, but thanks to it, I was able to make a much more solid argument.\"",
+        "author": "Student Lee",
+        "affiliation": "Korea University, Dept. of Business"
+      },
+      "2": {
+        "text": "\"It is efficient to be able to grasp the participation of all students in real-time in a class of 30. I can know immediately who is having difficulties.\"",
+        "author": "Prof. Park",
+        "affiliation": "Korea University, Dept. of Sociology"
+      }
+    }
+  },
+  "Faq": {
+    "tag": "FAQ",
+    "title": "Have any questions?",
+    "moreQuestions": "Have more questions?",
+    "contact": "Contact Us",
+    "items": {
+      "0": {
+        "question": "Is Agora free?",
+        "answer": "Yes, basic features are free to use. Consider the Pro plan if you need large-scale classes or advanced analysis features."
+      },
+      "1": {
+        "question": "Does AI write answers for students?",
+        "answer": "No. Agora's AI is not a simple chatbot. It is a 'discussion partner' that helps students develop their thoughts on their own by applying various educational methodologies such as the Socratic method and Devil's Advocate."
+      },
+      "2": {
+        "question": "How many people can participate simultaneously?",
+        "answer": "Up to 100 people can participate simultaneously per discussion. For large classes, we recommend dividing them into sections."
+      },
+      "3": {
+        "question": "How is student data protected?",
+        "answer": "All data is stored encrypted and strictly managed according to the privacy policy. Only the professor can access data from their own class."
+      },
+      "4": {
+        "question": "Is integration with existing LMS possible?",
+        "answer": "We are currently preparing integration with major LMS such as Moodle and Canvas. If you need integration, please contact us and we will support you with priority."
+      }
+    }
+  },
+  "Cta": {
+    "title": "Start a Better Discussion Class",
+    "description": "Experience Agora for free right now and meet a new discussion experience with AI.",
+    "buttonText": "Start for Free"
+  },
+  "Footer": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "contact": "Contact Us"
+  },
+  "Auth": {
+    "Login": {
+      "title": "Agora Login",
+      "welcome": "Welcome Back!",
+      "description": "Log in to your account to start discussion",
+      "googleBtn": "Continue with Google",
+      "or": "or",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "forgotPassword": "Forgot password?",
+      "submitBtn": "Log in",
+      "noAccount": "Don't have an account?",
+      "registerLink": "Sign up",
+      "success": "Login successful!",
+      "error": "An error occurred during login"
+    },
+    "Register": {
+      "title": "Agora Sign Up",
+      "welcome": "New Beginning",
+      "description": "Open a new chapter of discussion with Agora",
+      "googleBtn": "Start with Google",
+      "orEmail": "Or sign up with email",
+      "roleLabel": "What is your role?",
+      "instructor": "Professor / Instructor",
+      "student": "Student",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "studentNumberLabel": "Student ID",
+      "schoolLabel": "School",
+      "departmentLabel": "Department",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "passwordHint": "Letters, numbers, and special characters only",
+      "submitBtn": "Start Agora",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Log in",
+      "success": "📧 Verification email sent! Please check your inbox.",
+      "error": "An error occurred during registration",
+      "emailExists": "Email already exists. Please log in."
+    },
+    "Onboarding": {
+      "title": "Additional Information",
+      "welcome": "Almost there!",
+      "description": "Please tell us a bit more about yourself for better service",
+      "roleLabel": "What is your role?",
+      "instructor": "Professor / Instructor",
+      "student": "Student",
+      "nameLabel": "Name",
+      "studentNumberLabel": "Student ID",
+      "schoolLabel": "School",
+      "departmentLabel": "Department",
+      "submitBtn": "Start Agora",
+      "success": "Welcome! You are ready to start.",
+      "error": "An error occurred during setup. Please try again."
+    },
+    "ForgotPassword": {
+      "title": "Find Password",
+      "description": "Enter your registered email and we will send you a password reset link.",
+      "backToLogin": "Back to Login",
+      "emailLabel": "Email",
+      "submitBtn": "Send Link",
+      "successTitle": "Email Sent",
+      "successDescription": "Password reset link has been sent to your email.\nPlease check your inbox.",
+      "toastSuccess": "Password reset link sent",
+      "toastError": "An error occurred"
+    },
+    "UpdatePassword": {
+      "title": "Set New Password",
+      "description": "Please enter a new password to protect your account",
+      "passwordLabel": "New Password",
+      "confirmPasswordLabel": "Confirm Password",
+      "submitBtn": "Change Password",
+      "success": "Password has been changed",
+      "error": "An error occurred"
+    },
+    "ConfirmEmail": {
+      "title": "Verify Email",
+      "heading": "Please verify your email",
+      "descriptionPre": "Registration is almost complete!",
+      "descriptionPost": "Verification link has been sent to",
+      "defaultEmail": "your email address",
+      "step1": "Step 1",
+      "step1Desc": "Check your email inbox",
+      "step2": "Step 2",
+      "step2Desc": "Find the email from Agora",
+      "step3": "Step 3",
+      "step3Desc": "Click the \"Verify Email\" button",
+      "sending": "Sending...",
+      "sent": "Sent",
+      "cooldown": "Resend available in {seconds}s",
+      "resendBtn": "Resend Email",
+      "spamTipTitle": "Can't find the email?",
+      "spamTip": "Check your spam folder.",
+      "backToLogin": "Back to Login",
+      "resendSuccess": "Verification email resent!",
+      "resendError": "An error occurred while resending email"
+    },
+    "EmailConfirmed": {
+      "tag": "Confirmed",
+      "title": "Email Confirmed!",
+      "description": "Your email has been successfully verified.\nYou can now log in and start using Agora.",
+      "welcome": "Welcome aboard! Open a new chapter of discussion.",
+      "loginButton": "Log In"
+    },
+    "AuthError": {
+      "tag": "Auth Error",
+      "title": "Verification Failed",
+      "defaultMessage": "An error occurred during verification",
+      "resendButton": "Resend Verification Email",
+      "resendSuccess": "✓ Email sent! Check your inbox.",
+      "backToLogin": "Back to Login",
+      "registerAgain": "Register Again",
+      "emailNotFound": "Email not found. Please register again.",
+      "loading": "Loading..."
+    },
+    "Validation": {
+      "emailInvalid": "Please enter a valid email",
+      "passwordMin": "Password must be at least 6 characters",
+      "passwordRegex": "Password can only contain letters, numbers, and special characters",
+      "nameRequired": "Please enter your name",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "Errors": {
+      "security": "For security purposes, please try again later. (Wait about 1 min)",
+      "rateLimit": "Too many requests. Please try again later.",
+      "invalidCredentials": "Invalid email or password (or email verification might be pending)",
+      "emailNotConfirmed": "📬 Please complete email verification. Check your inbox!",
+      "socialLoginError": "An error occurred during social login"
+    }
+  },
+  "Join": {
+    "title": "Agora",
+    "loading": "Verifying...",
+    "unauthorized": {
+      "title": "Login Required",
+      "redirect": "Redirecting to login page..."
+    },
+    "unauthenticated": {
+      "title": "Login Required",
+      "description": "Please log in/sign up to join the discussion.",
+      "login": "Log In",
+      "register": "Register"
+    },
+    "joining": {
+      "title": "Joining Discussion",
+      "code": "Join Code:"
+    },
+    "draft": {
+      "title": "Discussion Pending",
+      "dashboard": "Go to Dashboard"
+    },
+    "closed": {
+      "title": "Discussion Closed",
+      "dashboard": "Go to Dashboard"
+    },
+    "error": {
+      "title": "Join Failed",
+      "dashboard": "Go to Dashboard",
+      "default": "An error occurred while joining the discussion.",
+      "invalidCode": "Invalid join code",
+      "studentOnly": "Only students can join discussions",
+      "notFound": "Discussion not found",
+      "draft": "This discussion has not started yet",
+      "closed": "This discussion has ended"
+    },
+    "footer": "AI-based Discussion Platform",
+    "toasts": {
+      "instructorForbidden": "Instructors cannot join as students.",
+      "alreadyJoined": "You have already joined this discussion.",
+      "success": "Joined successfully!"
+    }
+  },
+  "Instructor": {
+    "Dashboard": {
+      "tag": "Instructor Platform",
+      "greeting": "Hello, <spanClass>{name}</spanClass>",
+      "description": "Design new discussion topics that lead students' critical thinking <brClass></brClass>and analyze them in real-time.",
+      "stats": {
+        "totalSessions": "Total Discussion Sessions",
+        "activeSessions": "Active Sessions",
+        "totalParticipants": "Total Participants",
+        "sessions": "Sessions",
+        "participating": "participating",
+        "countUnit": ""
+      },
+      "manage": {
+        "title": "Manage Discussions",
+        "subtitle": "Status of all discussion sessions under management"
+      },
+      "empty": {
+        "title": "No discussions created",
+        "description": "Create your first discussion to start meaningful conversations with students.",
+        "button": "Create First Discussion"
+      },
+      "list": {
+        "joinCode": "Join Code: {code}",
+        "copyUrl": "Copy URL",
+        "menu": {
+          "copyCode": "Copy Code",
+          "copyUrl": "Copy URL",
+          "delete": "Delete"
+        },
+        "status": {
+          "draft": "Draft",
+          "active": "Active",
+          "closed": "Closed"
+        },
+        "confirmDelete": "Are you sure you want to delete the discussion \"{title}\"?"
+      },
+      "header": {
+        "newDiscussion": "New Discussion",
+        "settings": "Settings",
+        "logout": "Log out"
+      },
+      "toasts": {
+        "fetchError": "Failed to fetch discussions",
+        "dataError": "Failed to fetch data",
+        "codeCopied": "Join code copied",
+        "urlCopied": "Join link copied",
+        "copyFailed": "Failed to copy",
+        "deleteSuccess": "Discussion deleted",
+        "deleteFailed": "Failed to delete"
+      },
+      "loading": "Loading..."
+    },
+    "NewDiscussion": {
+      "header": "Create Discussion",
+      "title": "Start New Discussion",
+      "description": "Set engaging topics to stimulate student thinking, <brClass></brClass>and design deep conversations with custom AI tutors.",
+      "phases": {
+        "topic": {
+          "title": "Topic Settings",
+          "subtitle": "Phase 01: Core Topic",
+          "aiGenerator": {
+            "button": "Get AI Topic Recommendations",
+            "subtitle": "Enter learning materials to get topic suggestions",
+            "label": "Input Learning Materials",
+            "placeholder": "Paste lecture notes, textbook content, or paper abstracts...",
+            "hint": "Up to 8,000 characters. More details yield better topics.",
+            "generateButton": "Get Topic Recommendations",
+            "generating": "AI is analyzing topics...",
+            "results": "Recommended Topics ({count})",
+            "selectHint": "Click to select",
+            "manualInput": "Or enter manually"
+          },
+          "topicLabel": "Discussion Topic",
+          "topicPlaceholder": "Ex: Necessity of AI Ethics and Universal Basic Income",
+          "descLabel": "Description (Optional)",
+          "descPlaceholder": "Write background knowledge, reference links, or core questions..."
+        },
+        "aiTutor": {
+          "title": "AI Tutor Tuning",
+          "subtitle": "Phase 02: AI Intelligence",
+          "modes": {
+            "socratic": {
+              "label": "Socratic",
+              "desc": "Deep inquiry based on maieutics"
+            },
+            "balanced": {
+              "label": "Balanced",
+              "desc": "Harmony of multiple perspectives"
+            },
+            "debate": {
+              "label": "Debate",
+              "desc": "Challenging and sharp counterarguments"
+            },
+            "minimal": {
+              "label": "Minimal",
+              "desc": "Autonomous discussion environment"
+            }
+          },
+          "preview": {
+            "title": "First Message Preview by AI Mode",
+            "generating": "Generating preview...",
+            "placeholder": "Enter a topic to see examples by AI mode.",
+            "aiTutor": "AI Tutor",
+            "hint": "More specific topics generate more refined first questions.",
+            "active": "{mode} Mode Active"
+          }
+        },
+        "environment": {
+          "title": "Advanced Settings",
+          "subtitle": "Phase 03: Environment",
+          "anonymous": {
+            "title": "Enable Anonymous Mode",
+            "desc": "Hide real names and proceed anonymously."
+          },
+          "customStance": {
+            "title": "Custom Stances & Teams",
+            "desc": "Define additional teams or perspectives beyond Pro/Con."
+          },
+          "stances": {
+            "pro": "Pro",
+            "con": "Con",
+            "neutral": "Neutral",
+            "additional": "Additional Stance {n}",
+            "add": "Add New Stance",
+            "proLabel": "Primary Option A (Pro)",
+            "conLabel": "Primary Option B (Con)",
+            "additionalLabel": "Additional Option {n}"
+          },
+          "duration": {
+            "title": "Discussion Duration",
+            "desc": "Set average activity time per participant.",
+            "unlimited": "UNLIMITED",
+            "minutes": "MINUTES",
+            "labels": {
+              "quick": "Quick (3m)",
+              "target": "Standard (30m)",
+              "unlimited": "Unlimited"
+            },
+            "stats": {
+              "interaction": "Expected Interactions",
+              "turns": "Turns",
+              "precision": "Analysis Precision",
+              "level": "Level",
+              "max": "MAX",
+              "high": "HIGH",
+              "mid": "MID"
+            }
+          }
+        }
+      },
+      "guidelines": {
+        "title": "Operation Guidelines",
+        "desc": "Sessions are saved as <strongClass>Draft</strongClass>. You must click <strongClass>Start Discussion</strongClass> in the dashboard to activate the code. Topics can be edited anytime."
+      },
+      "buttons": {
+        "submit": "Create Discussion Space",
+        "submitting": "Saving...",
+        "cancel": "Create Later (Cancel)"
+      },
+      "draft": {
+        "saved": "Draft saved · {time}",
+        "loaded": "Draft loaded",
+        "cleared": "Draft deleted",
+        "deleteTooltip": "Delete draft"
+      },
+      "toasts": {
+        "enterMaterial": "Please enter learning materials",
+        "generated": "{count} topics generated",
+        "noTopics": "No topics generated. Try different materials.",
+        "errorGenerating": "Error generating topics",
+        "topicSelected": "Topic selected",
+        "createError": "Failed to create discussion",
+        "success": "Discussion created!"
+      },
+      "validation": {
+        "titleMin": "Please enter at least 2 characters",
+        "titleMax": "Please enter less than 100 characters",
+        "descMax": "Please enter less than 500 characters"
+      }
+    },
+    "DiscussionDetail": {
+      "loading": "Loading administrator dashboard...",
+      "status": {
+        "active": "Active",
+        "closed": "Closed",
+        "draft": "Draft",
+        "pending": "Pending"
+      },
+      "actions": {
+        "start": "Start",
+        "end": "End",
+        "report": "Report",
+        "generating": "Generating...",
+        "copyCode": "Copy Code",
+        "copyUrl": "Copy URL",
+        "settings": "Settings",
+        "pin": "Pin Quote",
+        "unpin": "Unpin",
+        "sendInstruction": "Send Instruction",
+        "sendWarning": "Send Warning"
+      },
+      "stats": {
+        "participants": "Participants",
+        "online": "Online",
+        "submissions": "Submissions",
+        "helpRequests": "Help Requests",
+        "extensionRequests": "Extension Requests",
+        "countUnit": ""
+      },
+      "participants": {
+        "title": "Participant List",
+        "count": "{count} students",
+        "empty": "No participants yet",
+        "emptyDesc": "Share the join code to invite students",
+        "online": "Online",
+        "offline": "Offline",
+        "stance": {
+          "pro": "Pro",
+          "con": "Con",
+          "neutral": "Neutral",
+          "undefined": "Undefined"
+        },
+        "details": {
+          "title": "Student Info",
+          "selected": "Selected Participant",
+          "currentStance": "Current Stance",
+          "stanceStatement": "Stance Statement",
+          "finalReflection": "Final Reflection",
+          "noSelection": "Unselected"
+        }
+      },
+      "chat": {
+        "allTitle": "All Participants Chat (Monitoring)",
+        "allDesc": "Monitor all student and AI conversations in real-time.",
+        "individualTitle": "{name}'s Chat",
+        "individualDesc": "Checking individual chat history.",
+        "viewAll": "View All",
+        "empty": "No conversations detected yet",
+        "emptyDesc": "Conversations will appear here when students start discussing with AI.",
+        "roles": {
+          "user": "Student",
+          "ai": "AI Tutor",
+          "instructor": "Professor (Me)",
+          "system": "System"
+        }
+      },
+      "sessionInfo": {
+        "title": "Session Overview",
+        "subtitle": "SESSION OVERVIEW",
+        "topic": "Topic & Description",
+        "noDescription": "No description provided for this session.",
+        "aiMode": "AI Tutoring",
+        "anonymous": "Anonymous Mode",
+        "on": "ON",
+        "off": "OFF"
+      },
+      "pins": {
+        "title": "Pinned Quotes",
+        "empty": "Pin key student quotes from the chat to share here."
+      },
+      "toasts": {
+        "loadError": "Failed to load discussion",
+        "statusChangeFail": "Failed to change status",
+        "started": "Discussion started!",
+        "ended": "Discussion ended.",
+        "codeCopied": "Join code copied!",
+        "urlCopied": "Join link copied!",
+        "reportCopied": "Report copied to clipboard!",
+        "reportFail": "Failed to generate report",
+        "pinSuccess": "Quote pinned!",
+        "pinFail": "Failed to pin quote",
+        "unpinSuccess": "Pin removed",
+        "unpinFail": "Failed to remove pin",
+        "instructionSent": "Instruction sent successfully",
+        "instructionFail": "Failed to send instruction",
+        "warningSent": "Warning sent",
+        "warningFail": "Failed to send warning"
+      },
+      "prompts": {
+        "instruction": "Enter instruction for the student:",
+        "warningContent": "⚠️ Warning: Inappropriate behavior detected. Please cooperate for a smooth discussion."
+      },
+      "report": {
+        "title": "📊 Discussion Report: {title}",
+        "generatedDate": "📅 Date: {date}",
+        "status": "📝 Status: {status}",
+        "statsTitle": "📈 Statistics",
+        "totalParticipants": "- Total Participants: {count}",
+        "submitted": "- Submitted: {count} ({rate}%)",
+        "stanceDist": "- Stance Distribution: {dist}",
+        "totalMessages": "- Total Messages: {count}",
+        "avgMessages": "- Avg Messages per Participant: {count}",
+        "aiSummary": "🤖 AI Analysis",
+        "footer": "Generated by Agora Discussion Platform"
+      },
+      "draftBanner": {
+        "text": "This discussion is currently in <strongClass>Draft</strongClass> status. Students cannot enter. Click the <startBtn>Start</startBtn> button to activate.",
+        "start": "Start"
+      },
+      "onboarding": {
+        "title": "Discussion Started!",
+        "subtitle": "Show this screen to let students join",
+        "scanQr": "Scan QR Code",
+        "inputCode": "Or enter Join Code",
+        "waiting": "Waiting for students...",
+        "joined": "students joined",
+        "startMonitoring": "Go to Dashboard"
+      }
+    },
+    "SettingsDialog": {
+      "title": "Discussion Settings",
+      "subtitle": "Discussion Settings",
+      "anonymous": {
+        "label": "Anonymous Mode",
+        "description": "Show as anonymous instead of real name"
+      },
+      "aiMode": {
+        "label": "Select AI Tutor Mode",
+        "modes": {
+          "socratic": {
+            "label": "Socratic Method",
+            "description": "Explores unconscious premises and fundamental values"
+          },
+          "balanced": {
+            "label": "Balanced",
+            "description": "Presents both sides in a balanced way"
+          },
+          "debate": {
+            "label": "Debate",
+            "description": "Promotes debate with active counterarguments"
+          },
+          "minimal": {
+            "label": "Minimal Intervention",
+            "description": "Intervenes only when necessary"
+          }
+        }
+      },
+      "duration": {
+        "label": "Discussion Duration",
+        "unlimited": "UNLIMITED",
+        "minutes": "MIN",
+        "labels": {
+          "short": "3min",
+          "medium": "30min",
+          "unlimited": "Unlimited"
+        },
+        "expectedTurns": "Expected turns: {count}"
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save Settings",
+        "saving": "Saving..."
+      },
+      "toasts": {
+        "saveSuccess": "Settings saved",
+        "saveFail": "Failed to save settings"
+      }
+    },
+    "DiscussionCard": {
+      "status": {
+        "live": "LIVE",
+        "closed": "CLOSED",
+        "draft": "DRAFT"
+      },
+      "codePrefix": "CODE: {code}",
+      "studentsSuffix": "{count} STUDENTS",
+      "enter": "Enter",
+      "deleteDialog": {
+        "title": "Confirm Deletion",
+        "description": "Are you sure you want to delete the discussion \"{title}\"?<br/>This action cannot be undone and all data will be permanently deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "toasts": {
+        "codeCopied": "Join code copied"
+      }
+    }
+  },
+  "Student": {
+    "Dashboard": {
+      "tag": "Student Platform",
+      "greeting": "Hello, {name}",
+      "description": "How will your logic change things today? Join a new discussion and expand your thoughts.",
+      "join": {
+        "title": "Join Discussion",
+        "description": "Enter the 6-digit code shared by your professor to join a new session.",
+        "placeholder": "Join Code",
+        "button": "Join",
+        "joining": "Joining..."
+      },
+      "stats": {
+        "total": "Total Discussions",
+        "active": "Active Sessions",
+        "submitted": "Insights Written"
+      },
+      "list": {
+        "title": "My Discussions",
+        "subtitle": "All active or completed discussion sessions",
+        "sessions": "Sessions",
+        "empty": {
+          "title": "No discussions yet",
+          "description": "No active discussions found. Enter a code to start your first discussion!"
+        },
+        "status": {
+          "live": "LIVE",
+          "active": "LIVE",
+          "closed": "CLOSED",
+          "draft": "DRAFT"
+        },
+        "stance": {
+          "unselected": "No Stance",
+          "submitted": "Submitted",
+          "pro": "Pro",
+          "con": "Con",
+          "neutral": "Neutral"
+        }
+      },
+      "loading": "Loading...",
+      "header": {
+        "settings": "Settings",
+        "logout": "Log out",
+        "studentId": "Student ID: {id}"
+      },
+      "toasts": {
+        "enterCode": "Please enter a join code",
+        "invalidCode": "Invalid join code",
+        "notActive": "Discussion is not active",
+        "joinSuccess": "Joined successfully!",
+        "joinFail": "Failed to join",
+        "error": "An error occurred"
+      },
+      "DiscussionDetail": {
+        "loading": "Loading...",
+        "StanceModal": {
+          "topic": "Discussion Topic",
+          "title": "Choose Your Stance",
+          "description": "Please choose the stance you will take in this discussion. \nYou will have a deep discussion with {name} based on your choice.",
+          "options": {
+            "pro": "Argue from the supporting side",
+            "con": "Critique from the opposing side",
+            "neutral": "Explore from a neutral perspective"
+          },
+          "reselect": "Choose Different Stance",
+          "statementTitle": "Write Stance Statement",
+          "statementDesc": "Briefly explain why you chose this stance or write your main arguments.",
+          "statementPlaceholder": "Ex: I support this because the positive long-term effects outweigh the risks...",
+          "starting": "Starting...",
+          "start": "Start Discussion"
+        },
+        "notFound": {
+          "title": "Discussion not found",
+          "button": "Back to Dashboard"
+        },
+        "stanceLabels": {
+          "pro": "Pro",
+          "con": "Con",
+          "neutral": "Neutral"
+        },
+        "aiNames": {
+          "debate": "Debate Tutor",
+          "socratic": "Socrates",
+          "balanced": "AI Tutor",
+          "minimal": "AI Guide",
+          "default": "AI Tutor"
+        },
+        "header": {
+          "gallery": "Gallery",
+          "finish": "Finish",
+          "help": "Help",
+          "requesting": "Requesting...",
+          "cancelHelp": "Cancel Help"
+        },
+        "stance": {
+          "myStance": "MY STANCE",
+          "yourStance": "YOUR STANCE",
+          "select": "Select Stance",
+          "submitted": "SUBMITTED"
+        },
+        "welcome": {
+          "title": "Start debate with {aiName}",
+          "desc": "{aiName} will ask critical questions based on your stance.",
+          "turns": "Max {count} turns"
+        },
+        "intro": {
+          "title": "Start debate with {name}",
+          "description": "{name} will ask critical questions based on your stance.",
+          "maxTurns": "Max {count} turns"
+        },
+        "chat": {
+          "roles": {
+            "user": "ME",
+            "instructor": "INSTRUCTOR"
+          },
+          "submitted": "Discussion submitted. No more messages allowed."
+        },
+        "input": {
+          "placeholder": "Enter your logic...",
+          "thinking": "{name} is thinking...",
+          "submitted": "Discussion submitted. No more messages allowed."
+        },
+        "modals": {
+          "stance": {
+            "title": "Choose your Stance",
+            "desc": "Select a stance to debate with {aiName}.",
+            "statementTitle": "Stance Statement",
+            "statementDesc": "Why did you choose this stance?",
+            "statementPlaceholder": "e.g., I believe this is correct because...",
+            "change": "Choose different stance",
+            "start": "Start Discussion",
+            "starting": "Starting..."
+          },
+          "submit": {
+            "title": "Submit Discussion?",
+            "desc": "You cannot send messages after submission.",
+            "cancel": "Continue Chatting",
+            "confirm": "Submit",
+            "submitting": "Submitting..."
+          },
+          "extension": {
+            "title": "Wrapping Up",
+            "desc": "Do you want to continue or submit?",
+            "extend": "Extend Chat",
+            "submit": "Go to Submit"
+          }
+        },
+        "submitDialog": {
+          "title": "Submit Discussion?",
+          "description": "You cannot send messages after submission.<br/>Are you sure?",
+          "cancel": "Continue Chatting",
+          "confirm": "Submit",
+          "submitting": "Submitting..."
+        },
+        "extensionDialog": {
+          "title": "Wrapping Up",
+          "description": "Do you want to continue or submit?",
+          "processing": "Processing...",
+          "continue": "Extend Chat",
+          "submit": "Go to Submit"
+        },
+        "thinking": {
+          "default": "{name} is thinking...",
+          "messages": {
+            "0": "Reading your response...",
+            "1": "Analyzing your argument...",
+            "2": "Finding logical gaps...",
+            "3": "Formulating a question...",
+            "4": "Preparing response..."
+          },
+          "analyzing": {
+            "short": "Analyzing...",
+            "long": "Still thinking... ({seconds}s)"
+          }
+        },
+        "aiIndicator": {
+          "thinking": "{aiName} is writing...",
+          "steps": {
+            "1": "Reading...",
+            "2": "Analyzing...",
+            "3": "Thinking..."
+          }
+        },
+        "toasts": {
+          "started": "Started as \"{stance}\"",
+          "startDesc": "Have a deep discussion with AI Tutor",
+          "stanceSelected": "Started as \"{stance}\"",
+          "stanceDescription": "Have a deep discussion with AI Tutor",
+          "stanceError": "Failed to select stance",
+          "error": "An error occurred",
+          "helpSent": "Help request sent to instructor",
+          "helpDesc": "Instructor will help you shortly",
+          "helpRequested": "Help request sent to instructor",
+          "helpRequestedDesc": "Instructor will help you shortly",
+          "helpCancelled": "Help request cancelled",
+          "helpError": "Failed to send help request",
+          "submitted": "Discussion submitted",
+          "submittedDesc": "No more messages allowed",
+          "submitSuccess": "Discussion submitted",
+          "submitSuccessDesc": "No more messages allowed",
+          "submitError": "Failed to submit discussion",
+          "sendFail": "Failed to send message",
+          "messageSendError": "Failed to send message",
+          "extended": "Chat extended",
+          "extendedDesc": "Request sent to instructor",
+          "extensionSuccess": "Chat extended",
+          "extensionSuccessDesc": "Request sent to instructor",
+          "extensionError": "Failed to extend chat"
+        }
+      },
+      "Submit": {
+        "title": "Final Reflection",
+        "keyPoints": {
+          "title": "Key Points",
+          "subtitle": "AI Analysis of your discussion",
+          "loading": "Analyzing...",
+          "error": "Failed to load key points"
+        },
+        "reflection": {
+          "title": "My Reflection",
+          "subtitle": "Optional: Write your thoughts",
+          "description": "Optional: Write your thoughts",
+          "optional": "OPTIONAL",
+          "placeholder": "e.g., I changed my mind about...",
+          "chars": " characters"
+        },
+        "button": {
+          "submit": "Submit",
+          "submitting": "Submitting...",
+          "note": "Cannot edit after submission"
+        },
+        "submit": {
+          "button": "Submit",
+          "submitting": "Submitting...",
+          "warning": "Cannot edit after submission"
+        },
+        "toasts": {
+          "success": "Discussion submitted!",
+          "successDesc": "Instructor can now review it",
+          "error": "Failed to submit",
+          "loadKeyPointsError": "Failed to load key points",
+          "submitSuccess": "Discussion submitted!",
+          "submitSuccessDesc": "Instructor can now review it",
+          "submitError": "Failed to submit"
+        }
+      },
+      "Gallery": {
+        "title": "Discussion Gallery",
+        "loading": "Loading...",
+        "notFound": {
+          "title": "Discussion not found",
+          "button": "Go Back"
+        },
+        "header": {
+          "title": "Discussion Gallery",
+          "submittedCount": "{count} Submitted"
+        },
+        "submittedCount": "{count} Submitted",
+        "filters": {
+          "all": "All",
+          "pro": "Pro",
+          "con": "Con",
+          "neutral": "Neutral",
+          "sort": {
+            "latest": "Latest",
+            "likes": "Likes",
+            "comments": "Comments"
+          }
+        },
+        "sort": {
+          "latest": "Latest",
+          "likes": "Likes",
+          "comments": "Comments"
+        },
+        "empty": {
+          "filter": "No results found",
+          "filterTitle": "No results found",
+          "filterDesc": "Try changing your filter options",
+          "reset": "Reset Filters",
+          "all": "No submissions yet",
+          "title": "No submissions yet",
+          "description": "Be the first to submit your discussion!"
+        },
+        "comments": {
+          "anonymous": "Anonymous",
+          "empty": "No comments yet",
+          "placeholder": "Write a comment..."
+        },
+        "card": {
+          "reflection": "Final Reflection",
+          "comments": "Comments",
+          "noComments": "No comments yet",
+          "inputPlaceholder": "Write a comment..."
+        }
+      }
+    }
+  },
+  "Admin": {
+    "Layout": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "discussions": "Discussions",
+      "settings": "Settings",
+      "logout": "Log Out",
+      "panel": "Admin Panel",
+      "loading": "Loading...",
+      "unauthorized": "You do not have admin permissions",
+      "fetchError": "Failed to fetch user info"
+    },
+    "Dashboard": {
+      "title": "Admin Dashboard",
+      "subtitle": "Platform Overview",
+      "stats": {
+        "totalUsers": "Total Users",
+        "instructors": "Instructors",
+        "students": "Students",
+        "todaySignups": "Today's Signups",
+        "weekSignups": "This Week's Signups",
+        "totalDiscussions": "Total Discussions",
+        "activeDiscussions": "Active",
+        "closedDiscussions": "Closed"
+      },
+      "recentUsers": {
+        "title": "Recent Users",
+        "subtitle": "Last 5 signups",
+        "viewAll": "View All",
+        "empty": "No users yet",
+        "role": {
+          "instructor": "Instructor",
+          "student": "Student"
+        }
+      },
+      "recentDiscussions": {
+        "title": "Recent Discussions",
+        "subtitle": "Last 5 sessions",
+        "viewAll": "View All",
+        "empty": "No discussions yet",
+        "status": {
+          "draft": "Draft",
+          "active": "Active",
+          "closed": "Closed"
+        },
+        "meta": "{instructor} · {count} participants"
+      },
+      "toast": {
+        "fetchError": "Failed to fetch stats"
+      }
+    },
+    "Users": {
+      "title": "User Management",
+      "subtitle": "Manage all registered users and change roles",
+      "stats": {
+        "totalUsers": "Total Users",
+        "instructors": "Instructors",
+        "students": "Students",
+        "todaySignups": "Today's Signups"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name, email, student ID...",
+        "rolePlaceholder": "Role Filter",
+        "all": "All",
+        "instructor": "Instructor",
+        "student": "Student"
+      },
+      "table": {
+        "user": "User",
+        "role": "Role",
+        "studentNumber": "Student ID",
+        "school": "School",
+        "createdAt": "Joined"
+      },
+      "loading": "Loading...",
+      "empty": {
+        "title": "No users found",
+        "description": "No users match the search criteria"
+      },
+      "pagination": {
+        "showing": "Showing {start}-{end} of {total} users"
+      },
+      "role": {
+        "instructor": "Instructor",
+        "student": "Student"
+      },
+      "toast": {
+        "fetchError": "Failed to load users",
+        "roleChanged": "Role changed successfully",
+        "roleChangeFailed": "Failed to change role"
+      }
+    },
+    "UserDetail": {
+      "loading": "Loading...",
+      "back": "Back",
+      "profile": "Profile Information",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "studentNumber": "Student ID",
+      "school": "School",
+      "department": "Department",
+      "createdAt": "Joined",
+      "noInfo": "No info",
+      "activity": {
+        "title": "Activity",
+        "discussions": "Discussions",
+        "messages": "Messages",
+        "lastActive": "Last Active"
+      },
+      "actions": {
+        "title": "Actions",
+        "changeRole": "Change Role",
+        "deleteUser": "Delete User",
+        "deleteConfirm": "Are you sure you want to delete this user?"
+      },
+      "toast": {
+        "notFound": "User not found",
+        "fetchError": "Failed to load user info",
+        "roleChanged": "Role changed successfully",
+        "roleChangeFailed": "Failed to change role",
+        "deleted": "User deleted successfully",
+        "deleteFailed": "Failed to delete user"
+      }
+    },
+    "Discussions": {
+      "title": "Discussion Management",
+      "subtitle": "Manage all discussions on the platform",
+      "stats": {
+        "total": "Total Discussions",
+        "active": "Active",
+        "closed": "Closed",
+        "draft": "Draft"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by title or instructor...",
+        "statusPlaceholder": "Status Filter",
+        "all": "All",
+        "active": "Active",
+        "closed": "Closed",
+        "draft": "Draft"
+      },
+      "table": {
+        "discussion": "Discussion",
+        "instructor": "Instructor",
+        "status": "Status",
+        "participants": "Participants",
+        "createdAt": "Created"
+      },
+      "loading": "Loading...",
+      "empty": {
+        "title": "No discussions found",
+        "description": "No discussions match the search criteria"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "closed": "Closed"
+      },
+      "toast": {
+        "fetchError": "Failed to load discussions"
+      }
+    },
+    "DiscussionDetail": {
+      "loading": "Loading...",
+      "back": "Back",
+      "info": {
+        "title": "Discussion Information",
+        "topic": "Topic",
+        "description": "Description",
+        "instructor": "Instructor",
+        "status": "Status",
+        "joinCode": "Join Code",
+        "createdAt": "Created",
+        "noDescription": "No description"
+      },
+      "stats": {
+        "title": "Statistics",
+        "participants": "Participants",
+        "messages": "Messages",
+        "avgMessages": "Avg Messages"
+      },
+      "actions": {
+        "title": "Actions",
+        "changeStatus": "Change Status",
+        "copyCode": "Copy Join Code",
+        "deleteDiscussion": "Delete Discussion",
+        "deleteConfirm": "Are you sure you want to delete this discussion?"
+      },
+      "status": {
+        "draft": "Draft",
+        "active": "Active",
+        "closed": "Closed"
+      },
+      "toast": {
+        "notFound": "Discussion not found",
+        "fetchError": "Failed to load discussion info",
+        "statusChanged": "Status changed successfully",
+        "statusChangeFailed": "Failed to change status",
+        "codeCopied": "Join code copied",
+        "copyFailed": "Failed to copy",
+        "deleted": "Discussion deleted successfully",
+        "deleteFailed": "Failed to delete discussion"
+      }
+    },
+    "Settings": {
+      "title": "System Settings",
+      "subtitle": "Manage platform-wide settings",
+      "maintenance": {
+        "title": "Maintenance Mode",
+        "description": "Enable maintenance mode to restrict user access"
+      },
+      "registration": {
+        "title": "User Registration",
+        "description": "Allow new user registrations"
+      },
+      "buttons": {
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel"
+      },
+      "toast": {
+        "fetchError": "Failed to load settings",
+        "saved": "Settings saved successfully",
+        "saveFailed": "Failed to save settings",
+        "cancelled": "Changes cancelled"
+      }
+    }
+  },
+  "Demo": {
+    "steps": {
+      "1": {
+        "title": "Create Discussion",
+        "subtitle": "Instructor Setup",
+        "description": "Instructors set discussion topics and select AI tutor modes. In just a few clicks, a smart discussion space is ready."
+      },
+      "2": {
+        "title": "Student Participation",
+        "subtitle": "Student Participation",
+        "description": "Students join via link, choose their stance, and participate in the discussion."
+      },
+      "3": {
+        "title": "AI Socrates",
+        "subtitle": "AI Intervention",
+        "description": "AI asks questions that point out logical gaps in students' arguments, expanding critical thinking."
+      },
+      "4": {
+        "title": "Real-time Analysis",
+        "subtitle": "Analysis & Feedback",
+        "description": "Instructors can monitor students' logical development and engagement at a glance."
+      }
+    },
+    "navigation": {
+      "next": "Next Step",
+      "start": "Get Started"
+    },
+    "step1": {
+      "phase1": "Phase 01: Discussion Topic",
+      "phase2": "Phase 02: AI Tutor Mode",
+      "phase3": "Phase 03: Settings",
+      "anonymous": "Anonymous Mode",
+      "anonymousDesc": "Hide participant names",
+      "duration": "Discussion Duration",
+      "durationDesc": "Average time per participant",
+      "minutes": "MIN",
+      "expectedTurns": "Expected Turns",
+      "analysis": "Analysis"
+    },
+    "step2": {
+      "joinDiscussion": "Join the discussion",
+      "startAiDiscussion": "Start your discussion with AI Tutor",
+      "aiTutorIntro": "AI Tutor will ask critical questions based on your chosen stance.",
+      "selectStance": "Select Your Stance",
+      "stances": {
+        "pro": "Pro",
+        "con": "Con",
+        "neutral": "Neutral",
+        "custom": "Add Stance"
+      }
+    },
+    "step3": {
+      "stance": "Con",
+      "debating": "debating",
+      "me": "ME",
+      "aiTutor": "AI TUTOR",
+      "inputPlaceholder": "Enter your argument...",
+      "thinking": {
+        "1": "Analyzing your response...",
+        "2": "Finding logical gaps...",
+        "3": "Selecting appropriate question..."
+      }
+    },
+    "step4": {
+      "liveParticipation": "Live Participation Status",
+      "online": "{count} online",
+      "pro": "Pro",
+      "con": "Con",
+      "neutral": "Neutral",
+      "submissionStatus": "Submission Status",
+      "participantList": "Participant List",
+      "needsHelp": "{count} need help"
+    },
+    "mockData": {
+      "topic": {
+        "title": "Can Artificial Intelligence Replace Human Creativity?",
+        "description": "Discuss the advancements and limitations of AI in art, music, and writing. Explore the essence of creativity and the role of machines."
+      },
+      "aiModes": {
+        "socratic": {
+          "label": "Socratic",
+          "desc": "Deep inquiry based on maieutics",
+          "preview": "Interesting perspective. So what do you think is the essence of 'creativity'? Is it something only humans can possess?"
+        },
+        "balanced": {
+          "label": "Balanced",
+          "desc": "Harmony of multiple perspectives",
+          "preview": "There are various perspectives on AI creativity. Proponents point to new pattern generation, while critics argue the absence of true intention."
+        },
+        "debate": {
+          "label": "Debate",
+          "desc": "Challenging counterarguments",
+          "preview": "That argument has logical gaps. How would you explain that AI has already created artworks that surpass human work?"
+        },
+        "minimal": {
+          "label": "Minimal",
+          "desc": "Autonomous discussion environment",
+          "preview": "Please proceed with your discussion freely. I'll ask questions when needed."
+        }
+      },
+      "conversation": {
+        "user": "AI ultimately follows programmed patterns, so true creativity is impossible. Creativity stems from consciousness and emotion.",
+        "ai": "Interesting perspective. Where do you think human creativity comes from? Don't humans also draw inspiration from patterns of experience and learning? If so, what is the essential difference between AI and human creative processes?"
+      },
+      "participants": {
+        "1": "Minji K.",
+        "2": "Junhyuk L.",
+        "3": "Seoyeon P.",
+        "4": "Daeun C.",
+        "5": "Woojin J.",
+        "6": "Sohee H."
+      }
+    }
+  }
+}
