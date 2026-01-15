@@ -100,7 +100,7 @@ export function Navbar() {
 
     const initials = useMemo(() => {
         const parts = displayName.trim().split(/\s+/).filter(Boolean);
-        const letters = parts.map((part) => part[0]).join('');
+        const letters = parts.map((part: string) => part[0]).join('');
         return letters.slice(0, 2).toUpperCase();
     }, [displayName]);
 
