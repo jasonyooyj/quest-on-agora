@@ -74,7 +74,7 @@ export function QuoteSection() {
                                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                             >
                                 <blockquote className="text-2xl md:text-3xl font-bold leading-relaxed text-zinc-900 tracking-tight">
-                                    "{currentTestimonial.text}"
+                                    &quot;{currentTestimonial.text}&quot;
                                 </blockquote>
                                 <div className="mt-12 flex items-center gap-5">
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border transition-all duration-300 shadow-lg ${currentTestimonial.role === "instructor"

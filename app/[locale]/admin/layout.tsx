@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -43,11 +43,7 @@ export default function AdminLayout({
     { href: '/admin/settings', label: t('settings'), icon: Settings },
   ]
 
-  useEffect(() => {
-    loadAdminUser()
-  }, [])
-
-  const loadAdminUser = async () => {
+  const loadAdminUser = useCallback(async () => {
     try {
       const supabase = getSupabaseClient()
       const { data: { user } } = await supabase.auth.getUser()
@@ -100,7 +96,11 @@ export default function AdminLayout({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [router, t])
+
+  useEffect(() => {
+    loadAdminUser()
+  }, [loadAdminUser])
 
   const handleLogout = async () => {
     const supabase = getSupabaseClient()

@@ -22,10 +22,13 @@ export function LoadingMessage({
   const [isLongLoading, setIsLongLoading] = useState(false);
 
   useEffect(() => {
-    if (!loading) {
+    const resetTimer = setTimeout(() => {
       setMessageIndex(0);
       setIsLongLoading(false);
-      return;
+    }, 0);
+
+    if (!loading) {
+      return () => clearTimeout(resetTimer);
     }
 
     // Message rotation
@@ -39,6 +42,7 @@ export function LoadingMessage({
     }, timeout);
 
     return () => {
+      clearTimeout(resetTimer);
       clearInterval(messageTimer);
       clearTimeout(timeoutTimer);
     };
@@ -63,4 +67,3 @@ export function LoadingMessage({
     </div>
   );
 }
-

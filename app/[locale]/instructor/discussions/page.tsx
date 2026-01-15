@@ -21,6 +21,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { DiscussionCard } from "@/components/instructor/DiscussionCard";
+import { ProfileMenuAuto } from "@/components/profile/ProfileMenuAuto";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -181,6 +182,7 @@ export default function DiscussionsPage() {
                 새 토론 만들기
               </button>
             </Link>
+            <ProfileMenuAuto />
           </div>
         </div>
       </header>
@@ -275,4 +277,3 @@ export default function DiscussionsPage() {
     </div>
   );
 }
-

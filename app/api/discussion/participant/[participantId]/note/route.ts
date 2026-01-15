@@ -39,7 +39,6 @@ export async function GET(
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const session = participant.session as any;
 
     if (session?.instructor_id !== user.id) {
@@ -124,7 +123,6 @@ export async function POST(
       );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const session = participant.session as any;
 
     if (session?.instructor_id !== user.id) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { useCallback, useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -82,11 +82,7 @@ export default function AdminDiscussionDetailPage({
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  useEffect(() => {
-    fetchDiscussionData()
-  }, [id])
-
-  const fetchDiscussionData = async () => {
+  const fetchDiscussionData = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/discussions/${id}`)
       if (!response.ok) {
@@ -108,7 +104,11 @@ export default function AdminDiscussionDetailPage({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [id, router])
+
+  useEffect(() => {
+    fetchDiscussionData()
+  }, [fetchDiscussionData])
 
   const handleStatusChange = async (newStatus: string) => {
     if (!discussion) return

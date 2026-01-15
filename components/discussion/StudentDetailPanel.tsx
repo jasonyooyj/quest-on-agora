@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { User } from "lucide-react";
 import {
   useParticipantMessages,
@@ -44,14 +44,12 @@ export function StudentDetailPanel({
   const sendIntervention = useSendIntervention(sessionId);
   const [noteText, setNoteText] = useState("");
 
-  // Sync note text with loaded data
-  useEffect(() => {
-    if (instructorNote) {
-      setNoteText(instructorNote.note);
-    } else {
-      setNoteText("");
+  const handleNoteDialogChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setNoteText(instructorNote?.note ?? "");
     }
-  }, [instructorNote]);
+    setShowNoteDialog(nextOpen);
+  };
 
   const handlePinMessage = (content: string) => {
     if (!participant) return;
@@ -129,7 +127,7 @@ export function StudentDetailPanel({
       <StudentStanceSummary participant={participant} />
 
       <StudentInterventionActions
-        onOpenNote={() => setShowNoteDialog(true)}
+        onOpenNote={() => handleNoteDialogChange(true)}
         onTemplateClick={handleTemplateClick}
       />
 
@@ -150,7 +148,7 @@ export function StudentDetailPanel({
       {/* Instructor Note Dialog */}
       <InterventionDialog
         open={showNoteDialog}
-        onOpenChange={setShowNoteDialog}
+        onOpenChange={handleNoteDialogChange}
         sessionId={sessionId}
         participantId={participant.id}
         participantName={getDisplayName()}

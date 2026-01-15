@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -15,13 +15,13 @@ import {
   Trash2,
   Settings,
   LogOut,
-  User,
   ArrowRight,
   Activity,
   Link2
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
+import { ProfileMenu } from '@/components/profile/ProfileMenu'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,11 +56,7 @@ export default function InstructorDashboard() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    loadUserAndDiscussions()
-  }, [])
-
-  const loadUserAndDiscussions = async () => {
+  const loadUserAndDiscussions = useCallback(async () => {
     try {
       const supabase = getSupabaseClient()
 
@@ -115,7 +111,11 @@ export default function InstructorDashboard() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [router, t])
+
+  useEffect(() => {
+    loadUserAndDiscussions()
+  }, [loadUserAndDiscussions])
 
   const handleCopyCode = async (code: string) => {
     try {
@@ -222,28 +222,15 @@ export default function InstructorDashboard() {
                 </button>
               </Link>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="group relative w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 hover:border-zinc-300 transition-all active:scale-95">
-                    <User className="w-5 h-5 text-zinc-500 group-hover:text-zinc-900 transition-colors" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 glass-panel bg-white/95 border-zinc-200 p-2 shadow-2xl backdrop-blur-xl">
-                  <div className="px-4 py-3 mb-2">
-                    <p className="text-sm font-bold text-zinc-900 mb-0.5">{user?.name}</p>
-                    <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
-                  </div>
-                  <DropdownMenuSeparator className="bg-zinc-200" />
-                  <DropdownMenuItem className="rounded-xl focus:bg-zinc-100 focus:text-zinc-900 cursor-pointer py-2.5">
-                    <Settings className="w-4 h-4 mr-3 text-zinc-500" />
-                    {t('header.settings')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout} className="rounded-xl focus:bg-red-500/10 focus:text-red-500 text-red-500 cursor-pointer py-2.5">
-                    <LogOut className="w-4 h-4 mr-3" />
-                    {t('header.logout')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <ProfileMenu
+                name={user?.name}
+                email={user?.email}
+                role={user?.role}
+                items={[
+                  { label: t('header.settings'), icon: Settings, href: '/settings' },
+                  { label: t('header.logout'), icon: LogOut, onClick: handleLogout, variant: 'danger' },
+                ]}
+              />
             </div>
           </div>
         </div>

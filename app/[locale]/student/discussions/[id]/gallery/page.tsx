@@ -11,6 +11,7 @@ import {
     ThumbsUp, ThumbsDown, Minus, Users, Clock,
     Filter, ArrowUpDown
 } from 'lucide-react'
+import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 
 interface Submission {
     id: string
@@ -140,9 +141,12 @@ export default function GalleryPage() {
                             <p className="text-sm text-muted-foreground/80 font-medium">{discussion.title}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 text-xs font-medium text-secondary-foreground border border-border/50">
-                        <Users className="w-3.5 h-3.5" />
-                        <span>{t('header.submittedCount', { count: submissions.length })}</span>
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/50 text-xs font-medium text-secondary-foreground border border-border/50">
+                            <Users className="w-3.5 h-3.5" />
+                            <span>{t('header.submittedCount', { count: submissions.length })}</span>
+                        </div>
+                        <ProfileMenuAuto />
                     </div>
                 </div>
             </header>
@@ -262,7 +266,7 @@ export default function GalleryPage() {
                                                 </span>
                                             </div>
                                             <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-muted-foreground italic">
-                                                "{submission.final_reflection}"
+                                                &quot;{submission.final_reflection}&quot;
                                             </p>
                                         </div>
                                     </div>

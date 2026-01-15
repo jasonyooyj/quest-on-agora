@@ -12,6 +12,7 @@ import {
 import { useDiscussionSession, useDiscussionParticipants } from '@/hooks/useDiscussion'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { useTranslations } from 'next-intl'
+import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 
 export default function SubmitPage() {
     const t = useTranslations('Student.Submit')
@@ -71,7 +72,7 @@ export default function SubmitPage() {
         }
 
         fetchKeyPoints()
-    }, [participant?.id, discussionId])
+    }, [discussionId, participant?.id, t])
 
     const handleSubmit = async () => {
         if (!participant || isSubmitting) return
@@ -132,17 +133,20 @@ export default function SubmitPage() {
         <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
             {/* Header */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200">
-                <div className="max-w-3xl mx-auto px-6 h-16 flex items-center gap-4">
-                    <Link
-                        href={`/student/discussions/${discussionId}`}
-                        className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 transition-all"
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
-                    <div>
-                        <h1 className="font-bold text-lg text-zinc-900">최종 정리 및 제출</h1>
-                        <p className="text-xs text-zinc-500">{discussion.title}</p>
+                <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link
+                            href={`/student/discussions/${discussionId}`}
+                            className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 transition-all"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                        <div>
+                            <h1 className="font-bold text-lg text-zinc-900">최종 정리 및 제출</h1>
+                            <p className="text-xs text-zinc-500">{discussion.title}</p>
+                        </div>
                     </div>
+                    <ProfileMenuAuto />
                 </div>
             </header>
 

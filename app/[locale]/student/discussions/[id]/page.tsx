@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -23,6 +23,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { useDiscussionSession, useDiscussionParticipants, useParticipantMessages } from '@/hooks/useDiscussion'
+import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 
 import { useTranslations } from 'next-intl'
 
@@ -189,14 +190,7 @@ export default function StudentDiscussionPage() {
         }
     }
 
-    // Auto-start discussion if stance is selected but no messages
-    useEffect(() => {
-        if (!isMessagesLoading && participant?.stance && messages.length === 0 && !sending && !streamingContent) {
-            handleSendMessage('')
-        }
-    }, [participant?.stance, messages.length, isMessagesLoading])
-
-    const handleSendMessage = async (forceMessage?: string) => {
+    const handleSendMessage = useCallback(async (forceMessage?: string) => {
         const isAutoStart = forceMessage === ''
         const textToSend = isAutoStart ? '' : (forceMessage || message).trim()
 
@@ -312,7 +306,14 @@ export default function StudentDiscussionPage() {
         } finally {
             setSending(false)
         }
-    }
+    }, [discussionId, message, participant, queryClient, sending, t])
+
+    // Auto-start discussion if stance is selected but no messages
+    useEffect(() => {
+        if (!isMessagesLoading && participant?.stance && messages.length === 0 && !sending && !streamingContent) {
+            handleSendMessage('')
+        }
+    }, [handleSendMessage, isMessagesLoading, messages.length, participant?.stance, sending, streamingContent])
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -431,6 +432,7 @@ export default function StudentDiscussionPage() {
                                 {participant?.needsHelp ? t('header.requesting') : t('header.help')}
                             </span>
                         </button>
+                        <ProfileMenuAuto />
                     </div>
                 </div>
             </header>
@@ -814,7 +816,11 @@ function ThinkingIndicator({ aiName = 'AI 튜터' }: { aiName?: string }) {
     const [elapsedSeconds, setElapsedSeconds] = useState(0)
 
     useEffect(() => {
-        setMessage(t('thinking.default', { name: aiName }))
+        const resetTimer = setTimeout(() => {
+            setMessage(t('thinking.default', { name: aiName }))
+        }, 0)
+
+        return () => clearTimeout(resetTimer)
     }, [aiName, t])
 
     useEffect(() => {

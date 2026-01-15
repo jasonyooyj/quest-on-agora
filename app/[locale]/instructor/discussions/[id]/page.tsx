@@ -11,6 +11,7 @@ import {
     AlertCircle, CheckCircle, User, Quote, X, Loader2, Link2
 } from 'lucide-react'
 import { SettingsDialog } from '@/components/instructor/SettingsDialog'
+import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 import { useTranslations, useFormatter } from 'next-intl'
 
 interface Discussion {
@@ -526,6 +527,7 @@ ${t('report.footer')}`
                         >
                             <Settings className="w-5 h-5" />
                         </button>
+                        <ProfileMenuAuto />
                     </div>
                 </div>
             </header>
@@ -848,7 +850,7 @@ ${t('report.footer')}`
                                         <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-200">
                                             <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">{t('participants.details.stanceStatement')}</span>
                                             <p className="text-sm font-medium leading-relaxed text-zinc-600 italic">
-                                                "{participants.find(p => p.id === selectedParticipant)?.stance_statement}"
+                                                &quot;{participants.find(p => p.id === selectedParticipant)?.stance_statement}&quot;
                                             </p>
                                         </div>
                                     )}
@@ -857,7 +859,7 @@ ${t('report.footer')}`
                                         <div className="bg-purple-50 rounded-2xl p-4 border border-purple-200">
                                             <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest block mb-2">{t('participants.details.finalReflection')}</span>
                                             <p className="text-sm font-medium leading-relaxed text-purple-700 italic">
-                                                "{participants.find(p => p.id === selectedParticipant)?.final_reflection}"
+                                                &quot;{participants.find(p => p.id === selectedParticipant)?.final_reflection}&quot;
                                             </p>
                                         </div>
                                     )}
@@ -952,7 +954,7 @@ ${t('report.footer')}`
                                         animate={{ opacity: 1, x: 0 }}
                                         className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50 relative group shadow-sm"
                                     >
-                                        <p className="text-sm font-medium leading-relaxed italic pr-6 text-zinc-600">"{pin.quote}"</p>
+                                        <p className="text-sm font-medium leading-relaxed italic pr-6 text-zinc-600">&quot;{pin.quote}&quot;</p>
                                         <div className="mt-3 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${pin.participant?.stance === 'pro' ? 'bg-emerald-500' :

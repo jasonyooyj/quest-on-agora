@@ -95,7 +95,7 @@ export function TopicClustersPanel({
               </div>
             </div>
             <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
-              "{cluster.sampleEvidence}"
+              &quot;{cluster.sampleEvidence}&quot;
             </p>
             <div className="flex gap-1">
               <Button

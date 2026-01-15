@@ -36,7 +36,27 @@
     "pricing": "Pricing",
     "about": "About",
     "login": "Login",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "loggedIn": "Logged in",
+    "dashboard": "My dashboard",
+    "account": "My account",
+    "roleInstructor": "Instructor",
+    "roleStudent": "Student",
+    "roleMember": "Member",
+    "settings": "Settings",
+    "logout": "Log out",
+    "language": "Language"
+  },
+  "Settings": {
+    "title": "Settings",
+    "subtitle": "Manage your account and default preferences.",
+    "back": "Back to dashboard",
+    "sections": {
+      "account": "Account",
+      "preferences": "Preferences"
+    },
+    "loading": "Loading settings...",
+    "comingSoon": "This section is coming soon."
   },
   "Marquee": {
     "items": {

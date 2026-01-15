@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import { HERO_CONTENT } from "@/lib/constants/landing-content";
@@ -31,7 +32,7 @@ export function HeroSection() {
     ];
 
     return (
-        <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        <section ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-24 md:pt-28">
             {/* Spatial Background Effects */}
             <div className="absolute inset-0 z-0 overflow-hidden bg-background">
                 {/* Soft Gradient Orbs */}
@@ -158,10 +159,12 @@ export function HeroSection() {
                                     <div className="flex -space-x-4 pl-2">
                                         {HERO_CONTENT.avatars.map((src, i) => (
                                             <div key={i} className={`w-12 h-12 rounded-full border-2 border-white relative overflow-hidden z-${(i + 1) * 10} shadow-lg transform group-hover:translate-x-2 transition-transform duration-300 bg-zinc-100`}>
-                                                <img
+                                                <Image
                                                     src={src}
                                                     alt={`Student ${i + 1}`}
-                                                    className="w-full h-full object-cover"
+                                                    fill={true}
+                                                    sizes="48px"
+                                                    className="object-cover"
                                                 />
                                             </div>
                                         ))}

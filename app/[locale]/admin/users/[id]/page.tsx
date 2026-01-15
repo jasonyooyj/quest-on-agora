@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { useCallback, useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
@@ -81,11 +81,7 @@ export default function AdminUserDetailPage({
   const [isLoading, setIsLoading] = useState(true)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  useEffect(() => {
-    fetchUserData()
-  }, [id])
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/users/${id}`)
       if (!response.ok) {
@@ -107,7 +103,11 @@ export default function AdminUserDetailPage({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [id, router])
+
+  useEffect(() => {
+    fetchUserData()
+  }, [fetchUserData])
 
   const handleRoleChange = async (newRole: string) => {
     if (!user) return

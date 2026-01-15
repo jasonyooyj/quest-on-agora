@@ -36,7 +36,27 @@
     "pricing": "요금제",
     "about": "소개",
     "login": "로그인",
-    "getStarted": "무료로 시작하기"
+    "getStarted": "무료로 시작하기",
+    "loggedIn": "로그인됨",
+    "dashboard": "내 대시보드",
+    "account": "내 계정",
+    "roleInstructor": "교수자",
+    "roleStudent": "학생",
+    "roleMember": "회원",
+    "settings": "설정",
+    "logout": "로그아웃",
+    "language": "언어"
+  },
+  "Settings": {
+    "title": "설정",
+    "subtitle": "계정 정보와 기본 환경을 관리하세요.",
+    "back": "대시보드로 돌아가기",
+    "sections": {
+      "account": "계정",
+      "preferences": "환경설정"
+    },
+    "loading": "설정을 불러오는 중...",
+    "comingSoon": "이 섹션은 준비 중입니다."
   },
   "Marquee": {
     "items": {

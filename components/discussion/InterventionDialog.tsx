@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -57,14 +57,14 @@ export function InterventionDialog({
   const [isVisibleToStudent, setIsVisibleToStudent] = useState(true);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
 
-  // Update intervention type when initialType changes (when dialog opens with different type)
-  useEffect(() => {
-    if (open && !isNoteMode) {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen && !isNoteMode) {
       setInterventionType(initialType);
       setContent("");
       setSelectedTemplateId("");
     }
-  }, [open, initialType, isNoteMode]);
+    onOpenChange(nextOpen);
+  };
 
   const sendIntervention = useSendIntervention(sessionId);
 
@@ -104,7 +104,7 @@ export function InterventionDialog({
           ? "학생에게 메시지가 전송되었습니다"
           : "AI에게만 지시가 전달되었습니다"
       );
-      onOpenChange(false);
+      handleOpenChange(false);
       // Reset form
       setContent("");
       setSelectedTemplateId("");
@@ -129,7 +129,7 @@ export function InterventionDialog({
   // Note mode: Simple textarea for instructor notes
   if (isNoteMode) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>교수 메모</DialogTitle>
@@ -151,13 +151,13 @@ export function InterventionDialog({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={() => handleOpenChange(false)}>
               취소
             </Button>
             <Button
               onClick={() => {
                 onSaveNote?.();
-                onOpenChange(false);
+                handleOpenChange(false);
               }}
               disabled={isSaving || !noteText.trim()}
             >
@@ -177,7 +177,7 @@ export function InterventionDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>교수 메모</DialogTitle>
@@ -263,7 +263,7 @@ export function InterventionDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>
             취소
           </Button>
           <Button

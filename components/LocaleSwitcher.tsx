@@ -3,7 +3,7 @@
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/routing";
 import { useTransition } from "react";
-import { Check, ChevronDown } from "lucide-react";
+import { Check } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +22,6 @@ export function LocaleSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-
   const currentLocale = locales.find((l) => l.code === locale) || locales[0];
 
   const switchLocale = (newLocale: string) => {
@@ -36,11 +35,12 @@ export function LocaleSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger
         disabled={isPending}
-        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100/80 rounded-full transition-all duration-200 disabled:opacity-50 outline-none"
+        aria-label={currentLocale.label}
+        title={currentLocale.label}
+        className="relative overflow-hidden h-10 w-10 flex items-center justify-center text-base bg-white/70 rounded-full shadow-[0_10px_26px_rgba(15,23,42,0.10)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/85 hover:shadow-[0_14px_30px_rgba(15,23,42,0.14)] disabled:opacity-50 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 focus-visible:ring-offset-2"
       >
-        <span className="text-base">{currentLocale.flag}</span>
-        <span className="hidden sm:inline">{currentLocale.label}</span>
-        <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+        <span className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-b from-white/60 via-white/0 to-white/0 opacity-70" aria-hidden={true} />
+        <span className="relative">{currentLocale.flag}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[140px]">
         {locales.map((loc) => (

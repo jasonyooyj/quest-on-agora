@@ -35,6 +35,7 @@ import {
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
 import { Switch } from '@/components/ui/switch'
+import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 import { useTranslations, useFormatter } from 'next-intl'
 
 const discussionSchema = (t: any) => z.object({
@@ -454,6 +455,7 @@ export default function NewDiscussionPage() {
             >
               <X className="w-5 h-5" />
             </Link>
+            <ProfileMenuAuto />
           </div>
         </div>
       </header>
@@ -804,7 +806,7 @@ export default function NewDiscussionPage() {
                                   animate={{ opacity: 1 }}
                                   className="text-lg font-medium leading-relaxed italic"
                                 >
-                                  "{previews[selectedAiMode]}"
+                                  &quot;{previews[selectedAiMode]}&quot;
                                 </motion.p>
                               ) : (
                                 <div className="space-y-3 pt-2">
