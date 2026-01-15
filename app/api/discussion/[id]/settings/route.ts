@@ -10,12 +10,29 @@ export async function PATCH(
         const settings = await request.json();
         const supabase = await createSupabaseRouteClient();
 
-        // First, fetch current settings to merge
+        // Authentication check
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user) {
+            return NextResponse.json(
+                { error: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        // First, fetch current settings and verify ownership
         const { data: currentSession, error: fetchError } = await supabase
             .from("discussion_sessions")
-            .select("settings")
+            .select("settings, instructor_id")
             .eq("id", id)
             .single();
+
+        // Authorization check - only instructor can modify settings
+        if (currentSession && currentSession.instructor_id !== user.id) {
+            return NextResponse.json(
+                { error: "Forbidden: Only the instructor can modify discussion settings" },
+                { status: 403 }
+            );
+        }
 
         if (fetchError) {
             return NextResponse.json(

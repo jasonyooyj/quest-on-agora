@@ -23,16 +23,31 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('toss-signature')
     const timestamp = request.headers.get('toss-timestamp')
 
-    // Verify webhook signature (if secret is configured)
-    if (process.env.TOSS_WEBHOOK_SECRET && signature && timestamp) {
-      const isValid = verifyWebhookSignature(body, signature, timestamp)
-      if (!isValid) {
-        console.error('Toss webhook signature verification failed')
-        return NextResponse.json(
-          { error: 'Invalid signature' },
-          { status: 400 }
-        )
-      }
+    // Verify webhook signature - MANDATORY for security
+    // Without this, attackers could forge payment success events
+    if (!process.env.TOSS_WEBHOOK_SECRET) {
+      console.error('TOSS_WEBHOOK_SECRET is not configured - webhook verification disabled is a security risk')
+      return NextResponse.json(
+        { error: 'Webhook secret not configured' },
+        { status: 500 }
+      )
+    }
+
+    if (!signature || !timestamp) {
+      console.error('Missing toss-signature or toss-timestamp headers')
+      return NextResponse.json(
+        { error: 'Missing signature headers' },
+        { status: 400 }
+      )
+    }
+
+    const isValid = verifyWebhookSignature(body, signature, timestamp)
+    if (!isValid) {
+      console.error('Toss webhook signature verification failed')
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 400 }
+      )
     }
 
     // Parse webhook payload
