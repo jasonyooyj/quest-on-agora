@@ -14,6 +14,8 @@ import {
   updateSubscriptionStatus,
   getSubscriptionByStripeId,
   getPlanByName,
+  invalidateSubscriptionCache,
+  invalidateOrganizationMembersCache,
 } from '@/lib/subscription'
 import Stripe from 'stripe'
 
@@ -177,6 +179,13 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     })
     .eq('stripe_subscription_id', subscription.id)
 
+  // Invalidate subscription cache
+  if (existing.organization_id) {
+    await invalidateOrganizationMembersCache(existing.organization_id)
+  } else if (existing.user_id) {
+    invalidateSubscriptionCache(existing.user_id)
+  }
+
   console.log('Subscription updated:', subscription.id)
 }
 
@@ -189,6 +198,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
   const supabase = await createSupabaseAdminClient()
 
+  // Get subscription first for cache invalidation
+  const { data: existing } = await supabase
+    .from('subscriptions')
+    .select('user_id, organization_id')
+    .eq('stripe_subscription_id', subscription.id)
+    .single()
+
   await supabase
     .from('subscriptions')
     .update({
@@ -197,6 +213,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       updated_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', subscription.id)
+
+  // Invalidate subscription cache
+  if (existing?.organization_id) {
+    await invalidateOrganizationMembersCache(existing.organization_id)
+  } else if (existing?.user_id) {
+    invalidateSubscriptionCache(existing.user_id)
+  }
 }
 
 /**
@@ -222,7 +245,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   // Get subscription
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('id')
+    .select('id, user_id, organization_id')
     .eq('stripe_subscription_id', invoiceData.subscription)
     .single()
 
@@ -248,7 +271,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   })
 
   // Update subscription status if it was past_due
-  await supabase
+  const { data: updated } = await supabase
     .from('subscriptions')
     .update({
       status: 'active',
@@ -256,6 +279,16 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     })
     .eq('stripe_subscription_id', invoiceData.subscription)
     .eq('status', 'past_due')
+    .select('id')
+
+  // Invalidate cache if status was updated
+  if (updated && updated.length > 0) {
+    if (subscription.organization_id) {
+      await invalidateOrganizationMembersCache(subscription.organization_id)
+    } else if (subscription.user_id) {
+      invalidateSubscriptionCache(subscription.user_id)
+    }
+  }
 }
 
 /**
@@ -280,7 +313,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   // Get subscription
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('id')
+    .select('id, user_id, organization_id')
     .eq('stripe_subscription_id', invoiceData.subscription)
     .single()
 
@@ -309,6 +342,13 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       updated_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', invoiceData.subscription)
+
+  // Invalidate subscription cache
+  if (subscription.organization_id) {
+    await invalidateOrganizationMembersCache(subscription.organization_id)
+  } else if (subscription.user_id) {
+    invalidateSubscriptionCache(subscription.user_id)
+  }
 }
 
 /**

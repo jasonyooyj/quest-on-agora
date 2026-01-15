@@ -14,6 +14,10 @@ import {
   getPayment,
   TossWebhookPayload,
 } from '@/lib/toss-payments'
+import {
+  invalidateSubscriptionCache,
+  invalidateOrganizationMembersCache,
+} from '@/lib/subscription'
 
 export const dynamic = 'force-dynamic'
 
@@ -159,6 +163,13 @@ async function handleSuccessfulRenewal(
     })
     .eq('id', subscriptionId)
 
+  // Invalidate subscription cache
+  if (subscription.organization_id) {
+    await invalidateOrganizationMembersCache(subscription.organization_id)
+  } else if (subscription.user_id) {
+    invalidateSubscriptionCache(subscription.user_id)
+  }
+
   // Record payment
   await supabase.from('payment_history').insert({
     subscription_id: subscriptionId,
@@ -184,6 +195,13 @@ async function handleFailedRenewal(
   status: string,
   supabase: Awaited<ReturnType<typeof createSupabaseAdminClient>>
 ) {
+  // Get subscription first for cache invalidation
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('user_id, organization_id')
+    .eq('id', subscriptionId)
+    .single()
+
   // Update subscription status to past_due
   await supabase
     .from('subscriptions')
@@ -192,6 +210,13 @@ async function handleFailedRenewal(
       updated_at: new Date().toISOString(),
     })
     .eq('id', subscriptionId)
+
+  // Invalidate subscription cache
+  if (subscription?.organization_id) {
+    await invalidateOrganizationMembersCache(subscription.organization_id)
+  } else if (subscription?.user_id) {
+    invalidateSubscriptionCache(subscription.user_id)
+  }
 
   // Record failed payment
   await supabase.from('payment_history').insert({
@@ -227,7 +252,7 @@ async function handleBillingStatusChanged(payload: TossWebhookPayload) {
   // Find subscription by customer key
   const { data: subscription } = await supabase
     .from('subscriptions')
-    .select('id')
+    .select('id, user_id, organization_id')
     .eq('toss_customer_key', customerKey)
     .eq('toss_billing_key', billingKey)
     .single()
@@ -250,6 +275,13 @@ async function handleBillingStatusChanged(payload: TossWebhookPayload) {
       },
     })
     .eq('id', subscription.id)
+
+  // Invalidate subscription cache
+  if (subscription.organization_id) {
+    await invalidateOrganizationMembersCache(subscription.organization_id)
+  } else if (subscription.user_id) {
+    invalidateSubscriptionCache(subscription.user_id)
+  }
 
   console.log('Subscription marked as incomplete:', subscription.id)
 

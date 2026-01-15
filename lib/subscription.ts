@@ -20,6 +20,15 @@ import {
   OrganizationMemberRow,
   transformPlanRow,
 } from '@/types/subscription'
+import {
+  getCachedSubscriptionInfo,
+  setCachedSubscriptionInfo,
+  invalidateSubscriptionCache,
+  invalidateOrganizationMembersCache,
+} from './subscription-cache'
+
+// Re-export cache invalidation functions for use in webhooks
+export { invalidateSubscriptionCache, invalidateOrganizationMembersCache }
 
 // ============================================================================
 // CONSTANTS
@@ -57,11 +66,18 @@ const DEFAULT_FREE_PLAN: {
 /**
  * Get comprehensive subscription information for a user.
  * This is the main function used to check what features/limits a user has.
+ * Results are cached for 30 seconds to reduce database queries.
  */
 export async function getSubscriptionInfo(
   userId: string,
   locale: 'ko' | 'en' = 'ko'
 ): Promise<SubscriptionInfo> {
+  // Check cache first
+  const cached = getCachedSubscriptionInfo(userId, locale)
+  if (cached) {
+    return cached
+  }
+
   const supabase = await createSupabaseAdminClient()
 
   // First, check if user belongs to an organization
@@ -119,7 +135,7 @@ export async function getSubscriptionInfo(
   // If no active subscription, return free tier info
   if (!subscription || !subscription.subscription_plans) {
     const freePlan = await getFreePlan()
-    return buildSubscriptionInfo(
+    const info = buildSubscriptionInfo(
       freePlan || DEFAULT_FREE_PLAN,
       null,
       usage,
@@ -127,11 +143,13 @@ export async function getSubscriptionInfo(
       organizationName,
       locale
     )
+    setCachedSubscriptionInfo(userId, info)
+    return info
   }
 
   const plan = transformPlanRow(subscription.subscription_plans)
 
-  return buildSubscriptionInfo(
+  const info = buildSubscriptionInfo(
     {
       name: plan.name,
       tier: plan.tier,
@@ -144,6 +162,8 @@ export async function getSubscriptionInfo(
     organizationName,
     locale
   )
+  setCachedSubscriptionInfo(userId, info)
+  return info
 }
 
 /**
@@ -430,23 +450,27 @@ export async function decrementUsage(
 
 /**
  * Check if a user has access to a specific feature
+ * @param subscriptionInfo - Optional pre-fetched subscription info to avoid redundant DB queries
  */
 export async function checkFeatureAccess(
   userId: string,
-  feature: keyof SubscriptionFeatures
+  feature: keyof SubscriptionFeatures,
+  subscriptionInfo?: SubscriptionInfo
 ): Promise<boolean> {
-  const info = await getSubscriptionInfo(userId)
+  const info = subscriptionInfo || await getSubscriptionInfo(userId)
   return info.features[feature] || false
 }
 
 /**
  * Check multiple features at once (more efficient)
+ * @param subscriptionInfo - Optional pre-fetched subscription info to avoid redundant DB queries
  */
 export async function checkFeaturesAccess(
   userId: string,
-  features: (keyof SubscriptionFeatures)[]
+  features: (keyof SubscriptionFeatures)[],
+  subscriptionInfo?: SubscriptionInfo
 ): Promise<Record<string, boolean>> {
-  const info = await getSubscriptionInfo(userId)
+  const info = subscriptionInfo || await getSubscriptionInfo(userId)
 
   const result: Record<string, boolean> = {}
   for (const feature of features) {
@@ -462,13 +486,14 @@ export async function checkFeaturesAccess(
 
 /**
  * Check if a user can perform an action based on their subscription limits
+ * @param additionalContext.subscriptionInfo - Optional pre-fetched subscription info to avoid redundant DB queries
  */
 export async function checkLimitAccess(
   userId: string,
   limitType: LimitType,
-  additionalContext?: { currentParticipants?: number }
+  additionalContext?: { currentParticipants?: number; subscriptionInfo?: SubscriptionInfo }
 ): Promise<LimitCheckResult> {
-  const info = await getSubscriptionInfo(userId)
+  const info = additionalContext?.subscriptionInfo || await getSubscriptionInfo(userId)
 
   switch (limitType) {
     case 'discussion':
@@ -690,6 +715,13 @@ export async function createSubscription(params: {
     throw error
   }
 
+  // Invalidate cache for the user or organization members
+  if (params.organizationId) {
+    await invalidateOrganizationMembersCache(params.organizationId)
+  } else if (params.userId) {
+    invalidateSubscriptionCache(params.userId)
+  }
+
   return data
 }
 
@@ -703,6 +735,13 @@ export async function updateSubscriptionStatus(
 ) {
   const supabase = await createSupabaseAdminClient()
 
+  // Get subscription first to know who to invalidate cache for
+  const { data: subscription } = await supabase
+    .from('subscriptions')
+    .select('user_id, organization_id')
+    .eq('id', subscriptionId)
+    .single()
+
   const { error } = await supabase
     .from('subscriptions')
     .update({
@@ -715,6 +754,13 @@ export async function updateSubscriptionStatus(
   if (error) {
     console.error('Error updating subscription:', error)
     throw error
+  }
+
+  // Invalidate cache for the user or organization members
+  if (subscription?.organization_id) {
+    await invalidateOrganizationMembersCache(subscription.organization_id)
+  } else if (subscription?.user_id) {
+    invalidateSubscriptionCache(subscription.user_id)
   }
 }
 

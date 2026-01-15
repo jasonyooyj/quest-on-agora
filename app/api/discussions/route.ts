@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createDiscussionSchema } from '@/lib/validations/discussion'
-import { checkLimitAccess, incrementUsage } from '@/lib/subscription'
+import { checkLimitAccess, incrementUsage, getSubscriptionInfo } from '@/lib/subscription'
 
 // Types for Supabase responses
 interface DiscussionSession {
@@ -124,7 +124,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Check subscription limits before creating discussion
-        const discussionLimit = await checkLimitAccess(user.id, 'discussion')
+        // Fetch subscription info once and pass to both limit checks for efficiency
+        const subscriptionInfo = await getSubscriptionInfo(user.id)
+
+        const discussionLimit = await checkLimitAccess(user.id, 'discussion', { subscriptionInfo })
         if (!discussionLimit.allowed) {
             return NextResponse.json({
                 error: discussionLimit.message || '월간 토론 생성 한도에 도달했습니다.',
@@ -135,7 +138,7 @@ export async function POST(request: NextRequest) {
             }, { status: 403 })
         }
 
-        const activeLimit = await checkLimitAccess(user.id, 'activeDiscussions')
+        const activeLimit = await checkLimitAccess(user.id, 'activeDiscussions', { subscriptionInfo })
         if (!activeLimit.allowed) {
             return NextResponse.json({
                 error: activeLimit.message || '동시 진행 가능한 토론 수를 초과했습니다.',
