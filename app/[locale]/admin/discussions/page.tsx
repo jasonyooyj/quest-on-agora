@@ -265,7 +265,7 @@ export default function AdminDiscussionsPage() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-lg font-bold text-zinc-900 truncate group-hover:text-red-500 transition-colors">
+                        <h3 className="text-lg font-bold text-zinc-900 truncate group-hover:text-red-500 transition-colors flex-1 min-w-0">
                           {discussion.title}
                         </h3>
                         {getStatusBadge(discussion.status)}

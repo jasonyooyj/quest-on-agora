@@ -59,7 +59,7 @@ interface Message {
 
 interface PinnedQuote {
     id: string
-    quote: string
+    content: string
     context: string | null
     pinned_at: string
     participant: {
@@ -1063,7 +1063,7 @@ ${t('report.footer')}`
                                         animate={{ opacity: 1, x: 0 }}
                                         className="p-4 rounded-2xl border border-zinc-200 bg-zinc-50 relative group shadow-sm"
                                     >
-                                        <p className="text-sm font-medium leading-relaxed italic pr-6 text-zinc-600">&quot;{pin.quote}&quot;</p>
+                                        <p className="text-sm font-medium leading-relaxed italic pr-6 text-zinc-600">&quot;{pin.content}&quot;</p>
                                         <div className="mt-3 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-1.5 h-1.5 rounded-full ${getStanceDotColor(pin.participant?.stance || null)}`} />

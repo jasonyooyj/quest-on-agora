@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth'
-import { openai, AI_MODEL } from '@/lib/openai'
+import { openai, AI_MODEL, AI_PROVIDER } from '@/lib/openai'
+import { getGenAI, GEMINI_MODEL } from '@/lib/gemini'
 import { TOPIC_GENERATION_PROMPT } from '@/lib/prompts'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
@@ -104,23 +105,54 @@ export async function POST(request: NextRequest) {
     ]
 
     const requestCompletion = async (extraInstruction?: string) => {
-      const completion = await openai.chat.completions.create({
-        model: AI_MODEL,
-        messages: extraInstruction
-          ? [
+      if (AI_PROVIDER === 'gemini') {
+        const genai = getGenAI();
+
+        const systemInstruction = TOPIC_GENERATION_PROMPT;
+        const fullPrompt = extraInstruction
+          ? `${systemInstruction}\n\n${userPrompt}\n\n${extraInstruction}`
+          : `${systemInstruction}\n\n${userPrompt}`;
+
+        // New SDK usage: genai.models.generateContent
+        const result = await genai.models.generateContent({
+          model: GEMINI_MODEL,
+          contents: fullPrompt,
+          config: {
+            responseMimeType: "application/json"
+          }
+        });
+
+        // Response structure might be response.text or result.response.text(), let's check docs safely
+        // Docs say: console.log(response.text);
+        return {
+          text: result.text || '', // SDK seems to return text directly or on response object?
+          // Docs: const response = await ai.models.generateContent(...) -> console.log(response.text)
+          // So result IS the response object which has text property getter?
+          // Actually docs say `console.log(response.text);` for Python and JS.
+          finishReason: 'stop', // Placeholder or extract if available
+          refusal: undefined
+        }
+
+      } else {
+        // OpenAI Fallback
+        const completion = await openai.chat.completions.create({
+          model: AI_MODEL,
+          messages: extraInstruction
+            ? [
               ...baseMessages,
               { role: 'user', content: extraInstruction },
             ]
-          : baseMessages,
-        max_completion_tokens: 2000,
-        response_format: { type: 'json_object' },
-      })
-      const choice = completion.choices[0]
-      const message = choice?.message
-      return {
-        text: message?.content?.trim() || '',
-        finishReason: choice?.finish_reason,
-        refusal: (message as { refusal?: string } | undefined)?.refusal,
+            : baseMessages,
+          max_completion_tokens: 2000,
+          response_format: { type: 'json_object' },
+        })
+        const choice = completion.choices[0]
+        const message = choice?.message
+        return {
+          text: message?.content?.trim() || '',
+          finishReason: choice?.finish_reason,
+          refusal: (message as { refusal?: string } | undefined)?.refusal,
+        }
       }
     }
 

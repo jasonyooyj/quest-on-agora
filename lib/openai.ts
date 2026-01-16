@@ -36,3 +36,10 @@ export const openai = new Proxy({} as OpenAI, {
  * DO NOT MODIFY without explicit user approval - See CLAUDE.md
  */
 export const AI_MODEL = "gpt-5-mini-2025-08-07";
+
+/**
+ * AI Provider selector.
+ * Can be 'openai' or 'gemini'.
+ * Defaults to 'gemini' for this refactor.
+ */
+export const AI_PROVIDER: 'openai' | 'gemini' = (process.env.AI_PROVIDER as 'openai' | 'gemini') || 'gemini';

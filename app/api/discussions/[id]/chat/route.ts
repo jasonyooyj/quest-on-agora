@@ -5,7 +5,8 @@ import { PromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
 import { RunnableSequence } from "@langchain/core/runnables"
 import { HumanMessage, SystemMessage, AIMessage } from "@langchain/core/messages"
-import { AI_MODEL } from '@/lib/openai'
+import { AI_MODEL, AI_PROVIDER } from '@/lib/openai'
+import { getGeminiChatModel } from '@/lib/gemini'
 import { sendMessageSchema } from '@/lib/validations/discussion'
 import { IterableReadableStream } from "@langchain/core/utils/stream"
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
@@ -57,8 +58,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             return NextResponse.json({ error: 'Discussion not found' }, { status: 404 })
         }
 
-        // Verify OpenAI API key exists
-        if (!process.env.OPENAI_API_KEY) {
+        // Verify API key exists based on provider
+        if (AI_PROVIDER === 'openai' && !process.env.OPENAI_API_KEY) {
+            return handleMockResponse(discussionId || id, participantId, supabase)
+        }
+        if (AI_PROVIDER === 'gemini' && !process.env.GOOGLE_API_KEY) {
             return handleMockResponse(discussionId || id, participantId, supabase)
         }
 
@@ -105,12 +109,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Wrap-up triggers one turn before maxTurns
         const isClosing = !isUnlimited && userTurns >= maxTurns - 1
 
-        // Initialize ChatOpenAI with streaming if requested
-        const chat = new ChatOpenAI({
-            modelName: AI_MODEL,
-            openAIApiKey: process.env.OPENAI_API_KEY,
-            streaming: stream,
-        })
+        // Initialize Chat Model based on provider
+        const chat = AI_PROVIDER === 'gemini'
+            ? getGeminiChatModel({ streaming: stream })
+            : new ChatOpenAI({
+                modelName: AI_MODEL,
+                openAIApiKey: process.env.OPENAI_API_KEY,
+                streaming: stream,
+            })
 
         // Handle streaming response
         if (stream) {

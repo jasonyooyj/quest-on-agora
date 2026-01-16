@@ -1,11 +1,11 @@
-Version: 0.12.4
+Version: 0.12.5
 
 # Quest on Agora - AI 토론 교육 플랫폼
 
 ## Tech Stack
 - **Framework**: Next.js 16, React 19.1, TypeScript 5.9
 - **Auth/DB**: Supabase (Auth + Postgres + RLS)
-- **AI**: OpenAI (gpt-5-mini-2025-08-07)), LangChain
+- **AI**: Gemini 3 Flash (Default), OpenAI (Fallback), LangChain
 - **UI**: shadcn/ui, Radix UI, Tailwind CSS 4, Framer Motion
 - **Payments**: Stripe (international), Toss Payments (Korea)
 - **i18n**: next-intl (ko/en)
