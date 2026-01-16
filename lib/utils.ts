@@ -1,11 +1,21 @@
+/**
+ * Shared utility helpers.
+ */
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 
+/**
+ * Merge class names with tailwind-aware conflict resolution.
+ */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * Resolve the current app base URL with a trailing slash.
+ */
 export function getURL() {
   // On client-side, always use the current origin to avoid redirect issues
   if (typeof window !== 'undefined') {
@@ -26,4 +36,34 @@ export function getURL() {
   url = url.charAt(url.length - 1) === '/' ? url : `${url}/`
 
   return url
+}
+
+/**
+ * Sanitize search input to prevent SQL injection in PostgREST LIKE patterns.
+ * Escapes special characters used in LIKE patterns.
+ *
+ * Use this for .ilike() method calls.
+ */
+export function sanitizeLikePattern(input: string): string {
+  return input
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/%/g, '\\%')    // Escape LIKE wildcards
+    .replace(/_/g, '\\_')    // Escape single-char wildcards
+}
+
+/**
+ * Sanitize search input for PostgREST .or() filter strings.
+ * Escapes LIKE pattern chars and removes filter syntax characters.
+ *
+ * Use this for .or() method calls with ilike filters.
+ */
+export function sanitizeOrFilter(input: string): string {
+  return input
+    .replace(/\\/g, '\\\\')  // Escape backslashes first
+    .replace(/%/g, '\\%')    // Escape LIKE wildcards
+    .replace(/_/g, '\\_')    // Escape single-char wildcards
+    .replace(/,/g, '')       // Remove commas (or() separator)
+    .replace(/\./g, '')      // Remove dots (filter syntax)
+    .replace(/\(/g, '')      // Remove parentheses
+    .replace(/\)/g, '')
 }

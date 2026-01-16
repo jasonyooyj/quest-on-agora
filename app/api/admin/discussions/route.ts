@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { isAdmin } from '@/lib/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { sanitizeLikePattern } from '@/lib/utils'
 
 export async function GET(request: NextRequest) {
   // Apply rate limiting
@@ -39,9 +40,10 @@ export async function GET(request: NextRequest) {
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
 
-    // Apply filters
+    // Apply filters with sanitized input to prevent SQL injection
     if (search) {
-      query = query.ilike('title', `%${search}%`)
+      const sanitized = sanitizeLikePattern(search)
+      query = query.ilike('title', `%${sanitized}%`)
     }
     if (status && status !== 'all') {
       query = query.eq('status', status)
