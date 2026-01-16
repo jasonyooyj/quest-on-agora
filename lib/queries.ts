@@ -1,3 +1,7 @@
+/**
+ * React Query key builders used across the app.
+ */
+
 export const QUERY_KEYS = {
     discussion: (id: string) => ['discussion', id] as const,
     gallery: (id: string) => ['discussion', id, 'gallery'] as const,

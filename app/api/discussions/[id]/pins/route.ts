@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { requireDiscussionOwner } from '@/lib/auth'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -14,25 +15,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = await params
-    const supabase = await createSupabaseRouteClient()
+
+    // Verify user is authenticated, is an instructor, and owns this discussion
+    try {
+      await requireDiscussionOwner(id)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unauthorized'
+      const status = message.includes('Forbidden') ? 403 : 401
+      return NextResponse.json({ error: message }, { status })
+    }
+
     const adminClient = await createSupabaseAdminClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Verify discussion ownership using admin client to bypass RLS
-    const { data: discussion } = await adminClient
-      .from('discussion_sessions')
-      .select('instructor_id')
-      .eq('id', id)
-      .single()
-
-    if (!discussion || discussion.instructor_id !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
 
     // Use admin client to bypass RLS for fetching pins with participant data
     const { data: pins, error } = await adminClient
@@ -67,26 +60,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = await params
-    const supabase = await createSupabaseRouteClient()
+
+    // Verify user is authenticated, is an instructor, and owns this discussion
+    try {
+      await requireDiscussionOwner(id)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unauthorized'
+      const status = message.includes('Forbidden') ? 403 : 401
+      return NextResponse.json({ error: message }, { status })
+    }
+
     const adminClient = await createSupabaseAdminClient()
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Verify discussion ownership using admin client
-    const { data: discussion } = await adminClient
-      .from('discussion_sessions')
-      .select('instructor_id')
-      .eq('id', id)
-      .single()
-
-    if (!discussion || discussion.instructor_id !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
     const body = await request.json()
     const { participantId, quote, context } = body
 
@@ -130,13 +114,14 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = await params
-    const supabase = await createSupabaseRouteClient()
-    const adminClient = await createSupabaseAdminClient()
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Verify user is authenticated, is an instructor, and owns this discussion
+    try {
+      await requireDiscussionOwner(id)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unauthorized'
+      const status = message.includes('Forbidden') ? 403 : 401
+      return NextResponse.json({ error: message }, { status })
     }
 
     const { searchParams } = new URL(request.url)
@@ -146,25 +131,18 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'pinId is required' }, { status: 400 })
     }
 
-    // Verify ownership through discussion using admin client
+    const adminClient = await createSupabaseAdminClient()
+
+    // Verify pin belongs to this session
     const { data: pin } = await adminClient
       .from('discussion_pinned_quotes')
       .select('session_id')
       .eq('id', pinId)
+      .eq('session_id', id)
       .single()
 
     if (!pin) {
       return NextResponse.json({ error: 'Pin not found' }, { status: 404 })
-    }
-
-    const { data: discussion } = await adminClient
-      .from('discussion_sessions')
-      .select('instructor_id')
-      .eq('id', pin.session_id)
-      .single()
-
-    if (!discussion || discussion.instructor_id !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     // Use admin client to bypass RLS for delete

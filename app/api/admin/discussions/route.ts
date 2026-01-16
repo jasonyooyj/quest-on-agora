@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
-import { isAdmin } from '@/lib/admin'
+import { requireAdmin } from '@/lib/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { sanitizeLikePattern } from '@/lib/utils'
 
@@ -10,18 +10,14 @@ export async function GET(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   try {
-    const supabase = await createSupabaseRouteClient()
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check admin access
-    if (!isAdmin(user.email)) {
+    // Verify user is authenticated and has admin access
+    try {
+      await requireAdmin()
+    } catch {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
+
+    const supabase = await createSupabaseRouteClient()
 
     // Parse query params
     const searchParams = request.nextUrl.searchParams

@@ -13,6 +13,7 @@ import { createCheckoutParams as createTossCheckout, isTossConfigured } from '@/
 import { getPlanById, getSubscriptionInfo } from '@/lib/subscription'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { z } from 'zod'
+import { getCurrentUser } from '@/lib/auth'
 
 // Request validation schema
 const checkoutSchema = z.object({
@@ -28,12 +29,9 @@ export async function POST(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   try {
-    const supabase = await createSupabaseRouteClient()
-
     // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const user = await getCurrentUser()
+    if (!user) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
     }
 
@@ -89,13 +87,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '이메일 정보가 필요합니다.' }, { status: 400 })
     }
 
-    // Get user name from profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name')
-      .eq('id', user.id)
-      .single()
-
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://agora.edu'
     const successUrl = `${baseUrl}/${locale}/checkout/success`
     const cancelUrl = `${baseUrl}/${locale}/pricing`
@@ -105,7 +96,7 @@ export async function POST(request: NextRequest) {
       const tossParams = await createTossCheckout({
         userId: user.id,
         userEmail,
-        userName: profile?.name || undefined,
+        userName: user.name || undefined,
         planId,
         billingInterval,
         successUrl,

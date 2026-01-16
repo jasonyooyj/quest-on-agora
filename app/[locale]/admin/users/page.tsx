@@ -83,7 +83,7 @@ export default function AdminUsersPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [page, search, role])
+  }, [page, search, role, t])
 
   const fetchStats = async () => {
     try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
-import { isAdmin } from '@/lib/admin'
+import { requireAdmin } from '@/lib/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 export async function GET(
@@ -13,18 +13,15 @@ export async function GET(
 
   try {
     const { id } = await params
-    const supabase = await createSupabaseRouteClient()
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check admin access
-    if (!isAdmin(user.email)) {
+    // Verify user is authenticated and has admin access
+    try {
+      await requireAdmin()
+    } catch {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
+
+    const supabase = await createSupabaseRouteClient()
 
     // Get discussion
     const { data: discussion, error } = await supabase
@@ -112,19 +109,15 @@ export async function PATCH(
 
   try {
     const { id } = await params
-    const supabase = await createSupabaseRouteClient()
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check admin access
-    if (!isAdmin(user.email)) {
+    // Verify user is authenticated and has admin access
+    try {
+      await requireAdmin()
+    } catch {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
+    const supabase = await createSupabaseRouteClient()
     const body = await request.json()
     const { status } = body
 
@@ -169,18 +162,15 @@ export async function DELETE(
 
   try {
     const { id } = await params
-    const supabase = await createSupabaseRouteClient()
 
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check admin access
-    if (!isAdmin(user.email)) {
+    // Verify user is authenticated and has admin access
+    try {
+      await requireAdmin()
+    } catch {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
+
+    const supabase = await createSupabaseRouteClient()
 
     // Delete discussion (cascades to messages, participants)
     const { error } = await supabase

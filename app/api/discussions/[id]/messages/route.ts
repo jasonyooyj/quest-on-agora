@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser } from '@/lib/auth'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -14,13 +15,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
+        const user = await getCurrentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         const { searchParams } = new URL(request.url)
         const participantId = searchParams.get('participant_id') ?? searchParams.get('participantId')
@@ -91,13 +92,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
+        const user = await getCurrentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         const body = await request.json()
         const { content, role = 'user' } = body

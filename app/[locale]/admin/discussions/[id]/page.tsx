@@ -106,7 +106,7 @@ export default function AdminDiscussionDetailPage({
     } finally {
       setIsLoading(false)
     }
-  }, [id, router])
+  }, [id, router, t])
 
   useEffect(() => {
     fetchDiscussionData()

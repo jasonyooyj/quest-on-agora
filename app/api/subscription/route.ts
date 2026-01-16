@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { getSubscriptionInfo } from '@/lib/subscription/info'
 import { getAvailablePlans } from '@/lib/subscription/plans'
+import { getCurrentUser } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,10 +11,8 @@ export const dynamic = 'force-dynamic'
  */
 export async function GET(request: Request) {
   try {
-    const supabase = await createSupabaseRouteClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const user = await getCurrentUser()
+    if (!user) {
       return NextResponse.json(
         { error: '인증이 필요합니다.' },
         { status: 401 }

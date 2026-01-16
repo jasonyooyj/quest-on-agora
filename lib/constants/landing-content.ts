@@ -1,5 +1,12 @@
+/**
+ * Static content for the marketing landing page.
+ */
+
 import { Users, Brain, BarChart3, Sparkles } from "lucide-react";
 
+/**
+ * Hero section copy and assets.
+ */
 export const HERO_CONTENT = {
     tag: "대학 토론 플랫폼",
     titlePrefix: "토론의",
@@ -16,6 +23,9 @@ export const HERO_CONTENT = {
     ],
 };
 
+/**
+ * Marquee text items for the landing page.
+ */
 export const MARQUEE_ITEMS = [
     "AI 소크라테스 대화",
     "비판적 사고의 확장",
@@ -25,6 +35,9 @@ export const MARQUEE_ITEMS = [
     "논증력 향상",
 ];
 
+/**
+ * Feature section copy and icons.
+ */
 export const FEATURES_CONTENT = {
     tag: "기능",
     title: "토론을 혁신하는 도구",
@@ -61,18 +74,27 @@ export const FEATURES_CONTENT = {
     ],
 };
 
+/**
+ * Summary stats displayed on the landing page.
+ */
 export const STATS_CONTENT = [
     { value: "47%", label: "비판적 사고력 향상" },
     { value: "2.3x", label: "참여율 증가" },
     { value: "89%", label: "교수 만족도" },
 ];
 
+/**
+ * Featured quote used in the social proof section.
+ */
 export const QUOTE_CONTENT = {
     text: '"Agora를 도입한 후, 학생들의 토론 참여도가 눈에 띄게 높아졌습니다. AI가 좋은 질문을 던져주니 학생들도 더 깊이 생각하게 되더군요."',
     author: "김교수",
     affiliation: "서울대학교 철학과",
 };
 
+/**
+ * Testimonials for the landing page.
+ */
 export const TESTIMONIALS = [
     {
         text: '"Agora를 도입한 후, 학생들의 토론 참여도가 눈에 띄게 높아졌습니다. AI가 좋은 질문을 던져주니 학생들도 더 깊이 생각하게 되더군요."',
@@ -94,6 +116,9 @@ export const TESTIMONIALS = [
     },
 ];
 
+/**
+ * Example classroom use cases.
+ */
 export const USE_CASES = [
     {
         title: "철학 수업",
@@ -115,6 +140,9 @@ export const USE_CASES = [
     },
 ];
 
+/**
+ * Problem/solution pairs highlighted in the landing page.
+ */
 export const PROBLEMS_SOLUTIONS = {
     problems: [
         {
@@ -146,6 +174,9 @@ export const PROBLEMS_SOLUTIONS = {
     ],
 };
 
+/**
+ * FAQ content for the landing page.
+ */
 export const FAQ_CONTENT = {
     tag: "자주 묻는 질문",
     title: "궁금하신 점이 있으신가요?",
@@ -173,6 +204,9 @@ export const FAQ_CONTENT = {
     ],
 };
 
+/**
+ * Copy for the AI modes section header.
+ */
 export const AI_MODES_CONTENT = {
     tag: "4가지 AI 모드",
     title: "수업 목표에 맞는 AI를 선택하세요",
@@ -180,6 +214,9 @@ export const AI_MODES_CONTENT = {
         "학생의 사고를 이끄는 방식을 교수님이 직접 설정할 수 있습니다.",
 };
 
+/**
+ * AI mode cards and examples.
+ */
 export const AI_MODES = [
     {
         id: "socratic",

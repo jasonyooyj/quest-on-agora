@@ -3,6 +3,7 @@ import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { openai, AI_MODEL } from '@/lib/openai'
 import { DISCUSSION_REPORT_SYSTEM_PROMPT } from '@/lib/prompts'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { requireDiscussionOwner } from '@/lib/auth'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -31,14 +32,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
   try {
     const { id } = await params
-    const supabase = await createSupabaseRouteClient()
 
-    // Verify authentication and instructor role
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Verify user is authenticated, is an instructor, and owns this discussion
+    try {
+      await requireDiscussionOwner(id)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unauthorized'
+      const status = message.includes('Forbidden') ? 403 : 401
+      return NextResponse.json({ error: message }, { status })
     }
+
+    const supabase = await createSupabaseRouteClient()
 
     // Get discussion
     const { data: discussion, error: discussionError } = await supabase
@@ -49,11 +53,6 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (discussionError || !discussion) {
       return NextResponse.json({ error: 'Discussion not found' }, { status: 404 })
-    }
-
-    // Verify ownership
-    if (discussion.instructor_id !== user.id) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
     // Get participants

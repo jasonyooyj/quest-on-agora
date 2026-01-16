@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser, requireDiscussionOwner } from '@/lib/auth'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -14,13 +15,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
+        const user = await getCurrentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         const { data: discussion, error } = await supabase
             .from('discussion_sessions')
@@ -73,25 +74,17 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
+
+        // Verify user is authenticated, is an instructor, and owns this discussion
+        try {
+            await requireDiscussionOwner(id)
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unauthorized'
+            const status = message.includes('Forbidden') ? 403 : 401
+            return NextResponse.json({ error: message }, { status })
+        }
+
         const supabase = await createSupabaseRouteClient()
-
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Verify ownership
-        const { data: existing } = await supabase
-            .from('discussion_sessions')
-            .select('instructor_id')
-            .eq('id', id)
-            .single()
-
-        if (!existing || existing.instructor_id !== user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-        }
-
         const body = await request.json()
         const { title, description, status, settings } = body
 
@@ -133,24 +126,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
+
+        // Verify user is authenticated, is an instructor, and owns this discussion
+        try {
+            await requireDiscussionOwner(id)
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unauthorized'
+            const status = message.includes('Forbidden') ? 403 : 401
+            return NextResponse.json({ error: message }, { status })
+        }
+
         const supabase = await createSupabaseRouteClient()
-
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Verify ownership
-        const { data: existing } = await supabase
-            .from('discussion_sessions')
-            .select('instructor_id')
-            .eq('id', id)
-            .single()
-
-        if (!existing || existing.instructor_id !== user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-        }
 
         const { error } = await supabase
             .from('discussion_sessions')

@@ -9,6 +9,14 @@ export const routing = defineRouting({
   defaultLocale: 'ko'
 });
 
+// Type for supported locales
+export type Locale = (typeof routing.locales)[number];
+
+// Type guard for locale validation
+export function isValidLocale(locale: string | undefined): locale is Locale {
+  return !!locale && (routing.locales as readonly string[]).includes(locale);
+}
+
 // Lightweight wrappers around Next.js' navigation APIs
 // that will automatically handle the locale prefix
 export const {Link, redirect, usePathname, useRouter} =

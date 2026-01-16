@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
-import { isAdmin } from '@/lib/admin'
+import { requireAdmin } from '@/lib/admin'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 // Default settings
@@ -21,18 +21,14 @@ export async function GET(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   try {
-    const supabase = await createSupabaseRouteClient()
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check admin access
-    if (!isAdmin(user.email)) {
+    // Verify user is authenticated and has admin access
+    try {
+      await requireAdmin()
+    } catch {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
+
+    const supabase = await createSupabaseRouteClient()
 
     // Try to get settings from database
     const { data: settingsRow, error } = await supabase
@@ -69,18 +65,15 @@ export async function PATCH(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   try {
-    const supabase = await createSupabaseRouteClient()
-
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Check admin access
-    if (!isAdmin(user.email)) {
+    // Verify user is authenticated and has admin access
+    let admin
+    try {
+      admin = await requireAdmin()
+    } catch {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
+
+    const supabase = await createSupabaseRouteClient()
 
     const body = await request.json()
     const newSettings = body.settings
@@ -114,7 +107,7 @@ export async function PATCH(request: NextRequest) {
         id: 'main',
         settings: mergedSettings,
         updated_at: new Date().toISOString(),
-        updated_by: user.id
+        updated_by: admin.id
       })
       .select()
       .single()

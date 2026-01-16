@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import {
   confirmPayment,
   issueBillingKey,
@@ -17,6 +17,7 @@ import {
 import { createSubscription, getPlanById } from '@/lib/subscription'
 import { z } from 'zod'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser } from '@/lib/auth'
 
 // Request validation schema for one-time payment confirmation
 const confirmSchema = z.object({
@@ -41,12 +42,9 @@ export async function POST(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   try {
-    const supabase = await createSupabaseRouteClient()
-
     // Authenticate user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const user = await getCurrentUser()
+    if (!user) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
     }
 

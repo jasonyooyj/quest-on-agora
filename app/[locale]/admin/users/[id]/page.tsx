@@ -105,7 +105,7 @@ export default function AdminUserDetailPage({
     } finally {
       setIsLoading(false)
     }
-  }, [id, router])
+  }, [id, router, t])
 
   useEffect(() => {
     fetchUserData()

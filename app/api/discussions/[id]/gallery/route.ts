@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser } from '@/lib/auth'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -16,13 +17,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id: sessionId } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         // Get discussion info
         const { data: discussion } = await supabase

@@ -2,8 +2,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Copy, Check, Users, Monitor, ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import QRCode from 'react-qr-code'
-import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { getURL } from '@/lib/utils'
 
 interface DiscussionOnboardingOverlayProps {
     className?: string
@@ -22,13 +22,7 @@ export function DiscussionOnboardingOverlay({
 }: DiscussionOnboardingOverlayProps) {
     const t = useTranslations('Instructor.DiscussionDetail.onboarding')
     const tCommon = useTranslations('Instructor.DiscussionDetail')
-    const [joinUrl, setJoinUrl] = useState('')
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            setJoinUrl(`${window.location.origin}/join/${joinCode}`)
-        }
-    }, [joinCode])
+    const joinUrl = `${getURL()}join/${joinCode}`
 
     const copyUrl = () => {
         navigator.clipboard.writeText(joinUrl)

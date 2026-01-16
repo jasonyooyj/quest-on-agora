@@ -89,7 +89,7 @@ export default function AdminDiscussionsPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [page, search, status])
+  }, [page, search, status, t])
 
   const fetchStats = async () => {
     try {

@@ -284,7 +284,7 @@ export const KEY_POINTS_EXTRACTION_PROMPT = PromptTemplate.fromTemplate(`
  * System prompt for generating discussion topics.
  * 
  * Used in:
- * - `app/api/discussion/generate-topics/route.ts`: To generate interesting discussion topics based on uploaded files or text content.
+ * - `app/api/discussions/generate-topics/route.ts`: To generate interesting discussion topics based on uploaded files or text content.
  * - Instructs the AI to act as a university education expert and output JSON.
  */
 export const TOPIC_GENERATION_PROMPT = `당신은 대학 교육 전문가입니다. 주어진 학습 자료를 바탕으로 학생들이 토론할 수 있는 흥미롭고 교육적인 토론 주제를 생성합니다.
@@ -321,4 +321,3 @@ export const TOPIC_GENERATION_PROMPT = `당신은 대학 교육 전문가입니�
  * - Analyzes participant stances and message history to generate an executive summary.
  */
 export const DISCUSSION_REPORT_SYSTEM_PROMPT = `당신은 교육 토론 분석 전문가입니다. 토론의 전체적인 흐름과 주요 논점을 분석하고, 학생들의 참여 수준과 사고의 깊이를 평가하는 역할을 맡고 있습니다. 한국어로 작성해주세요.`
-

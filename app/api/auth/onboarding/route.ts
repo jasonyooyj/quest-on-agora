@@ -1,24 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseRouteClient } from '@/lib/supabase-server'
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseAdminClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
-
-// Create a Supabase admin client with service role key (bypasses RLS)
-function getSupabaseAdmin() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-    if (!supabaseServiceKey) {
-        throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set')
-    }
-
-    return createClient(supabaseUrl, supabaseServiceKey, {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-        },
-    })
-}
+import { getCurrentUser } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
     // Apply rate limiting for auth endpoints
@@ -26,13 +9,9 @@ export async function POST(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse
 
     try {
-        const supabase = await createSupabaseRouteClient()
-
         // Get current authenticated user
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            console.error('Auth error:', authError)
+        const user = await getCurrentUser()
+        if (!user) {
             return NextResponse.json(
                 { error: 'Unauthorized' },
                 { status: 401 }
@@ -50,14 +29,14 @@ export async function POST(request: NextRequest) {
         }
 
         // Use admin client to bypass RLS for profile creation
-        const supabaseAdmin = getSupabaseAdmin()
+        const supabaseAdmin = await createSupabaseAdminClient()
 
         // Upsert profile with onboarding data
         const { data, error } = await supabaseAdmin
             .from('profiles')
             .upsert({
                 id: user.id,
-                email: user.email,
+                email: user.email || '',
                 name,
                 role,
                 student_number: student_number || null,

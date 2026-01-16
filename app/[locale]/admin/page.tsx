@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
@@ -54,11 +54,7 @@ export default function AdminDashboard() {
   const [recentDiscussions, setRecentDiscussions] = useState<RecentDiscussion[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    loadDashboardData()
-  }, [])
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/stats')
       if (!response.ok) throw new Error('Failed to fetch stats')
@@ -73,7 +69,11 @@ export default function AdminDashboard() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [loadDashboardData])
 
   const getStatusBadge = (status: string) => {
     const styles = {

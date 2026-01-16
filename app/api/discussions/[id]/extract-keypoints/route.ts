@@ -6,6 +6,8 @@ import { RunnableSequence } from "@langchain/core/runnables"
 import { AI_MODEL } from '@/lib/openai'
 import { KEY_POINTS_EXTRACTION_PROMPT } from '@/lib/prompts'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import type { DiscussionSettings } from '@/types/discussion'
+import { getCurrentUser } from '@/lib/auth'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -20,7 +22,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id: sessionId } = await params
-        const supabase = await createSupabaseRouteClient()
+
+        const user = await getCurrentUser()
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
 
         const body = await request.json()
         const { participantId } = body
@@ -29,11 +35,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             return NextResponse.json({ error: 'participantId is required' }, { status: 400 })
         }
 
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
+        const supabase = await createSupabaseRouteClient()
 
         // Get discussion info
         const { data: discussion } = await supabase
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Get participant info
         const { data: participant } = await supabase
             .from('discussion_participants')
-            .select('id, stance, user_id')
+            .select('id, stance, student_id')
             .eq('id', participantId)
             .single()
 
@@ -58,7 +60,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         }
 
         // Verify user owns this participant record
-        if (participant.user_id !== user.id) {
+        if (participant.student_id !== user.id) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             `${m.role === 'user' ? '학생' : 'AI'}: ${m.content}`
         ).join('\n\n')
 
-        const settings = discussion.settings as any
+        const settings = discussion.settings as DiscussionSettings | null
         const stanceLabel = participant.stance
             ? (settings?.stanceLabels?.[participant.stance] || participant.stance)
             : '미정'

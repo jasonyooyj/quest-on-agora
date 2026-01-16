@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser } from '@/lib/auth'
 
 interface RouteParams {
   params: Promise<{ code: string }>
@@ -30,38 +31,20 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const supabase = await createSupabaseRouteClient()
-
     // Check authentication
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    const user = await getCurrentUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized', code: 'UNAUTHORIZED' }, { status: 401 })
     }
 
-    // Get user profile and verify role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('name, role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: 'Profile not found', code: 'PROFILE_NOT_FOUND', needsOnboarding: true },
-        { status: 403 }
-      )
-    }
-
-    if (profile.role !== 'student') {
+    if (user.role !== 'student') {
       return NextResponse.json(
         { error: 'Only students can join', code: 'STUDENT_ONLY' },
         { status: 403 }
       )
     }
+
+    const supabase = await createSupabaseRouteClient()
 
     // Find discussion by join code
     // Use admin client to bypass RLS (so we can distinguish between "not found" and "not active/draft")
@@ -131,7 +114,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const settings = discussion.settings as DiscussionSettings
     const displayName = settings?.anonymous
       ? `학생 ${(count || 0) + 1}`
-      : profile.name
+      : user.name
 
     // Create participant record
     const { data: participant, error: insertError } = await supabase

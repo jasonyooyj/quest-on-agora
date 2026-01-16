@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import {
   Settings,
@@ -54,14 +54,10 @@ export default function AdminSettingsPage() {
   const [hasChanges, setHasChanges] = useState(false)
 
   useEffect(() => {
-    fetchSettings()
-  }, [])
-
-  useEffect(() => {
     setHasChanges(JSON.stringify(settings) !== JSON.stringify(originalSettings))
   }, [settings, originalSettings])
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/settings')
       if (!response.ok) throw new Error('Failed to fetch settings')
@@ -75,7 +71,11 @@ export default function AdminSettingsPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [t])
+
+  useEffect(() => {
+    fetchSettings()
+  }, [fetchSettings])
 
   const handleSave = async () => {
     setIsSaving(true)

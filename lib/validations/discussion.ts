@@ -1,9 +1,17 @@
+/**
+ * Zod schemas and types for discussion-related requests.
+ */
+
 import { z } from 'zod'
 
-// AI modes available for discussions
+/**
+ * Allowed AI modes for discussions.
+ */
 export const aiModeSchema = z.enum(['socratic', 'balanced', 'debate', 'minimal'])
 
-// Discussion settings schema
+/**
+ * Schema for discussion settings payloads.
+ */
 export const discussionSettingsSchema = z.object({
   anonymous: z.boolean().default(true),
   stanceOptions: z.array(z.string()).min(2).max(10).default(['pro', 'con', 'neutral']),
@@ -14,14 +22,18 @@ export const discussionSettingsSchema = z.object({
   duration: z.number().min(3).max(60).nullable().optional(),
 })
 
-// Create discussion request schema
+/**
+ * Schema for create discussion requests.
+ */
 export const createDiscussionSchema = z.object({
   title: z.string().min(1, '제목을 입력해주세요').max(100, '제목은 100자 이내로 입력해주세요'),
   description: z.string().max(500, '설명은 500자 이내로 입력해주세요').optional().nullable(),
   settings: discussionSettingsSchema.optional(),
 })
 
-// Update discussion request schema
+/**
+ * Schema for update discussion requests.
+ */
 export const updateDiscussionSchema = z.object({
   title: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional().nullable(),
@@ -29,14 +41,18 @@ export const updateDiscussionSchema = z.object({
   settings: discussionSettingsSchema.partial().optional(),
 })
 
-// Join discussion request schema
+/**
+ * Schema for join discussion requests.
+ */
 export const joinDiscussionSchema = z.object({
   joinCode: z.string()
     .length(12, '참여 코드는 12자리입니다')
     .regex(/^[A-Z0-9]+$/, '참여 코드는 영문 대문자와 숫자로만 구성됩니다'),
 })
 
-// Chat message request schema
+/**
+ * Schema for chat message requests.
+ */
 export const sendMessageSchema = z.object({
   participantId: z.string().uuid('유효하지 않은 참가자 ID입니다'),
   userMessage: z.string()
@@ -45,7 +61,9 @@ export const sendMessageSchema = z.object({
   discussionId: z.string().uuid().optional(),
 })
 
-// Update participant schema
+/**
+ * Schema for participant update requests.
+ */
 export const updateParticipantSchema = z.object({
   stance: z.string().max(50).optional(),
   stance_statement: z.string().max(2000).optional(),
@@ -56,18 +74,24 @@ export const updateParticipantSchema = z.object({
   requested_extension: z.boolean().optional(),
 })
 
-// Comment schema
+/**
+ * Schema for discussion comments.
+ */
 export const createCommentSchema = z.object({
   participantId: z.string().uuid(),
   content: z.string().min(1).max(1000, '댓글은 1000자 이내로 입력해주세요'),
 })
 
-// Like schema
+/**
+ * Schema for toggling likes.
+ */
 export const toggleLikeSchema = z.object({
   participantId: z.string().uuid(),
 })
 
-// Type exports
+/**
+ * Type exports derived from discussion schemas.
+ */
 export type AiMode = z.infer<typeof aiModeSchema>
 export type DiscussionSettings = z.infer<typeof discussionSettingsSchema>
 export type CreateDiscussionInput = z.infer<typeof createDiscussionSchema>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { updateParticipantSchema } from '@/lib/validations/discussion'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser, requireDiscussionOwner } from '@/lib/auth'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -21,24 +22,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
+
+        // Verify user is authenticated, is an instructor, and owns this discussion
+        try {
+            await requireDiscussionOwner(id)
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unauthorized'
+            const status = message.includes('Forbidden') ? 403 : 401
+            return NextResponse.json({ error: message }, { status })
+        }
+
         const supabase = await createSupabaseRouteClient()
-
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Verify instructor access
-        const { data: discussion } = await supabase
-            .from('discussion_sessions')
-            .select('instructor_id')
-            .eq('id', id)
-            .single()
-
-        if (!discussion || discussion.instructor_id !== user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-        }
 
         const { data: participants, error } = await supabase
             .from('discussion_participants')
@@ -66,24 +60,17 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
+        const user = await getCurrentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Get user profile
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('name, role')
-            .eq('id', user.id)
-            .single()
-
-        if (!profile || profile.role !== 'student') {
+        if (user.role !== 'student') {
             return NextResponse.json({ error: 'Only students can join discussions' }, { status: 403 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         // Verify discussion exists and is joinable
         const { data: discussion } = await supabase
@@ -124,7 +111,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const settings = discussion.settings as DiscussionSettings
         const displayName = settings?.anonymous
             ? `학생 ${(count || 0) + 1}`
-            : profile.name
+            : user.name
 
         const { data: participant, error } = await supabase
             .from('discussion_participants')
@@ -157,13 +144,13 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
+        const user = await getCurrentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         const body = await request.json()
         const validation = updateParticipantSchema.safeParse(body)

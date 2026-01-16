@@ -3,6 +3,7 @@ import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createDiscussionSchema } from '@/lib/validations/discussion'
 import { checkLimitAccess, incrementUsage, getSubscriptionInfo } from '@/lib/subscription'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser, requireInstructor } from '@/lib/auth'
 
 // Types for Supabase responses
 interface DiscussionSession {
@@ -33,28 +34,16 @@ export async function GET(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse
 
     try {
-        const supabase = await createSupabaseRouteClient()
-
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
+        const user = await getCurrentUser()
+        if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Get user profile to check role
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-
-        if (!profile) {
-            return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
-        }
+        const supabase = await createSupabaseRouteClient()
 
         let discussions: unknown[]
 
-        if (profile.role === 'instructor') {
+        if (user.role === 'instructor') {
             // Get discussions created by instructor
             const { data, error } = await supabase
                 .from('discussion_sessions')
@@ -113,24 +102,17 @@ export async function POST(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse
 
     try {
+        // Verify user is authenticated and is an instructor
+        let user
+        try {
+            user = await requireInstructor()
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Unauthorized'
+            const status = message.includes('Forbidden') ? 403 : 401
+            return NextResponse.json({ error: message }, { status })
+        }
+
         const supabase = await createSupabaseRouteClient()
-
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError || !user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Verify instructor role
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
-
-        if (profile?.role !== 'instructor') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-        }
 
         // Check subscription limits before creating discussion
         // Fetch subscription info once and pass to both limit checks for efficiency

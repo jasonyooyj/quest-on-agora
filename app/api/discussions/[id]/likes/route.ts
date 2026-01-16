@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser } from '@/lib/auth'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -16,12 +17,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id: sessionId } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         const body = await request.json()
         const { participantId } = body
@@ -72,12 +74,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     try {
         const { id: sessionId } = await params
-        const supabase = await createSupabaseRouteClient()
 
-        const { data: { user } } = await supabase.auth.getUser()
+        const user = await getCurrentUser()
         if (!user) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
+
+        const supabase = await createSupabaseRouteClient()
 
         const { searchParams } = new URL(request.url)
         const participantId = searchParams.get('participantId')

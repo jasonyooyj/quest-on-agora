@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { requireDiscussionOwner } from '@/lib/auth'
 
 export async function PATCH(
   request: NextRequest,
@@ -12,26 +13,24 @@ export async function PATCH(
 
   try {
     const { id } = await params
+
+    // Verify user is authenticated, is an instructor, and owns this discussion
+    try {
+      await requireDiscussionOwner(id)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unauthorized'
+      const status = message.includes('Forbidden') ? 403 : 401
+      return NextResponse.json({ error: message }, { status })
+    }
+
     const settings = await request.json()
     const supabase = await createSupabaseRouteClient()
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { data: currentSession, error: fetchError } = await supabase
       .from('discussion_sessions')
-      .select('settings, instructor_id')
+      .select('settings')
       .eq('id', id)
       .single()
-
-    if (currentSession && currentSession.instructor_id !== user.id) {
-      return NextResponse.json(
-        { error: 'Forbidden: Only the instructor can modify discussion settings' },
-        { status: 403 }
-      )
-    }
 
     if (fetchError) {
       return NextResponse.json(

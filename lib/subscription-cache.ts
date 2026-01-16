@@ -15,8 +15,17 @@ import { createSupabaseAdminClient } from './supabase-server'
 // CACHE CONFIGURATION
 // ============================================================================
 
-const CACHE_TTL_MS = 30 * 1000 // 30 seconds
-const CLEANUP_INTERVAL_MS = 5 * 60 * 1000 // 5 minutes
+/**
+ * Cache TTL: 5 minutes
+ *
+ * Subscription data changes infrequently (plan upgrades, cancellations, billing).
+ * Explicit invalidation via invalidateSubscriptionCache() handles immediate updates
+ * when subscription changes occur (webhooks, checkout completion).
+ *
+ * Previous: 30 seconds caused excessive cache misses (PERF-002)
+ */
+const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
+const CLEANUP_INTERVAL_MS = 15 * 60 * 1000 // 15 minutes
 
 // ============================================================================
 // CACHE TYPES
@@ -101,7 +110,6 @@ export function setCachedSubscriptionInfo(
   userId: string,
   info: SubscriptionInfo
 ): void {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { planDisplayName, ...cacheData } = info
 
   subscriptionCache.set(userId, {

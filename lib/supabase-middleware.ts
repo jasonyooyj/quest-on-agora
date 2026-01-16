@@ -1,3 +1,7 @@
+/**
+ * Middleware helper to refresh sessions and enforce route access rules.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -7,6 +11,9 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
     .map(e => e.trim().toLowerCase())
     .filter(e => e.length > 0)
 
+/**
+ * Refresh Supabase auth cookies and enforce route access policies.
+ */
 export async function updateSession(request: NextRequest, response?: NextResponse) {
     let supabaseResponse = response || NextResponse.next({
         request,

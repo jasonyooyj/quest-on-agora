@@ -3,6 +3,12 @@ import { getCurrentUser } from '@/lib/auth'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
+// Type for the joined session data from Supabase
+interface ParticipantWithSession {
+  id: string
+  session: { instructor_id: string } | null
+}
+
 // GET /api/discussions/participants/[participantId]/note - Get instructor note
 export async function GET(
   request: NextRequest,
@@ -45,9 +51,10 @@ export async function GET(
       )
     }
 
-    const session = participant.session as any
+    // Type assertion for joined session data
+    const typedParticipant = participant as unknown as ParticipantWithSession
 
-    if (session?.instructor_id !== user.id) {
+    if (typedParticipant.session?.instructor_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -133,9 +140,10 @@ export async function POST(
       )
     }
 
-    const session = participant.session as any
+    // Type assertion for joined session data
+    const typedParticipant = participant as unknown as ParticipantWithSession
 
-    if (session?.instructor_id !== user.id) {
+    if (typedParticipant.session?.instructor_id !== user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

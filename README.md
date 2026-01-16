@@ -27,6 +27,7 @@
 - [프로젝트 구조](#프로젝트-구조)
 - [설치 및 실행](#설치-및-실행)
 - [환경 변수](#환경-변수)
+- [프로덕션 배포](#프로덕션-배포)
 - [데이터베이스](#데이터베이스)
 - [API 엔드포인트](#api-엔드포인트)
 
@@ -247,6 +248,12 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.com
 
 ---
 
+## 프로덕션 배포
+
+프로덕션 설정과 웹훅 구성은 `docs/PRODUCTION_SETUP.md`를 참고하세요.
+
+---
+
 ## 데이터베이스
 
 ### 마이그레이션
@@ -292,8 +299,12 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.com
 | Method | Endpoint | 설명 |
 |--------|----------|------|
 | POST | `/api/join/[code]` | Join Code로 참여 |
-| GET | `/api/discussion/[id]/participants` | 참가자 목록 |
-| GET | `/api/discussion/[id]/stances` | 입장 분포 |
+| GET | `/api/discussions/[id]/participants` | 참가자 목록 |
+| GET | `/api/discussions/[id]/stances` | 입장 분포 |
+
+### API 문서
+- OpenAPI 스펙: `/api/openapi`
+- Swagger UI: `/api-docs`
 
 ### 인증
 | Method | Endpoint | 설명 |

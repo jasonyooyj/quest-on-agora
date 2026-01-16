@@ -10,14 +10,10 @@ import { sendMessageSchema } from '@/lib/validations/discussion'
 import { IterableReadableStream } from "@langchain/core/utils/stream"
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
+import type { DiscussionSettings } from '@/types/discussion'
+
 interface RouteParams {
     params: Promise<{ id: string }>
-}
-
-interface DiscussionSettings {
-    anonymous?: boolean
-    stanceOptions?: string[]
-    aiMode?: string
 }
 
 // System prompts for standard modes
@@ -99,7 +95,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             .eq('id', participantId)
             .single()
 
-        const settings = discussion.settings as any
+        const settings = discussion.settings as DiscussionSettings | null
         const stanceLabel = participant?.stance ? settings?.stanceLabels?.[participant.stance] : undefined
         const aiMode = settings?.aiMode || 'socratic'
         const userTurns = history?.filter(m => m.role === 'user').length || 0

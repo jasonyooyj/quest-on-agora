@@ -1,3 +1,7 @@
+/**
+ * Auth helpers for Supabase-backed sessions and role checks.
+ */
+
 import { createSupabaseServerClient } from './supabase-server'
 
 export type UserRole = 'instructor' | 'student'
@@ -12,6 +16,9 @@ export interface AuthUser {
   avatarUrl?: string
 }
 
+/**
+ * Fetch the current authenticated user and profile, or null if signed out.
+ */
 export async function getCurrentUser(): Promise<AuthUser | null> {
   const supabase = await createSupabaseServerClient()
 
@@ -47,6 +54,9 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   }
 }
 
+/**
+ * Require an authenticated user or throw an Unauthorized error.
+ */
 export async function requireAuth(): Promise<AuthUser> {
   const user = await getCurrentUser()
   if (!user) {
@@ -55,10 +65,42 @@ export async function requireAuth(): Promise<AuthUser> {
   return user
 }
 
+/**
+ * Require the current user to have a specific role.
+ */
 export async function requireRole(role: UserRole): Promise<AuthUser> {
   const user = await requireAuth()
   if (user.role !== role) {
     throw new Error(`Forbidden: requires ${role} role`)
   }
+  return user
+}
+
+/**
+ * Require the current user to be an instructor.
+ * Convenience wrapper for requireRole('instructor').
+ */
+export async function requireInstructor(): Promise<AuthUser> {
+  return requireRole('instructor')
+}
+
+/**
+ * Verify that the current user owns a specific discussion session.
+ * Returns the user if authorized, throws if not.
+ */
+export async function requireDiscussionOwner(sessionId: string): Promise<AuthUser> {
+  const supabase = await createSupabaseServerClient()
+  const user = await requireInstructor()
+
+  const { data: session } = await supabase
+    .from('discussion_sessions')
+    .select('instructor_id')
+    .eq('id', sessionId)
+    .single()
+
+  if (!session || session.instructor_id !== user.id) {
+    throw new Error('Forbidden: You do not own this discussion')
+  }
+
   return user
 }

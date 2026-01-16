@@ -330,7 +330,7 @@ export default function StudentDiscussionPage() {
         } finally {
             setSending(false)
         }
-    }, [discussionId, message, participant, queryClient, sending, t])
+    }, [discussionId, locale, message, participant, queryClient, sending, t])
 
     // Auto-start discussion if stance is selected but no messages
     useEffect(() => {

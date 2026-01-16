@@ -1,7 +1,14 @@
+/**
+ * Supabase server/client helpers for App Router and API routes.
+ */
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
 
+/**
+ * Create a Supabase client wired to Next.js server cookies.
+ */
 export async function createSupabaseServerClient() {
     const cookieStore = await cookies()
 
@@ -28,7 +35,9 @@ export async function createSupabaseServerClient() {
     )
 }
 
-// For API routes
+/**
+ * Create a Supabase client scoped for API route handlers.
+ */
 export async function createSupabaseRouteClient() {
     const cookieStore = await cookies()
 
@@ -54,6 +63,9 @@ export async function createSupabaseRouteClient() {
     )
 }
 
+/**
+ * Create an admin Supabase client using the service role key.
+ */
 export const createSupabaseAdminClient = async () => {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
