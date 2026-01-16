@@ -7,7 +7,7 @@
 ![React](https://img.shields.io/badge/React-19.1-61dafb?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?style=for-the-badge&logo=typescript)
 ![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5.2-412991?style=for-the-badge&logo=openai)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--5-mini-412991?style=for-the-badge&logo=openai)
 ![Stripe](https://img.shields.io/badge/Stripe-Payments-635bff?style=for-the-badge&logo=stripe)
 ![Toss](https://img.shields.io/badge/Toss-Payments-0064ff?style=for-the-badge)
 
