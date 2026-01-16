@@ -31,7 +31,7 @@ export const MARQUEE_ITEMS = [
     "비판적 사고의 확장",
     "실시간 논리 분석",
     "실전 토론 데이터",
-    "맞춤형 교수 피드백",
+    "맞춤형 강사 피드백",
     "논증력 향상",
 ];
 
@@ -41,7 +41,7 @@ export const MARQUEE_ITEMS = [
 export const FEATURES_CONTENT = {
     tag: "기능",
     title: "토론을 혁신하는 도구",
-    description: "교수와 학생 모두를 위한 스마트한 토론 환경을 제공합니다.",
+    description: "강사와 학생 모두를 위한 스마트한 토론 환경을 제공합니다.",
     items: [
         {
             number: "01",
@@ -66,7 +66,7 @@ export const FEATURES_CONTENT = {
         },
         {
             number: "04",
-            title: "교수 개입",
+            title: "강사 개입",
             description:
                 "적재적소에 힌트, 반례, 격려를 보내세요. 학생별 맞춤 피드백으로 토론의 깊이를 더합니다.",
             icon: Sparkles,
@@ -80,7 +80,7 @@ export const FEATURES_CONTENT = {
 export const STATS_CONTENT = [
     { value: "47%", label: "비판적 사고력 향상" },
     { value: "2.3x", label: "참여율 증가" },
-    { value: "89%", label: "교수 만족도" },
+    { value: "89%", label: "강사 만족도" },
 ];
 
 /**
@@ -88,7 +88,7 @@ export const STATS_CONTENT = [
  */
 export const QUOTE_CONTENT = {
     text: '"Agora를 도입한 후, 학생들의 토론 참여도가 눈에 띄게 높아졌습니다. AI가 좋은 질문을 던져주니 학생들도 더 깊이 생각하게 되더군요."',
-    author: "김교수",
+    author: "김강사",
     affiliation: "서울대학교 철학과",
 };
 
@@ -98,7 +98,7 @@ export const QUOTE_CONTENT = {
 export const TESTIMONIALS = [
     {
         text: '"Agora를 도입한 후, 학생들의 토론 참여도가 눈에 띄게 높아졌습니다. AI가 좋은 질문을 던져주니 학생들도 더 깊이 생각하게 되더군요."',
-        author: "김상민 교수님",
+        author: "김상민 강사님",
         affiliation: "홍익대학교 경영학과",
         role: "instructor" as const,
     },
@@ -110,7 +110,7 @@ export const TESTIMONIALS = [
     },
     {
         text: '"30명 수업에서 실시간으로 모든 학생의 참여를 파악할 수 있어 효율적입니다. 누가 어려워하는지 바로 알 수 있어요."',
-        author: "박정상 교수님",
+        author: "박정상 강사님",
         affiliation: "고려대학교 사회학과",
         role: "instructor" as const,
     },
@@ -195,7 +195,7 @@ export const FAQ_CONTENT = {
         },
         {
             question: "학생 데이터는 어떻게 보호되나요?",
-            answer: "모든 데이터는 암호화되어 저장되며, 개인정보처리방침에 따라 엄격하게 관리됩니다. 교수님만 본인 수업의 데이터에 접근할 수 있습니다.",
+            answer: "모든 데이터는 암호화되어 저장되며, 개인정보처리방침에 따라 엄격하게 관리됩니다. 강사님만 본인 수업의 데이터에 접근할 수 있습니다.",
         },
         {
             question: "기존 LMS와 연동이 가능한가요?",
@@ -211,7 +211,7 @@ export const AI_MODES_CONTENT = {
     tag: "4가지 AI 모드",
     title: "수업 목표에 맞는 AI를 선택하세요",
     description:
-        "학생의 사고를 이끄는 방식을 교수님이 직접 설정할 수 있습니다.",
+        "학생의 사고를 이끄는 방식을 강사님이 직접 설정할 수 있습니다.",
 };
 
 /**

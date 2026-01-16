@@ -351,7 +351,7 @@ export default function AdminDiscussionDetailPage({
               <div className="p-2 rounded-xl bg-purple-500/10">
                 <GraduationCap className="w-5 h-5 text-purple-500" />
               </div>
-              <h2 className="font-bold text-zinc-900">교수자 정보</h2>
+              <h2 className="font-bold text-zinc-900">강사 정보</h2>
             </div>
           </div>
           <div className="p-6">
@@ -369,7 +369,7 @@ export default function AdminDiscussionDetailPage({
                 </div>
               </Link>
             ) : (
-              <p className="text-zinc-500 text-center py-4">교수자 정보를 찾을 수 없습니다</p>
+              <p className="text-zinc-500 text-center py-4">강사 정보를 찾을 수 없습니다</p>
             )}
           </div>
         </motion.div>

@@ -31,7 +31,8 @@ import {
   ChevronUp,
   Save,
   RotateCcw,
-  Lock
+  Lock,
+  MinusCircle
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -117,6 +118,7 @@ export default function NewDiscussionPage() {
   const createCheck = canCreateDiscussion(subscription)
   const [anonymous, setAnonymous] = useState(true)
   const [useCustomStances, setUseCustomStances] = useState(false)
+  const [includeNeutral, setIncludeNeutral] = useState(true)
   const [stanceLabels, setStanceLabels] = useState({ pro: t('phases.environment.stances.pro'), con: t('phases.environment.stances.con') })
   const [additionalStances, setAdditionalStances] = useState<string[]>([])
   const [duration, setDuration] = useState<number | null>(15)
@@ -373,7 +375,10 @@ export default function NewDiscussionPage() {
         neutral: t('phases.environment.stances.neutral', { default: 'Neutral' })
       }
 
-      const stanceOptions = ['pro', 'con', 'neutral']
+      const stanceOptions = ['pro', 'con']
+      if (includeNeutral) {
+        stanceOptions.push('neutral')
+      }
 
       additionalStances.forEach((label, index) => {
         const id = `stance_${String.fromCharCode(99 + index)}`
@@ -953,6 +958,24 @@ export default function NewDiscussionPage() {
                   <Switch
                     checked={anonymous}
                     onCheckedChange={setAnonymous}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                </div>
+
+                {/* Include Neutral Stance */}
+                <div className="flex items-center justify-between p-8 rounded-[3rem] bg-zinc-50 border border-zinc-200 transition-all hover:bg-zinc-100 hover:border-zinc-300">
+                  <div className="flex items-center gap-6">
+                    <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-500 shadow-inner">
+                      <MinusCircle className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-black text-zinc-900">{t('phases.environment.includeNeutral.title')}</p>
+                      <p className="text-sm text-zinc-500 font-medium">{t('phases.environment.includeNeutral.desc')}</p>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={includeNeutral}
+                    onCheckedChange={setIncludeNeutral}
                     className="data-[state=checked]:bg-primary"
                   />
                 </div>

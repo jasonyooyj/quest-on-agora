@@ -20,7 +20,7 @@ export function useDiscussionParticipants(sessionId: string) {
   const query = useQuery({
     queryKey: ["discussion-participants", sessionId],
     queryFn: async (): Promise<DiscussionParticipant[]> => {
-      const response = await fetch(`/api/discussions/${sessionId}/participants`);
+      const response = await fetch(`/api/discussions/${sessionId}/participants?t=${Date.now()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch participants");
       }
@@ -105,7 +105,7 @@ export function useStanceDistribution(sessionId: string) {
   const query = useQuery({
     queryKey: ["discussion-stances", sessionId],
     queryFn: async (): Promise<StanceDistribution> => {
-      const response = await fetch(`/api/discussions/${sessionId}/stances`);
+      const response = await fetch(`/api/discussions/${sessionId}/stances?t=${Date.now()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch stances");
       }

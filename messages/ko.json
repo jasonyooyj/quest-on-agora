@@ -40,7 +40,7 @@
     "loggedIn": "로그인됨",
     "dashboard": "내 대시보드",
     "account": "내 계정",
-    "roleInstructor": "교수자",
+    "roleInstructor": "강사",
     "roleStudent": "학생",
     "roleMember": "회원",
     "settings": "설정",
@@ -141,7 +141,7 @@
       "1": "비판적 사고의 확장",
       "2": "실시간 논리 분석",
       "3": "실전 토론 데이터",
-      "4": "맞춤형 교수 피드백",
+      "4": "맞춤형 강사 피드백",
       "5": "논증력 향상"
     }
   },
@@ -184,7 +184,7 @@
   "Features": {
     "tag": "기능",
     "title": "토론을 혁신하는 도구",
-    "description": "교수와 학생 모두를 위한 스마트한 토론 환경을 제공합니다.",
+    "description": "강사와 학생 모두를 위한 스마트한 토론 환경을 제공합니다.",
     "items": {
       "0": {
         "title": "실시간 모니터링",
@@ -199,7 +199,7 @@
         "description": "찬성·반대·중립의 분포와 각 입장의 핵심 근거를 시각화합니다. 토론의 흐름을 읽으세요."
       },
       "3": {
-        "title": "교수 개입",
+        "title": "강사 개입",
         "description": "적재적소에 힌트, 반례, 격려를 보내세요. 학생별 맞춤 피드백으로 토론의 깊이를 더합니다."
       }
     }
@@ -207,7 +207,7 @@
   "AiModes": {
     "tag": "4가지 AI 모드",
     "title": "수업 목표에 맞는 AI를 선택하세요",
-    "description": "학생의 사고를 이끄는 방식을 교수님이 직접 설정할 수 있습니다.",
+    "description": "학생의 사고를 이끄는 방식을 강사님이 직접 설정할 수 있습니다.",
     "close": "닫기",
     "viewExample": "대화 예시 보기",
     "exampleTitle": "대화 예시",
@@ -264,7 +264,7 @@
     },
     "2": {
       "value": "89%",
-      "label": "교수 만족도"
+      "label": "강사 만족도"
     }
   },
   "UseCases": {
@@ -297,7 +297,7 @@
     "items": {
       "0": {
         "text": "\"Agora를 도입한 후, 학생들의 토론 참여도가 눈에 띄게 높아졌습니다. AI가 좋은 질문을 던져주니 학생들도 더 깊이 생각하게 되더군요.\"",
-        "author": "김상민 교수님",
+        "author": "김상민 강사님",
         "affiliation": "홍익대학교 경영학과"
       },
       "1": {
@@ -307,7 +307,7 @@
       },
       "2": {
         "text": "\"30명 수업에서 실시간으로 모든 학생의 참여를 파악할 수 있어 효율적입니다. 누가 어려워하는지 바로 알 수 있어요.\"",
-        "author": "박정상 교수님",
+        "author": "박정상 강사님",
         "affiliation": "고려대학교 사회학과"
       }
     }
@@ -332,7 +332,7 @@
       },
       "3": {
         "question": "학생 데이터는 어떻게 보호되나요?",
-        "answer": "모든 데이터는 암호화되어 저장되며, 개인정보처리방침에 따라 엄격하게 관리됩니다. 교수님만 본인 수업의 데이터에 접근할 수 있습니다."
+        "answer": "모든 데이터는 암호화되어 저장되며, 개인정보처리방침에 따라 엄격하게 관리됩니다. 강사님만 본인 수업의 데이터에 접근할 수 있습니다."
       },
       "4": {
         "question": "기존 LMS와 연동이 가능한가요?",
@@ -373,7 +373,7 @@
       "googleBtn": "Google로 시작하기",
       "orEmail": "또는 이메일로 가입",
       "roleLabel": "본인의 역할은 무엇인가요?",
-      "instructor": "교수 / 강사",
+      "instructor": "강사",
       "student": "학생",
       "nameLabel": "성함",
       "emailLabel": "이메일",
@@ -395,7 +395,7 @@
       "welcome": "거의 다 왔습니다!",
       "description": "원활한 서비스 이용을 위해 몇 가지 정보를 알려주세요",
       "roleLabel": "본인의 역할은 무엇인가요?",
-      "instructor": "교수 / 강사",
+      "instructor": "강사",
       "student": "학생",
       "nameLabel": "성함",
       "studentNumberLabel": "학번",
@@ -524,14 +524,14 @@
     },
     "footer": "AI 기반 토론 플랫폼",
     "toasts": {
-      "instructorForbidden": "교수자는 학생으로 참여할 수 없습니다.",
+      "instructorForbidden": "강사는 학생으로 참여할 수 없습니다.",
       "alreadyJoined": "이미 참여 중인 토론입니다",
       "success": "토론에 참여했습니다!"
     }
   },
   "Instructor": {
     "Dashboard": {
-      "tag": "교수자 플랫폼",
+      "tag": "강사 플랫폼",
       "greeting": "안녕하세요, <spanClass>{name}</spanClass>님",
       "description": "학생들의 비판적 사고를 이끄는 새로운 토론 주제를 <brClass></brClass>지금 바로 설계하고 실시간으로 분석해보세요.",
       "stats": {
@@ -645,6 +645,10 @@
         "environment": {
           "title": "토론 환경 전문 설정",
           "subtitle": "Phase 03: Environment",
+          "includeNeutral": {
+            "title": "중립 입장 포함",
+            "desc": "학생들이 '중립' 입장을 선택할 수 있도록 허용합니다."
+          },
           "anonymous": {
             "title": "익명 모드 활성화",
             "desc": "참여자들의 실명을 숨기고 익명으로 토론을 진행합니다."
@@ -687,7 +691,7 @@
       },
       "guidelines": {
         "title": "운영 가이드라인",
-        "desc": "토론 세션은 생성 완료 후 <strongClass>대기 상태</strongClass>로 저장됩니다. 교수자용 대시보드에서 <strongClass>토론 시작</strongClass> 버튼을 눌러야만 코드가 활성화되며 학생들이 입장을 시작할 수 있습니다. 이미 생성된 주제는 나중에 언제든 수정이 가능합니다."
+        "desc": "토론 세션은 생성 완료 후 <strongClass>대기 상태</strongClass>로 저장됩니다. 강사용 대시보드에서 <strongClass>토론 시작</strongClass> 버튼을 눌러야만 코드가 활성화되며 학생들이 입장을 시작할 수 있습니다. 이미 생성된 주제는 나중에 언제든 수정이 가능합니다."
       },
       "buttons": {
         "submit": "토론 공간 개설하기",
@@ -778,7 +782,7 @@
         "roles": {
           "user": "학생",
           "ai": "AI 튜터",
-          "instructor": "교수 (나)",
+          "instructor": "강사 (나)",
           "system": "시스템"
         }
       },

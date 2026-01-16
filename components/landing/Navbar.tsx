@@ -248,7 +248,7 @@ export function Navbar() {
                 </div>
 
                 {/* Mobile Menu Toggle */}
-                <div className="flex justify-end md:hidden justify-self-end">
+                <div className="flex justify-end md:hidden justify-self-end col-start-3">
                     <button
                         className="text-zinc-600 hover:text-zinc-900"
                         onClick={() => {

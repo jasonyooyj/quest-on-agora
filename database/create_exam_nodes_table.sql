@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS exam_nodes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   
-  -- 이 노드를 소유한 교수 (Clerk instructor_id 사용 - TEXT 타입)
+  -- 이 노드를 소유한 강사 (Clerk instructor_id 사용 - TEXT 타입)
   instructor_id TEXT NOT NULL,
   
   -- 부모 폴더 (루트면 null)

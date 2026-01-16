@@ -13,7 +13,8 @@ import {
   Settings,
   Hash,
   ArrowRight,
-  Loader2
+  Loader2,
+  ChevronRight
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -27,6 +28,9 @@ interface Discussion {
   created_at: string
   my_stance: string | null
   is_submitted: boolean
+  settings: {
+    stanceLabels?: Record<string, string>
+  }
 }
 
 interface UserProfile {
@@ -87,6 +91,9 @@ export default function StudentDashboard() {
             title,
             description,
             status,
+            description,
+            status,
+            settings,
             created_at
           )
         `)
@@ -103,7 +110,10 @@ export default function StudentDashboard() {
           status: p.session.status,
           created_at: p.session.created_at,
           my_stance: p.stance,
-          is_submitted: p.is_submitted
+          created_at: p.session.created_at,
+          my_stance: p.stance,
+          is_submitted: p.is_submitted,
+          settings: p.session.settings
         })) || []
         setDiscussions(formattedDiscussions)
       }
@@ -204,7 +214,7 @@ export default function StudentDashboard() {
       closed: 'bg-zinc-100 text-zinc-500 border-zinc-200',
     }
     const labelKey = status as 'draft' | 'active' | 'closed'
-    
+
     return (
       <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border tracking-tight ${styles[status as keyof typeof styles]}`}>
         {t(`list.status.${labelKey}`)}
@@ -212,7 +222,7 @@ export default function StudentDashboard() {
     )
   }
 
-  const getStanceBadge = (stance: string | null, isSubmitted: boolean) => {
+  const getStanceBadge = (stance: string | null, isSubmitted: boolean, settings?: { stanceLabels?: Record<string, string> }) => {
     if (!stance) {
       return <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('list.stance.unselected')}</span>
     }
@@ -224,11 +234,13 @@ export default function StudentDashboard() {
     }
 
     const stanceKey = stance as 'pro' | 'con' | 'neutral'
+    // Use custom label if available, otherwise fallback to translation
+    const label = settings?.stanceLabels?.[stance] || t(`list.stance.${stanceKey}`)
 
     return (
       <div className="flex items-center gap-2">
-        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-widest ${stanceStyles[stance]}`}>
-          {t(`list.stance.${stanceKey}`)}
+        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-widest ${stanceStyles[stance] || 'bg-zinc-100 text-zinc-500 border-zinc-200'}`}>
+          {label}
         </span>
         {isSubmitted && (
           <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-500 uppercase tracking-widest">
@@ -447,28 +459,30 @@ export default function StudentDashboard() {
                   className="group"
                 >
                   <div
-                    className="glass-panel bg-white/90 border-zinc-200 p-6 hover:bg-white hover:border-zinc-300 transition-all cursor-pointer relative overflow-hidden active:scale-[0.99] shadow-sm"
+                    className="glass-panel bg-white/90 border-zinc-200 p-5 sm:p-6 hover:bg-white hover:border-zinc-300 transition-all cursor-pointer relative overflow-hidden active:scale-[0.99] shadow-sm"
                     onClick={() => router.push(`/student/discussions/${discussion.id}`)}
                   >
                     <div className="absolute top-0 left-0 w-1 h-full bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex flex-row items-center justify-between gap-4 sm:gap-6">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-4 mb-3">
-                          <h3 className="text-xl font-bold text-zinc-900 truncate group-hover:text-primary transition-colors flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4 mb-3">
+                          <h3 className="text-xl font-bold text-zinc-900 line-clamp-2 group-hover:text-primary transition-colors">
                             {discussion.title}
                           </h3>
-                          {getStatusBadge(discussion.status)}
+                          <div className="shrink-0 pt-1">
+                            {getStatusBadge(discussion.status)}
+                          </div>
                         </div>
 
                         {discussion.description && (
-                          <p className="text-zinc-500 text-sm mb-6 line-clamp-1 max-w-3xl">
+                          <p className="text-zinc-500 text-sm mb-6 line-clamp-2 max-w-3xl">
                             {discussion.description}
                           </p>
                         )}
 
                         <div className="flex flex-wrap items-center gap-6">
-                          {getStanceBadge(discussion.my_stance, discussion.is_submitted)}
+                          {getStanceBadge(discussion.my_stance, discussion.is_submitted, discussion.settings)}
                           <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                             <Clock className="w-3.5 h-3.5" />
                             <span>{format.dateTime(new Date(discussion.created_at), { year: 'numeric', month: '2-digit', day: '2-digit' })}</span>
@@ -476,8 +490,14 @@ export default function StudentDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-white text-zinc-400 transition-all">
+                      <div className="flex items-center gap-4 shrink-0">
+                        {/* Mobile: Simple Chevron */}
+                        <div className="sm:hidden text-zinc-300 group-hover:text-primary transition-colors">
+                          <ChevronRight className="w-6 h-6" />
+                        </div>
+
+                        {/* Desktop: Circular Action Button */}
+                        <div className="hidden sm:flex w-12 h-12 rounded-full border border-zinc-200 items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-white text-zinc-400 transition-all">
                           <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                         </div>
                       </div>

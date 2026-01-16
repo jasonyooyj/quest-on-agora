@@ -159,20 +159,26 @@ export default function GalleryPage() {
                     <div className="flex items-center gap-3">
                         <Filter className="w-4 h-4 text-muted-foreground/70" />
                         <div className="flex gap-1.5 p-1 bg-muted/50 rounded-full border border-border/40">
-                            {['all', 'pro', 'con', 'neutral'].map((stance) => (
-                                <button
-                                    key={stance}
-                                    onClick={() => setStanceFilter(stance)}
-                                    className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${stanceFilter === stance
-                                        ? 'bg-white text-black shadow-sm ring-1 ring-black/5'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
-                                        }`}
-                                >
-                                    {stance === 'all' ? t('filters.all') :
-                                        stance === 'pro' ? t('filters.pro') :
-                                            stance === 'con' ? t('filters.con') : t('filters.neutral')}
-                                </button>
-                            ))}
+                            {(() => {
+                                const labels = discussion.settings.stanceLabels || { pro: 'pro', con: 'con', neutral: 'neutral' };
+                                const stances = ['all', ...Object.keys(labels).filter(k => k !== 'neutral'), 'neutral'];
+
+                                return stances.map((stance) => (
+                                    <button
+                                        key={stance}
+                                        onClick={() => setStanceFilter(stance)}
+                                        className={`px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-200 ${stanceFilter === stance
+                                            ? 'bg-white text-black shadow-sm ring-1 ring-black/5'
+                                            : 'text-muted-foreground hover:text-foreground hover:bg-black/5'
+                                            }`}
+                                    >
+                                        {stance === 'all'
+                                            ? t('filters.all')
+                                            : discussion.settings.stanceLabels?.[stance] || (['pro', 'con', 'neutral'].includes(stance) ? t(`filters.${stance}`) : stance)
+                                        }
+                                    </button>
+                                ))
+                            })()}
                         </div>
                     </div>
 

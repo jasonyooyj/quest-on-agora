@@ -85,15 +85,15 @@ export function StudentChatTranscript({
                             ) : (
                                 <div
                                     className={`max-w-[85%] rounded-lg p-3 ${message.role === "user"
-                                            ? "bg-primary text-primary-foreground"
-                                            : message.role === "instructor"
-                                                ? "bg-amber-50 border border-amber-200"
-                                                : "bg-blue-50 border border-blue-200"
+                                        ? "bg-primary text-primary-foreground"
+                                        : message.role === "instructor"
+                                            ? "bg-amber-50 border border-amber-200"
+                                            : "bg-blue-50 border border-blue-200"
                                         }`}
                                 >
                                     {message.role === "instructor" && (
                                         <div className="text-[10px] text-amber-600 mb-1 font-medium">
-                                            교수 메시지
+                                            강사 메시지
                                         </div>
                                     )}
                                     {message.role === "system" && (
@@ -106,8 +106,8 @@ export function StudentChatTranscript({
                                     </p>
                                     <div
                                         className={`text-[10px] mt-1.5 flex items-center justify-between gap-2 ${message.role === "user"
-                                                ? "text-primary-foreground/70"
-                                                : "text-muted-foreground"
+                                            ? "text-primary-foreground/70"
+                                            : "text-muted-foreground"
                                             }`}
                                     >
                                         <span>

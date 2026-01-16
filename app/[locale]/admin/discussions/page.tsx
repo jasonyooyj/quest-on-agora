@@ -281,7 +281,7 @@ export default function AdminDiscussionsPage() {
                           {discussion.participant_count}명 참여
                         </span>
                         <span>
-                          교수자: {discussion.instructor?.name || 'Unknown'}
+                          강사: {discussion.instructor?.name || 'Unknown'}
                         </span>
                         <span>
                           참여 코드: {discussion.join_code}

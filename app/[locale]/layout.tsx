@@ -11,7 +11,7 @@ import { isValidLocale } from '@/i18n/routing';
 
 export const metadata: Metadata = {
   title: "Agora - 대학 토론 플랫폼",
-  description: "AI 기반 대학 토론 플랫폼. 교수와 학생이 함께하는 깊이 있는 토론 경험.",
+  description: "AI 기반 대학 토론 플랫폼. 강사와 학생이 함께하는 깊이 있는 토론 경험.",
   icons: {
     icon: "/favicon.ico",
   },

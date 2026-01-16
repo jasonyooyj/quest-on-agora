@@ -292,12 +292,12 @@
     }
   },
   "Quote": {
-    "professor": "PROFESSOR",
+    "professor": "INSTRUCTOR",
     "student": "STUDENT",
     "items": {
       "0": {
         "text": "\"After introducing Agora, student participation in discussions has noticeably increased. Since AI asks good questions, students also think more deeply.\"",
-        "author": "Prof. Kim",
+        "author": "Instructor Kim",
         "affiliation": "Seoul National University, Dept. of Philosophy"
       },
       "1": {
@@ -307,7 +307,7 @@
       },
       "2": {
         "text": "\"It is efficient to be able to grasp the participation of all students in real-time in a class of 30. I can know immediately who is having difficulties.\"",
-        "author": "Prof. Park",
+        "author": "Instructor Park",
         "affiliation": "Korea University, Dept. of Sociology"
       }
     }
@@ -332,7 +332,7 @@
       },
       "3": {
         "question": "How is student data protected?",
-        "answer": "All data is stored encrypted and strictly managed according to the privacy policy. Only the professor can access data from their own class."
+        "answer": "All data is stored encrypted and strictly managed according to the privacy policy. Only the instructor can access data from their own class."
       },
       "4": {
         "question": "Is integration with existing LMS possible?",
@@ -373,7 +373,7 @@
       "googleBtn": "Start with Google",
       "orEmail": "Or sign up with email",
       "roleLabel": "What is your role?",
-      "instructor": "Professor / Instructor",
+      "instructor": "Instructor",
       "student": "Student",
       "nameLabel": "Name",
       "emailLabel": "Email",
@@ -395,7 +395,7 @@
       "welcome": "Almost there!",
       "description": "Please tell us a bit more about yourself for better service",
       "roleLabel": "What is your role?",
-      "instructor": "Professor / Instructor",
+      "instructor": "Instructor",
       "student": "Student",
       "nameLabel": "Name",
       "studentNumberLabel": "Student ID",
@@ -645,6 +645,10 @@
         "environment": {
           "title": "Advanced Settings",
           "subtitle": "Phase 03: Environment",
+          "includeNeutral": {
+            "title": "Include Neutral Stance",
+            "desc": "Allow students to select 'Neutral' stance."
+          },
           "anonymous": {
             "title": "Enable Anonymous Mode",
             "desc": "Hide real names and proceed anonymously."
@@ -778,7 +782,7 @@
         "roles": {
           "user": "Student",
           "ai": "AI Tutor",
-          "instructor": "Professor (Me)",
+          "instructor": "Instructor (Me)",
           "system": "System"
         }
       },

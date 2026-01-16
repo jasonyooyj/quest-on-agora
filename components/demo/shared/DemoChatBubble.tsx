@@ -35,13 +35,12 @@ export default function DemoChatBubble({
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`${compact ? 'max-w-[90%] p-3' : 'max-w-[85%] p-4'} rounded-[1.25rem] transition-all ${
-        isUser
+      <div className={`${compact ? 'max-w-[90%] p-3' : 'max-w-[85%] p-4'} rounded-[1.25rem] transition-all ${isUser
           ? 'bg-primary text-white shadow-[0_0_20px_rgba(var(--primary-rgb),0.25)] rounded-tr-none'
           : role === 'instructor'
             ? 'bg-amber-50 border border-amber-200 text-zinc-900 rounded-tl-none'
             : 'bg-zinc-50 border border-zinc-200 text-zinc-900 rounded-tl-none'
-      }`}>
+        }`}>
         <div className={`flex items-center gap-2 mb-1.5 ${isUser ? 'opacity-70' : 'text-zinc-500'}`}>
           {participantName && stance && (
             <span className={`flex items-center gap-1 ${getStanceColor(stance)}`}>
@@ -49,7 +48,7 @@ export default function DemoChatBubble({
             </span>
           )}
           <span className={`${compact ? 'text-[8px]' : 'text-[9px]'} font-extrabold uppercase tracking-widest`}>
-            {isUser ? (participantName || '나') : role === 'instructor' ? '교수님' : 'AI 튜터'}
+            {isUser ? (participantName || '나') : role === 'instructor' ? '강사님' : 'AI 튜터'}
           </span>
           {time && (
             <span className={`${compact ? 'text-[7px]' : 'text-[8px]'} font-bold opacity-60`}>

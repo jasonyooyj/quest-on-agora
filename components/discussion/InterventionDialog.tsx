@@ -132,7 +132,7 @@ export function InterventionDialog({
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>교수 메모</DialogTitle>
+            <DialogTitle>강사 메모</DialogTitle>
             <DialogDescription>
               {participantName} 학생에 대한 개인 메모입니다 (학생에게 보이지 않음)
             </DialogDescription>
@@ -180,7 +180,7 @@ export function InterventionDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>교수 메모</DialogTitle>
+          <DialogTitle>강사 메모</DialogTitle>
           <DialogDescription>
             {participantName} 학생에게 메시지를 보내거나 AI에게 지시를 전달합니다
           </DialogDescription>
@@ -251,7 +251,7 @@ export function InterventionDialog({
               <Label className="font-medium">학생에게 직접 표시</Label>
               <p className="text-xs text-muted-foreground">
                 {isVisibleToStudent
-                  ? "학생 화면에 교수 메시지로 표시됩니다"
+                  ? "학생 화면에 강사 메시지로 표시됩니다"
                   : "AI에게만 전달되어 AI가 자연스럽게 질문합니다"}
               </p>
             </div>

@@ -258,7 +258,7 @@ export default function AdminUserDetailPage({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="instructor">교수자</SelectItem>
+                  <SelectItem value="instructor">강사</SelectItem>
                   <SelectItem value="student">학생</SelectItem>
                 </SelectContent>
               </Select>

@@ -15,7 +15,7 @@ export function StudentInterventionActions({
         <div className="px-4 py-3 border-b shrink-0 bg-muted/30">
             <div className="flex items-center justify-between mb-2">
                 <div className="text-xs font-medium text-muted-foreground">
-                    교수 메모
+                    강사 메모
                 </div>
                 <Button
                     size="sm"
