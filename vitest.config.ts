@@ -7,6 +7,10 @@ export default defineConfig({
     environment: 'node',
     include: ['**/*.test.ts'],
     exclude: ['node_modules', 'e2e'],
+    // Use jsdom for React hook tests
+    environmentMatchGlobs: [
+      ['hooks/**/*.test.ts', 'jsdom'],
+    ],
   },
   resolve: {
     alias: {
