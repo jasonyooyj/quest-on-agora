@@ -105,54 +105,83 @@ export async function POST(request: NextRequest) {
     ]
 
     const requestCompletion = async (extraInstruction?: string) => {
-      if (AI_PROVIDER === 'gemini') {
-        const genai = getGenAI();
+      // Retry configuration
+      const MAX_RETRIES = 3;
+      const BASE_DELAY = 1000;
 
+      const generateWithGemini = async () => {
+        const genai = getGenAI();
         const systemInstruction = TOPIC_GENERATION_PROMPT;
         const fullPrompt = extraInstruction
           ? `${systemInstruction}\n\n${userPrompt}\n\n${extraInstruction}`
           : `${systemInstruction}\n\n${userPrompt}`;
 
-        // New SDK usage: genai.models.generateContent
-        const result = await genai.models.generateContent({
-          model: GEMINI_MODEL,
-          contents: fullPrompt,
-          config: {
-            responseMimeType: "application/json"
+        let lastError: any;
+
+        for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+          try {
+            // New SDK usage: genai.models.generateContent
+            const result = await genai.models.generateContent({
+              model: GEMINI_MODEL,
+              contents: fullPrompt,
+              config: {
+                responseMimeType: "application/json"
+              }
+            });
+
+            return {
+              text: result.text || '',
+              finishReason: 'stop',
+              refusal: undefined
+            };
+          } catch (error: any) {
+            lastError = error;
+            // Check for overload (503) or rate limit (429) errors
+            // The error object structure might vary, checking common properties
+            const isOverloaded = error.status === 503 || error.message?.includes('503') || error.message?.includes('overloaded');
+            const isRateLimited = error.status === 429 || error.message?.includes('429');
+
+            if ((isOverloaded || isRateLimited) && attempt < MAX_RETRIES - 1) {
+              const delayTime = BASE_DELAY * Math.pow(2, attempt);
+              console.warn(`[generate-topics] Gemini ${isOverloaded ? 'overloaded' : 'rate limited'}, retrying in ${delayTime}ms (attempt ${attempt + 1}/${MAX_RETRIES})`);
+              await new Promise(resolve => setTimeout(resolve, delayTime));
+              continue;
+            }
+            throw error; // Rethrow if it's not a retryable error or max retries reached
           }
-        });
-
-        // Response structure might be response.text or result.response.text(), let's check docs safely
-        // Docs say: console.log(response.text);
-        return {
-          text: result.text || '', // SDK seems to return text directly or on response object?
-          // Docs: const response = await ai.models.generateContent(...) -> console.log(response.text)
-          // So result IS the response object which has text property getter?
-          // Actually docs say `console.log(response.text);` for Python and JS.
-          finishReason: 'stop', // Placeholder or extract if available
-          refusal: undefined
         }
+        throw lastError;
+      };
 
-      } else {
-        // OpenAI Fallback
-        const completion = await openai.chat.completions.create({
-          model: AI_MODEL,
-          messages: extraInstruction
-            ? [
-              ...baseMessages,
-              { role: 'user', content: extraInstruction },
-            ]
-            : baseMessages,
-          max_completion_tokens: 2000,
-          response_format: { type: 'json_object' },
-        })
-        const choice = completion.choices[0]
-        const message = choice?.message
-        return {
-          text: message?.content?.trim() || '',
-          finishReason: choice?.finish_reason,
-          refusal: (message as { refusal?: string } | undefined)?.refusal,
+      if (AI_PROVIDER === 'gemini') {
+        try {
+          return await generateWithGemini();
+        } catch (error) {
+          console.error('[generate-topics] Gemini generation failed after retries:', error);
+          // Fallback to OpenAI if Gemini fails completely
+          console.warn('[generate-topics] Falling back to OpenAI...');
+          // Continue to OpenAI block below
         }
+      }
+
+      // OpenAI (Primary or Fallback)
+      const completion = await openai.chat.completions.create({
+        model: AI_MODEL,
+        messages: extraInstruction
+          ? [
+            ...baseMessages,
+            { role: 'user', content: extraInstruction },
+          ]
+          : baseMessages,
+        max_completion_tokens: 2000,
+        response_format: { type: 'json_object' },
+      })
+      const choice = completion.choices[0]
+      const message = choice?.message
+      return {
+        text: message?.content?.trim() || '',
+        finishReason: choice?.finish_reason,
+        refusal: (message as { refusal?: string } | undefined)?.refusal,
       }
     }
 
