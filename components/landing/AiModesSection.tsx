@@ -96,6 +96,7 @@ export function AiModesSection() {
                         return (
                             <motion.div
                                 key={mode.id}
+                                className="h-full"
                                 initial={{ opacity: 0, y: 30 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
@@ -106,7 +107,7 @@ export function AiModesSection() {
                                 }}
                             >
                                 <div
-                                    className={`glass-panel p-8 cursor-pointer transition-all duration-300 rounded-[2.5rem] relative overflow-hidden group ${isSelected
+                                    className={`glass-panel p-8 cursor-pointer transition-all duration-300 rounded-[2.5rem] relative overflow-hidden group h-full ${isSelected
                                         ? `border-primary/50 bg-zinc-50 shadow-xl -translate-y-1`
                                         : "hover:-translate-y-1 hover:bg-zinc-50"
                                         }`}
@@ -129,7 +130,7 @@ export function AiModesSection() {
                                                 </h3>
                                             </div>
                                         </div>
-                                        <div className={`text-[10px] font-bold px-3 py-1.5 rounded-full ${colors.bgLight} ${colors.text} border ${colors.border} tracking-wide`}>
+                                        <div className={`text-[10px] font-bold px-3 py-1.5 rounded-full ${colors.bgLight} ${colors.text} border ${colors.border} tracking-wide whitespace-nowrap`}>
                                             {isSelected ? t('close') : t('viewExample')}
                                         </div>
                                     </div>

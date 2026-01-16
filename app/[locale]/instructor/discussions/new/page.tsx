@@ -506,7 +506,7 @@ export default function NewDiscussionPage() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-4 mb-8"
+                className="flex items-center justify-center gap-4 mb-8"
               >
                 <LimitWarning
                   type="discussion"

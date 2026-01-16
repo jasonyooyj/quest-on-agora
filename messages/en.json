@@ -476,7 +476,14 @@
       "rateLimit": "Too many requests. Please try again later.",
       "invalidCredentials": "Invalid email or password (or email verification might be pending)",
       "emailNotConfirmed": "📬 Please complete email verification. Check your inbox!",
-      "socialLoginError": "An error occurred during social login"
+      "socialLoginError": "An error occurred during social login",
+      "invalidLink": "Verification link is invalid or expired. Please request a new verification email.",
+      "alreadyVerified": "Email is already verified. Please log in.",
+      "invalidToken": "Verification token is invalid. Please request a new verification email.",
+      "accessDenied": "Access denied.",
+      "generalError": "An error occurred during verification.",
+      "emailVerificationFailed": "Email verification failed. Please try again.",
+      "malformedLink": "Verification link is malformed. Please request a new verification email."
     }
   },
   "Join": {
@@ -1144,57 +1151,60 @@
           "loadKeyPointsError": "Failed to load key points",
           "submitSuccess": "Discussion submitted!",
           "submitSuccessDesc": "Instructor can now review it",
-          "submitError": "Failed to submit"
+          "submitError": "Failed to submit",
+          "return": "Go Back"
         }
+      }
+    },
+    "Gallery": {
+      "title": "Discussion Gallery",
+      "loading": "Loading...",
+      "notFound": {
+        "title": "Discussion not found",
+        "button": "Go Back"
       },
-      "Gallery": {
+      "header": {
         "title": "Discussion Gallery",
-        "loading": "Loading...",
-        "notFound": {
-          "title": "Discussion not found",
-          "button": "Go Back"
-        },
-        "header": {
-          "title": "Discussion Gallery",
-          "submittedCount": "{count} Submitted"
-        },
-        "submittedCount": "{count} Submitted",
-        "filters": {
-          "all": "All",
-          "pro": "Pro",
-          "con": "Con",
-          "neutral": "Neutral",
-          "sort": {
-            "latest": "Latest",
-            "likes": "Likes",
-            "comments": "Comments"
-          }
-        },
+        "submittedCount": "{count} Submitted"
+      },
+      "submittedCount": "{count} Submitted",
+      "filters": {
+        "all": "All",
+        "pro": "Pro",
+        "con": "Con",
+        "neutral": "Neutral",
         "sort": {
           "latest": "Latest",
           "likes": "Likes",
           "comments": "Comments"
-        },
-        "empty": {
-          "filter": "No results found",
-          "filterTitle": "No results found",
-          "filterDesc": "Try changing your filter options",
-          "reset": "Reset Filters",
-          "all": "No submissions yet",
-          "title": "No submissions yet",
-          "description": "Be the first to submit your discussion!"
-        },
-        "comments": {
-          "anonymous": "Anonymous",
-          "empty": "No comments yet",
-          "placeholder": "Write a comment..."
-        },
-        "card": {
-          "reflection": "Final Reflection",
-          "comments": "Comments",
-          "noComments": "No comments yet",
-          "inputPlaceholder": "Write a comment..."
         }
+      },
+      "sort": {
+        "latest": "Latest",
+        "likes": "Likes",
+        "comments": "Comments"
+      },
+      "empty": {
+        "filter": "No results found",
+        "filterTitle": "No results found",
+        "filterDesc": "Try changing your filter options",
+        "reset": "Reset Filters",
+        "all": "No submissions yet",
+        "title": "No submissions yet",
+        "description": "Be the first to submit your discussion!"
+      },
+      "comments": {
+        "anonymous": "Anonymous",
+        "empty": "No comments yet",
+        "placeholder": "Write a comment..."
+      },
+      "card": {
+        "reflection": "Final Reflection",
+        "studentName": "Student {index}",
+        "noStatement": "(No statement provided)",
+        "comments": "Comments",
+        "noComments": "No comments yet",
+        "inputPlaceholder": "Write a comment..."
       }
     }
   },
@@ -1539,6 +1549,102 @@
         "5": "Woojin J.",
         "6": "Sohee H."
       }
+    }
+  },
+  "Pricing": {
+    "tag": "Pricing",
+    "title": "Simple, Transparent Pricing",
+    "description": "Choose the perfect plan for your classroom needs.",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "saveLabel": "2 months free",
+    "popular": "Most Popular",
+    "monthShort": "mo",
+    "contactSales": "Contact Sales",
+    "featuresLabel": "Everything included:",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "For instructors who want to try out the platform.",
+        "cta": "Start for Free",
+        "features": {
+          "1": "3 discussions per month",
+          "2": "1 active discussion at a time",
+          "3": "Up to 30 participants per session",
+          "4": "Basic AI Tutor (Socratic Mode)",
+          "5": "Standard Dashboard"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For instructors who use debate regularly.",
+        "cta": "Get Started",
+        "features": {
+          "1": "30 discussions per month",
+          "2": "5 active discussions at a time",
+          "3": "Up to 100 participants per session",
+          "4": "Advanced Analytics & Exports",
+          "5": "All AI Tutor Modes"
+        }
+      },
+      "institution": {
+        "name": "Institution",
+        "description": "Enterprise solution for school-wide adoption.",
+        "cta": "Contact Sales",
+        "features": {
+          "1": "Unlimited discussions & participants",
+          "2": "SSO Integration",
+          "3": "Department Admin Dashboard",
+          "4": "LMS Integration",
+          "5": "Dedicated Manager & Priority Support"
+        }
+      }
+    }
+  },
+  "Legal": {
+    "Privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: January 1, 2024",
+      "purpose": {
+        "title": "1. Purpose of Personal Information Processing",
+        "content": "Agora processes personal information for the following purposes. The processed personal information will not be used for purposes other than the following, and necessary measures such as obtaining separate consent will be taken if the purpose of use changes.",
+        "items": {
+          "1": "Member registration and management",
+          "2": "Service provision and improvement",
+          "3": "Discussion activity analysis and feedback provision"
+        }
+      },
+      "items": {
+        "title": "2. Personal Information Items Processed",
+        "content": "The Company collects the following personal information for membership registration, service application, etc.",
+        "list": {
+          "required": "Required: Email, Password, Name, Affiliation (School/Department)",
+          "optional": "Optional: Profile Picture, Bio"
+        }
+      },
+      "retention": {
+        "title": "3. Destruction of Personal Information",
+        "content": "The Company destroys personal information without delay when the personal information becomes unnecessary, such as when the personal information retention period has elapsed or the processing purpose has been achieved."
+      },
+      "demoNote": "* This Privacy Policy is an example written for demonstration purposes and has no actual legal effect."
+    },
+    "Terms": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: January 1, 2024",
+      "article1": {
+        "title": "Article 1 (Purpose)",
+        "content": "These Terms aim to prescribe the rights, obligations, and responsibilities between Agora (hereinafter referred to as the \"Company\") and members in relation to the use of the online discussion platform service (hereinafter referred to as the \"Service\") provided by the Company."
+      },
+      "article2": {
+        "title": "Article 2 (Definition)",
+        "content1": "1. \"Service\" refers to Agora and related various services that members can use regardless of the terminal implemented (including various wired/wireless devices such as PCs and portable terminals).",
+        "content2": "2. \"Member\" refers to a customer who accesses the Company's service, concludes a user agreement with the Company according to these Terms, and uses the service provided by the Company."
+      },
+      "article3": {
+        "title": "Article 3 (Effect and Change of Terms)",
+        "content": "The Company posts the contents of these Terms on the initial screen of the service so that members can easily know. The Company may revise these Terms to the extent that it does not violate relevant laws such as the \"Act on the Regulation of Terms and Conditions\"."
+      },
+      "demoNote": "* These Terms are an example written for demonstration purposes and has no actual legal effect."
     }
   }
 }

@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 
 /**
  * Validates redirect path to prevent open redirect vulnerabilities
@@ -21,28 +22,29 @@ function getSafeRedirectPath(redirect: string | null): string {
     return redirect
 }
 
-// Supabase 에러 메시지를 한글로 변환
-function getKoreanErrorMessage(errorMessage: string): string {
+// Translate Supabase error messages
+function getLocalizedErrorMessage(errorMessage: string, t: any): string {
     const msg = errorMessage.toLowerCase()
 
     if (msg.includes('expired') || msg.includes('invalid')) {
-        return '인증 링크가 만료되었거나 유효하지 않습니다. 새로운 인증 메일을 요청해주세요.'
+        return t('invalidLink')
     }
     if (msg.includes('already been used') || msg.includes('already confirmed')) {
-        return '이미 인증이 완료된 이메일입니다. 로그인해주세요.'
+        return t('alreadyVerified')
     }
     if (msg.includes('token')) {
-        return '인증 토큰이 유효하지 않습니다. 새로운 인증 메일을 요청해주세요.'
+        return t('invalidToken')
     }
     if (msg.includes('access_denied')) {
-        return '접근이 거부되었습니다.'
+        return t('accessDenied')
     }
 
-    return '인증 과정에서 오류가 발생했습니다.'
+    return t('generalError')
 }
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params
+    const t = await getTranslations({ locale, namespace: 'Auth.Errors' })
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
     const next = requestUrl.searchParams.get('next')
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // Handle errors from Supabase (e.g. invalid link, expired link)
     if (errorParam || errorDescription) {
-        const message = getKoreanErrorMessage(errorDescription || errorParam || '')
+        const message = getLocalizedErrorMessage(errorDescription || errorParam || '', t)
         return NextResponse.redirect(
             new URL(`/${locale}/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )
@@ -103,7 +105,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         }
 
         // If there was an error, redirect to error page with Korean message
-        const message = getKoreanErrorMessage(error.message)
+        const message = getLocalizedErrorMessage(error.message, t)
         return NextResponse.redirect(
             new URL(`/${locale}/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )

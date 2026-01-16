@@ -58,7 +58,7 @@ const getStanceStyle = (stance: string) => {
 }
 
 export default function GalleryPage() {
-    const t = useTranslations('Student.Dashboard.Gallery')
+    const t = useTranslations('Student.Dashboard.DiscussionDetail.Gallery')
     const format = useFormatter()
     const params = useParams()
     const router = useRouter()
@@ -234,11 +234,12 @@ export default function GalleryPage() {
                                             <div className="flex items-center gap-2 mb-0.5">
                                                 <span className="font-semibold text-sm text-foreground/90">
                                                     {discussion.settings.anonymous
-                                                        ? `학생 ${index + 1}`
-                                                        : submission.display_name || `학생 ${index + 1}`}
+                                                        ? t('card.studentName', { index: index + 1 })
+                                                        : submission.display_name || t('card.studentName', { index: index + 1 })}
                                                 </span>
                                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium border ${getStanceStyle(submission.stance || 'neutral')}`}>
-                                                    {discussion.settings.stanceLabels?.[submission.stance || 'neutral'] || submission.stance || '중립'}
+                                                    {discussion.settings.stanceLabels?.[submission.stance || 'neutral'] ||
+                                                        (['pro', 'con', 'neutral'].includes(submission.stance || 'neutral') ? t(`filters.${submission.stance || 'neutral'}`) : submission.stance)}
                                                 </span>
                                             </div>
                                             <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
@@ -252,7 +253,7 @@ export default function GalleryPage() {
                                 {/* Statement */}
                                 <div className="px-5 pb-4">
                                     <p className="text-[15px] leading-relaxed whitespace-pre-wrap text-foreground/80 font-normal">
-                                        {submission.stance_statement || '(입장 설명 없음)'}
+                                        {submission.stance_statement || t('card.noStatement')}
                                     </p>
                                 </div>
 
@@ -262,7 +263,7 @@ export default function GalleryPage() {
                                         <div className="border-t border-border/30 pt-4">
                                             <div className="flex items-center gap-2 mb-2">
                                                 <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider bg-purple-100 px-2 py-0.5 rounded-full">
-                                                    최종 정리
+                                                    {t('card.reflection')}
                                                 </span>
                                             </div>
                                             <p className="text-[14px] leading-relaxed whitespace-pre-wrap text-muted-foreground italic">

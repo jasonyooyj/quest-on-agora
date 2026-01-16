@@ -14,6 +14,8 @@ export function StatsSection() {
     return (
         <section className="py-24 relative overflow-hidden bg-zinc-50/50">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
             <div className="max-w-7xl mx-auto px-6 lg:px-12 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                     {stats.map((stat, index) => (

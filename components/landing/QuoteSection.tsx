@@ -54,7 +54,7 @@ export function QuoteSection() {
 
     return (
         <section className="py-24 lg:py-40 relative">
-            <div className="max-w-4xl mx-auto px-6 lg:px-12">
+            <div className="max-w-7xl mx-auto px-6 lg:px-12">
                 <div className="relative glass-panel p-12 md:p-20 rounded-[3rem] border-zinc-200 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.1)] overflow-hidden">
                     {/* Spatial Background Elements */}
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50" />
@@ -78,8 +78,8 @@ export function QuoteSection() {
                                 </blockquote>
                                 <div className="mt-12 flex items-center gap-5">
                                     <div className={`w-16 h-16 rounded-2xl flex items-center justify-center border transition-all duration-300 shadow-lg ${currentTestimonial.role === "instructor"
-                                            ? "bg-emerald-100 border-emerald-200 text-emerald-600"
-                                            : "bg-primary/15 border-primary/30 text-primary"
+                                        ? "bg-emerald-100 border-emerald-200 text-emerald-600"
+                                        : "bg-primary/15 border-primary/30 text-primary"
                                         }`}
                                     >
                                         {currentTestimonial.role === "instructor" ? (
@@ -92,8 +92,8 @@ export function QuoteSection() {
                                         <div className="font-bold text-lg flex items-center gap-3 text-zinc-900">
                                             {currentTestimonial.author}
                                             <span className={`text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-full border ${currentTestimonial.role === "instructor"
-                                                    ? "bg-emerald-50 border-emerald-200 text-emerald-600"
-                                                    : "bg-primary/10 border-primary/20 text-primary"
+                                                ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+                                                : "bg-primary/10 border-primary/20 text-primary"
                                                 }`}
                                             >
                                                 {currentTestimonial.role === "instructor" ? t('professor') : t('student')}
@@ -119,8 +119,8 @@ export function QuoteSection() {
                                         setCurrentIndex(index);
                                     }}
                                     className={`h-1.5 rounded-full transition-all duration-500 ${index === currentIndex
-                                            ? "bg-primary w-10"
-                                            : "bg-zinc-200 hover:bg-zinc-300 w-1.5"
+                                        ? "bg-primary w-10"
+                                        : "bg-zinc-200 hover:bg-zinc-300 w-1.5"
                                         }`}
                                     aria-label={`Go to testimonial ${index + 1}`}
                                 />

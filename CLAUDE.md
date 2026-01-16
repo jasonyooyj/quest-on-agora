@@ -5,7 +5,7 @@ Version: 0.12.0
 ## Tech Stack
 - **Framework**: Next.js 16, React 19.1, TypeScript 5.9
 - **Auth/DB**: Supabase (Auth + Postgres + RLS)
-- **AI**: OpenAI (gpt-5.2), LangChain
+- **AI**: OpenAI (gpt-5-mini), LangChain
 - **UI**: shadcn/ui, Radix UI, Tailwind CSS 4, Framer Motion
 - **Payments**: Stripe (international), Toss Payments (Korea)
 - **i18n**: next-intl (ko/en)
@@ -65,7 +65,7 @@ database/migrations/       # SQL 마이그레이션
 - `lib/toss-payments.ts` - `issueBillingKey()`, `chargeSubscription()`
 
 ### AI & Prompts
-- `lib/openai.ts` - Lazy-loaded OpenAI client, `AI_MODEL = "gpt-5.2"`
+- `lib/openai.ts` - Lazy-loaded OpenAI client, `AI_MODEL = "gpt-5-mini"`
   - **⚠️ DO NOT MODIFY AI_MODEL without explicit user approval**
 - `lib/prompts/index.ts` - 4 AI modes: socratic, balanced, debate, minimal
 

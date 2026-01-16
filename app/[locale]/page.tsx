@@ -7,6 +7,7 @@ import { AiModesSection } from "@/components/landing/AiModesSection";
 import { StatsSection } from "@/components/landing/StatsSection";
 import { UseCasesSection } from "@/components/landing/UseCasesSection";
 import { QuoteSection } from "@/components/landing/QuoteSection";
+import { PricingSection } from "@/components/landing/PricingSection";
 import { FaqSection } from "@/components/landing/FaqSection";
 import { CtaSection } from "@/components/landing/CtaSection";
 import { Footer } from "@/components/landing/Footer";
@@ -23,6 +24,7 @@ export default function Home() {
       <StatsSection />
       <UseCasesSection />
       <QuoteSection />
+      <PricingSection />
       <FaqSection />
       <CtaSection />
       <Footer />

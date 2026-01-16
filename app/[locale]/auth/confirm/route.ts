@@ -1,25 +1,27 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
+import { getTranslations } from 'next-intl/server'
 
-// Supabase 에러 메시지를 한글로 변환
-function getKoreanErrorMessage(errorMessage: string): string {
+// Translate Supabase error messages
+function getLocalizedErrorMessage(errorMessage: string, t: any): string {
     const msg = errorMessage.toLowerCase()
 
     if (msg.includes('expired') || msg.includes('invalid')) {
-        return '인증 링크가 만료되었거나 유효하지 않습니다. 새로운 인증 메일을 요청해주세요.'
+        return t('invalidLink')
     }
     if (msg.includes('already been used') || msg.includes('already confirmed')) {
-        return '이미 인증이 완료된 이메일입니다. 로그인해주세요.'
+        return t('alreadyVerified')
     }
     if (msg.includes('token')) {
-        return '인증 토큰이 유효하지 않습니다. 새로운 인증 메일을 요청해주세요.'
+        return t('invalidToken')
     }
 
-    return '이메일 확인에 실패했습니다. 다시 시도해주세요.'
+    return t('emailVerificationFailed')
 }
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params
+    const t = await getTranslations({ locale, namespace: 'Auth.Errors' })
     const requestUrl = new URL(request.url)
     const token_hash = requestUrl.searchParams.get('token_hash')
     const type = requestUrl.searchParams.get('type')
@@ -30,7 +32,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const errorDescription = requestUrl.searchParams.get('error_description')
 
     if (errorParam || errorDescription) {
-        const message = getKoreanErrorMessage(errorDescription || errorParam || '')
+        const message = getLocalizedErrorMessage(errorDescription || errorParam || '', t)
         return NextResponse.redirect(
             new URL(`/${locale}/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )
@@ -55,7 +57,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         }
 
         // 에러 발생 시 한글 메시지로 변환
-        const message = getKoreanErrorMessage(error.message)
+        const message = getLocalizedErrorMessage(error.message, t)
         return NextResponse.redirect(
             new URL(`/${locale}/auth/error?message=${encodeURIComponent(message)}&canResend=true`, requestUrl.origin)
         )
@@ -63,6 +65,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     // token_hash가 없는 경우
     return NextResponse.redirect(
-        new URL(`/${locale}/auth/error?message=` + encodeURIComponent('인증 링크가 잘못되었습니다. 새로운 인증 메일을 요청해주세요.') + '&canResend=true', requestUrl.origin)
+        new URL(`/${locale}/auth/error?message=` + encodeURIComponent(t('malformedLink')) + '&canResend=true', requestUrl.origin)
     )
 }

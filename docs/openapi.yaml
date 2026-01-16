@@ -1,0 +1,1567 @@
+openapi: 3.1.0
+info:
+  title: Quest on Agora API
+  version: 0.10.2
+  description: |
+    REST API for discussion sessions, participants, AI chat, billing, and admin.
+    Canonical discussion endpoints use `/api/discussions` (plural). Legacy `/api/discussion` routes are deprecated.
+servers:
+  - url: /api
+
+tags:
+  - name: Discussions
+  - name: Participants
+  - name: Messages
+  - name: Pins
+  - name: Gallery
+  - name: AI
+  - name: Auth
+  - name: Billing
+  - name: Webhooks
+  - name: Admin
+  - name: Misc
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sb-access-token
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: string
+      required:
+        - error
+    DiscussionSettings:
+      type: object
+      additionalProperties: true
+    DiscussionSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+        joinCode:
+          type: string
+        settings:
+          $ref: '#/components/schemas/DiscussionSettings'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        participantCount:
+          type: integer
+    DiscussionSession:
+      type: object
+      properties:
+        id:
+          type: string
+        instructor_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+        join_code:
+          type: string
+        settings:
+          $ref: '#/components/schemas/DiscussionSettings'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+        discussion_participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiscussionParticipant'
+    DiscussionParticipant:
+      type: object
+      properties:
+        id:
+          type: string
+        session_id:
+          type: string
+        student_id:
+          type: string
+          nullable: true
+        display_name:
+          type: string
+          nullable: true
+        stance:
+          type: string
+          nullable: true
+        stance_statement:
+          type: string
+          nullable: true
+        evidence:
+          type: array
+          nullable: true
+          items:
+            type: string
+        evidence_1:
+          type: string
+          nullable: true
+        evidence_2:
+          type: string
+          nullable: true
+        is_submitted:
+          type: boolean
+        is_online:
+          type: boolean
+        needs_help:
+          type: boolean
+        requested_extension:
+          type: boolean
+          nullable: true
+        last_active_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+    DiscussionMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        session_id:
+          type: string
+        participant_id:
+          type: string
+          nullable: true
+        role:
+          type: string
+        content:
+          type: string
+        message_type:
+          type: string
+          nullable: true
+        is_visible_to_student:
+          type: boolean
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        participant:
+          type: object
+          nullable: true
+          properties:
+            display_name:
+              type: string
+              nullable: true
+            stance:
+              type: string
+              nullable: true
+    Pin:
+      type: object
+      properties:
+        id:
+          type: string
+        quote:
+          type: string
+        context:
+          type: string
+          nullable: true
+        pinned_at:
+          type: string
+          format: date-time
+        participant:
+          type: object
+          nullable: true
+          properties:
+            display_name:
+              type: string
+              nullable: true
+            stance:
+              type: string
+              nullable: true
+    DiscussionComment:
+      type: object
+      properties:
+        id:
+          type: string
+        participant_id:
+          type: string
+        user_id:
+          type: string
+        user_name:
+          type: string
+        content:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    InstructorNote:
+      type: object
+      properties:
+        id:
+          type: string
+        participantId:
+          type: string
+        note:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ActivityStats:
+      type: object
+      properties:
+        messagesPerInterval:
+          type: array
+          items:
+            type: integer
+        timestamps:
+          type: array
+          items:
+            type: string
+            format: date-time
+        totalMessages:
+          type: integer
+    StanceDistribution:
+      type: object
+      properties:
+        pro:
+          type: integer
+        con:
+          type: integer
+        neutral:
+          type: integer
+        unsubmitted:
+          type: integer
+    TopicCluster:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        keywords:
+          type: array
+          items:
+            type: string
+        participantCount:
+          type: integer
+        sampleEvidence:
+          type: string
+        participantIds:
+          type: array
+          items:
+            type: string
+    GenerateTopicsRequest:
+      type: object
+      properties:
+        context:
+          type: string
+        fileUrl:
+          type: string
+        fileName:
+          type: string
+        mimeType:
+          type: string
+    GenerateTopicsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        topics:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              description:
+                type: string
+              stances:
+                type: object
+                properties:
+                  pro:
+                    type: string
+                  con:
+                    type: string
+        sourceLength:
+          type: integer
+    DiscussionReport:
+      type: object
+      properties:
+        discussion:
+          type: object
+          properties:
+            id:
+              type: string
+            title:
+              type: string
+            description:
+              type: string
+              nullable: true
+            status:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            closedAt:
+              type: string
+              format: date-time
+              nullable: true
+            settings:
+              $ref: '#/components/schemas/DiscussionSettings'
+        statistics:
+          type: object
+          properties:
+            totalParticipants:
+              type: integer
+            submittedCount:
+              type: integer
+            submissionRate:
+              type: string
+            stanceDistribution:
+              type: object
+              additionalProperties:
+                type: integer
+            totalMessages:
+              type: integer
+            userMessages:
+              type: integer
+            aiMessages:
+              type: integer
+            avgMessagesPerParticipant:
+              type: string
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              displayName:
+                type: string
+                nullable: true
+              stance:
+                type: string
+                nullable: true
+              stanceStatement:
+                type: string
+                nullable: true
+              isSubmitted:
+                type: boolean
+        aiSummary:
+          type: string
+          nullable: true
+        generatedAt:
+          type: string
+          format: date-time
+
+paths:
+  /discussions:
+    get:
+      tags:
+        - Discussions
+      summary: List discussions for the current user
+      responses:
+        '200':
+          description: Discussion list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discussions:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/DiscussionSummary'
+                        - $ref: '#/components/schemas/DiscussionSession'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    post:
+      tags:
+        - Discussions
+      summary: Create a discussion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                settings:
+                  $ref: '#/components/schemas/DiscussionSettings'
+              required:
+                - title
+      responses:
+        '201':
+          description: Discussion created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discussion:
+                    $ref: '#/components/schemas/DiscussionSession'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /discussions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Discussions
+      summary: Get a discussion
+      responses:
+        '200':
+          description: Discussion detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discussion:
+                    $ref: '#/components/schemas/DiscussionSession'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    patch:
+      tags:
+        - Discussions
+      summary: Update a discussion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+                settings:
+                  $ref: '#/components/schemas/DiscussionSettings'
+      responses:
+        '200':
+          description: Discussion updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discussion:
+                    $ref: '#/components/schemas/DiscussionSession'
+    delete:
+      tags:
+        - Discussions
+      summary: Delete a discussion
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+  /discussions/{id}/participants:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Participants
+      summary: List participants
+      responses:
+        '200':
+          description: Participant list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  participants:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiscussionParticipant'
+    post:
+      tags:
+        - Participants
+      summary: Join a discussion
+      responses:
+        '201':
+          description: Participant created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  participant:
+                    $ref: '#/components/schemas/DiscussionParticipant'
+    patch:
+      tags:
+        - Participants
+      summary: Update participant status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stance:
+                  type: string
+                stance_statement:
+                  type: string
+                final_reflection:
+                  type: string
+                is_submitted:
+                  type: boolean
+                needs_help:
+                  type: boolean
+                is_online:
+                  type: boolean
+                requested_extension:
+                  type: boolean
+      responses:
+        '200':
+          description: Participant updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  participant:
+                    $ref: '#/components/schemas/DiscussionParticipant'
+  /discussions/{id}/messages:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Messages
+      summary: List messages
+      parameters:
+        - name: participant_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Message list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiscussionMessage'
+    post:
+      tags:
+        - Messages
+      summary: Send a message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                role:
+                  type: string
+                participantId:
+                  type: string
+      responses:
+        '201':
+          description: Message created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/DiscussionMessage'
+  /discussions/{id}/chat:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - AI
+      summary: AI chat (streaming or JSON)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                userMessage:
+                  type: string
+                stream:
+                  type: boolean
+                locale:
+                  type: string
+      responses:
+        '200':
+          description: Streamed or JSON AI response
+          content:
+            text/event-stream:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: object
+  /discussions/{id}/pins:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Pins
+      summary: List pinned quotes
+      responses:
+        '200':
+          description: Pin list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pins:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Pin'
+    post:
+      tags:
+        - Pins
+      summary: Pin a quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                quote:
+                  type: string
+                context:
+                  type: string
+                  nullable: true
+              required:
+                - participantId
+                - quote
+      responses:
+        '201':
+          description: Pin created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pin:
+                    $ref: '#/components/schemas/Pin'
+    delete:
+      tags:
+        - Pins
+      summary: Unpin a quote
+      parameters:
+        - name: pinId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Unpinned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+  /discussions/{id}/comments:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Gallery
+      summary: List comments for a participant
+      parameters:
+        - name: participantId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiscussionComment'
+    post:
+      tags:
+        - Gallery
+      summary: Add a comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                content:
+                  type: string
+              required:
+                - participantId
+                - content
+      responses:
+        '200':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment:
+                    $ref: '#/components/schemas/DiscussionComment'
+  /discussions/{id}/likes:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Gallery
+      summary: Add a like
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                participantId:
+                  type: string
+              required:
+                - participantId
+      responses:
+        '200':
+          description: Like added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+    delete:
+      tags:
+        - Gallery
+      summary: Remove a like
+      parameters:
+        - name: participantId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Like removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+  /discussions/{id}/gallery:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Gallery
+      summary: Gallery submissions
+      responses:
+        '200':
+          description: Gallery data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  discussion:
+                    type: object
+                  submissions:
+                    type: array
+                    items:
+                      type: object
+  /discussions/{id}/report:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - AI
+      summary: Generate discussion report
+      responses:
+        '200':
+          description: Report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  report:
+                    $ref: '#/components/schemas/DiscussionReport'
+  /discussions/{id}/extract-keypoints:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - AI
+      summary: Extract reflection key points
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                participantId:
+                  type: string
+              required:
+                - participantId
+      responses:
+        '200':
+          description: Key points
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keyPoints:
+                    type: array
+                    items:
+                      type: string
+  /discussions/{id}/settings:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    patch:
+      tags:
+        - Discussions
+      summary: Update discussion settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscussionSettings'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+  /discussions/{id}/close:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Discussions
+      summary: Close a discussion
+      responses:
+        '200':
+          description: Closed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+  /discussions/{id}/intervention:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Messages
+      summary: Send instructor intervention
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                participantId:
+                  type: string
+                content:
+                  type: string
+                messageType:
+                  type: string
+                isVisibleToStudent:
+                  type: boolean
+              required:
+                - participantId
+                - content
+      responses:
+        '200':
+          description: Intervention sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    $ref: '#/components/schemas/DiscussionMessage'
+  /discussions/{id}/activity:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Discussions
+      summary: Activity stats
+      responses:
+        '200':
+          description: Activity data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityStats'
+  /discussions/{id}/stances:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Discussions
+      summary: Stance distribution
+      responses:
+        '200':
+          description: Distribution
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  distribution:
+                    $ref: '#/components/schemas/StanceDistribution'
+  /discussions/{id}/topics:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - AI
+      summary: Discussion topic clusters
+      responses:
+        '200':
+          description: Topics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TopicCluster'
+  /discussions/participants/{participantId}/note:
+    parameters:
+      - name: participantId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Participants
+      summary: Get instructor note
+      responses:
+        '200':
+          description: Note
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  note:
+                    $ref: '#/components/schemas/InstructorNote'
+    post:
+      tags:
+        - Participants
+      summary: Save instructor note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+              required:
+                - note
+      responses:
+        '200':
+          description: Note saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  note:
+                    $ref: '#/components/schemas/InstructorNote'
+  /discussions/generate-topics:
+    post:
+      tags:
+        - AI
+      summary: Generate discussion topics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateTopicsRequest'
+      responses:
+        '200':
+          description: Topics generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateTopicsResponse'
+  /instructor/discussion-preview:
+    post:
+      tags:
+        - AI
+      summary: Generate discussion preview message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topic:
+                  type: string
+                stanceOptions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Preview
+          content:
+            application/json:
+              schema:
+                type: object
+  /join/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      tags:
+        - Participants
+      summary: Join a discussion via code
+      responses:
+        '201':
+          description: Joined
+          content:
+            application/json:
+              schema:
+                type: object
+  /auth/onboarding:
+    post:
+      tags:
+        - Auth
+      summary: Complete onboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Onboarding complete
+          content:
+            application/json:
+              schema:
+                type: object
+  /auth/profile:
+    post:
+      tags:
+        - Auth
+      summary: Create or update profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Profile saved
+          content:
+            application/json:
+              schema:
+                type: object
+  /student/profile:
+    get:
+      tags:
+        - Auth
+      summary: Get student profile
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+        - Auth
+      summary: Update student profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /checkout:
+    get:
+      tags:
+        - Billing
+      summary: Get checkout plans
+      responses:
+        '200':
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+        - Billing
+      summary: Create checkout session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Checkout session
+          content:
+            application/json:
+              schema:
+                type: object
+  /checkout/toss/callback:
+    post:
+      tags:
+        - Billing
+      summary: Toss payment callback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Processed
+          content:
+            application/json:
+              schema:
+                type: object
+  /billing/portal:
+    post:
+      tags:
+        - Billing
+      summary: Create Stripe customer portal session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Portal session
+          content:
+            application/json:
+              schema:
+                type: object
+  /webhooks/stripe:
+    post:
+      tags:
+        - Webhooks
+      summary: Stripe webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Received
+  /webhooks/toss:
+    post:
+      tags:
+        - Webhooks
+      summary: Toss webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Received
+  /admin/stats:
+    get:
+      tags:
+        - Admin
+      summary: Platform stats
+      responses:
+        '200':
+          description: Stats
+          content:
+            application/json:
+              schema:
+                type: object
+  /admin/settings:
+    get:
+      tags:
+        - Admin
+      summary: Get admin settings
+      responses:
+        '200':
+          description: Settings
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      tags:
+        - Admin
+      summary: Update admin settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: List users
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User list
+          content:
+            application/json:
+              schema:
+                type: object
+  /admin/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Admin
+      summary: Get user
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      tags:
+        - Admin
+      summary: Update user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      tags:
+        - Admin
+      summary: Delete user
+      responses:
+        '200':
+          description: User deleted
+          content:
+            application/json:
+              schema:
+                type: object
+  /admin/discussions:
+    get:
+      tags:
+        - Admin
+      summary: List discussions
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Discussion list
+          content:
+            application/json:
+              schema:
+                type: object
+  /admin/discussions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - Admin
+      summary: Get discussion
+      responses:
+        '200':
+          description: Discussion
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      tags:
+        - Admin
+      summary: Update discussion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Discussion updated
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      tags:
+        - Admin
+      summary: Delete discussion
+      responses:
+        '200':
+          description: Discussion deleted
+          content:
+            application/json:
+              schema:
+                type: object
+  /supa:
+    post:
+      tags:
+        - Misc
+      summary: Multi-action Supabase helper
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                data:
+                  type: object
+              required:
+                - action
+      responses:
+        '200':
+          description: Action response
+          content:
+            application/json:
+              schema:
+                type: object

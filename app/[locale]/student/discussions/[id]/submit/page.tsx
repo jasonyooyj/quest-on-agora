@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 
 export default function SubmitPage() {
-    const t = useTranslations('Student.Dashboard.Submit')
+    const t = useTranslations('Student.Dashboard.DiscussionDetail.Submit')
     const params = useParams()
     const router = useRouter()
     const discussionId = params.id as string
@@ -110,7 +110,7 @@ export default function SubmitPage() {
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 animate-spin mx-auto text-indigo-500 mb-4" />
-                    <p className="text-zinc-500 font-medium">로딩 중...</p>
+                    <p className="text-zinc-500 font-medium">{t('submit.submitting')}</p>
                 </div>
             </div>
         )
@@ -120,9 +120,9 @@ export default function SubmitPage() {
         return (
             <div className="min-h-screen flex items-center justify-center p-4">
                 <div className="text-center">
-                    <p className="text-zinc-500 mb-4">토론 또는 참가 정보를 찾을 수 없습니다.</p>
+                    <p className="text-zinc-500 mb-4">{t('toasts.loadKeyPointsError')}</p>
                     <button onClick={() => router.push('/student')} className="btn-brutal-fill">
-                        돌아가기
+                        {t('toasts.return')}
                     </button>
                 </div>
             </div>
@@ -142,7 +142,7 @@ export default function SubmitPage() {
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
                         <div>
-                            <h1 className="font-bold text-lg text-zinc-900">최종 정리 및 제출</h1>
+                            <h1 className="font-bold text-lg text-zinc-900">{t('title')}</h1>
                             <p className="text-xs text-zinc-500">{discussion.title}</p>
                         </div>
                     </div>
@@ -162,8 +162,8 @@ export default function SubmitPage() {
                             <Lightbulb className="w-5 h-5 text-amber-600" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-zinc-900">대화의 핵심 포인트</h2>
-                            <p className="text-xs text-zinc-500">AI가 분석한 오늘 토론의 주요 논점들</p>
+                            <h2 className="font-bold text-zinc-900">{t('keyPoints.title')}</h2>
+                            <p className="text-xs text-zinc-500">{t('keyPoints.subtitle')}</p>
                         </div>
                     </div>
 
@@ -171,7 +171,7 @@ export default function SubmitPage() {
                         {isLoadingKeyPoints ? (
                             <div className="flex items-center justify-center py-8 gap-3 text-zinc-400">
                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>핵심 포인트 분석 중...</span>
+                                <span>{t('keyPoints.loading')}</span>
                             </div>
                         ) : (
                             <ul className="space-y-3">

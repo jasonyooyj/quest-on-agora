@@ -96,8 +96,8 @@ INSERT INTO subscription_plans (
     }'::jsonb,
     19900,          -- ₩19,900/month (~$15)
     199000,         -- ₩199,000/year (~$150, 2 months free)
-    1900,           -- $19.00/month (USD cents)
-    19000,          -- $190.00/year (USD cents)
+    1999,           -- $19.99/month (USD cents)
+    19990,          -- $199.90/year (USD cents)
     NULL,           -- To be set after Stripe product creation
     NULL,           -- To be set after Stripe product creation
     NULL,           -- To be set after Toss product creation
