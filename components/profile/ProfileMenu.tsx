@@ -83,17 +83,17 @@ export function ProfileMenu({
       <DropdownMenuTrigger asChild={true}>
         <button
           type="button"
-          className="group relative flex items-center gap-3 rounded-full border-0 bg-white/70 px-4 py-2 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/85 hover:shadow-[0_16px_34px_rgba(15,23,42,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 focus-visible:ring-offset-2"
+          className="group relative flex items-center gap-3 rounded-full border-0 bg-white/70 p-1 sm:px-4 sm:py-2 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:bg-white/85 hover:shadow-[0_16px_34px_rgba(15,23,42,0.16)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 focus-visible:ring-offset-2"
         >
           <span
             className="pointer-events-none absolute inset-0 rounded-full bg-gradient-to-b from-white/60 via-white/0 to-white/0 opacity-70"
             aria-hidden={true}
           />
-          <div className="relative h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm font-bold flex items-center justify-center shadow-[0_6px_16px_rgba(99,102,241,0.35)]">
+          <div className="relative h-9 w-9 sm:h-10 sm:w-10 rounded-full sm:rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-sm font-bold flex items-center justify-center shadow-[0_6px_16px_rgba(99,102,241,0.35)] shrink-0">
             {initials || "A"}
             <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white" />
           </div>
-          <div className="flex flex-col min-w-0 max-w-[220px] text-left">
+          <div className="hidden sm:flex flex-col min-w-0 max-w-[220px] text-left">
             <div className="flex items-center gap-3 min-w-0">
               <span className="text-sm font-semibold text-zinc-900 leading-tight truncate">
                 {displayName}
@@ -108,7 +108,7 @@ export function ProfileMenu({
               <span className="text-xs text-zinc-500 truncate">{email}</span>
             )}
           </div>
-          <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors relative" />
+          <ChevronDown className="w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors relative hidden sm:block" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent

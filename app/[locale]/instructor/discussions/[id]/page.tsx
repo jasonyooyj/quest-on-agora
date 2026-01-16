@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Users, MessageSquare, Play, Pause, Clock,
     Copy, ArrowLeft, Settings, BarChart3,
-    AlertCircle, CheckCircle, User, Quote, X, Loader2, Link2
+    AlertCircle, CheckCircle, User, Quote, X, Loader2, Link2, Info
 } from 'lucide-react'
 import { SettingsDialog } from '@/components/instructor/SettingsDialog'
 import { DiscussionOnboardingOverlay } from '@/components/instructor/DiscussionOnboardingOverlay'
@@ -531,8 +531,11 @@ ${t('report.footer')}`
                             <TooltipProvider>
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <h1 className="text-xl font-bold tracking-tight text-zinc-900 line-clamp-2 sm:line-clamp-1 cursor-default">
-                                            {discussion.title}
+                                        <h1 className="text-xl font-bold tracking-tight text-zinc-900 flex items-center gap-2 group cursor-default">
+                                            <span className="line-clamp-2 sm:truncate text-left">
+                                                {discussion.title}
+                                            </span>
+                                            <Info className="w-4 h-4 text-zinc-300 group-hover:text-primary shrink-0" />
                                         </h1>
                                     </TooltipTrigger>
                                     <TooltipContent side="bottom" className="max-w-sm">

@@ -70,6 +70,7 @@ export default function StudentDiscussionPage() {
     const [showExtensionDialog, setShowExtensionDialog] = useState(false)
     const [requestingExtension, setRequestingExtension] = useState(false)
     const [showDescriptionModal, setShowDescriptionModal] = useState(false)
+    const [showHelpModal, setShowHelpModal] = useState(false)
 
     // Stance Selection State
     const [isConfirmingStance, setIsConfirmingStance] = useState(false)
@@ -167,20 +168,58 @@ export default function StudentDiscussionPage() {
         }
     }
 
-    const requestHelp = async () => {
+    const requestHelp = () => {
         if (!participant) return
 
+        // If already requesting help, cancel it directly without confirmation
+        if (participant.needsHelp) {
+            confirmHelpRequest()
+            return
+        }
+
+        // Show confirmation modal for new requests
+        setShowHelpModal(true)
+    }
+
+    const confirmHelpRequest = async () => {
+        if (!participant) return
+        setShowHelpModal(false) // Close the modal
+
+        const newNeedsHelp = !participant.needsHelp
+
+        // Optimistic update
+        queryClient.setQueryData(['discussion-participants', discussionId], (old: any[] = []) => {
+            return old.map(p =>
+                p.id === participant.id
+                    ? { ...p, needsHelp: newNeedsHelp, helpRequestedAt: newNeedsHelp ? new Date().toISOString() : null }
+                    : p
+            )
+        })
+
         try {
-            const newStatus = !participant.needsHelp
-            await supabase
+            const { error } = await supabase
                 .from('discussion_participants')
                 .update({
-                    needs_help: newStatus,
-                    help_requested_at: newStatus ? new Date().toISOString() : null
+                    needs_help: newNeedsHelp,
+                    help_requested_at: newNeedsHelp ? new Date().toISOString() : null
                 })
                 .eq('id', participant.id)
 
-            if (newStatus) {
+            if (error) {
+                console.error('Error toggling help:', error)
+                toast.error(t('toasts.helpError'))
+                // Rollback optimistic update if error
+                queryClient.setQueryData(['discussion-participants', discussionId], (old: any[] = []) => {
+                    return old.map(p =>
+                        p.id === participant.id
+                            ? { ...p, needsHelp: !newNeedsHelp, helpRequestedAt: !newNeedsHelp ? new Date().toISOString() : null } // Revert
+                            : p
+                    )
+                })
+                return
+            }
+
+            if (newNeedsHelp) {
                 toast.success(t('toasts.helpRequested'), {
                     description: t('toasts.helpRequestedDesc')
                 })
@@ -425,24 +464,26 @@ export default function StudentDiscussionPage() {
 
             {/* Header */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-5 min-w-0 flex-1">
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 sm:gap-5 min-w-0 flex-1">
                         <Link
                             href="/student"
                             className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-700 transition-all active:scale-90 shrink-0"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <div className="min-w-0">
+                        <div className="min-w-0 flex-1">
                             {discussion.description ? (
                                 <button
                                     onClick={() => setShowDescriptionModal(true)}
-                                    className="text-left group"
+                                    className="text-left group block w-full"
                                     title={t('header.viewDescription')}
                                 >
-                                    <h1 className="font-bold text-xl tracking-tight text-zinc-900 line-clamp-2 sm:line-clamp-1 group-hover:text-primary transition-colors flex items-center gap-2">
-                                        {discussion.title}
-                                        <Info className="w-4 h-4 text-zinc-300 group-hover:text-primary shrink-0 hidden sm:inline" />
+                                    <h1 className="font-bold text-xl tracking-tight text-zinc-900 group-hover:text-primary transition-colors flex items-center gap-2">
+                                        <span className="line-clamp-2 sm:truncate text-left">
+                                            {discussion.title}
+                                        </span>
+                                        <Info className="w-4 h-4 text-zinc-300 group-hover:text-primary shrink-0" />
                                     </h1>
                                 </button>
                             ) : (
@@ -859,6 +900,28 @@ export default function StudentDiscussionPage() {
                     </div>
                 )}
             </AnimatePresence>
+            {/* Help Confirmation Modal */}
+            <AlertDialog open={showHelpModal} onOpenChange={setShowHelpModal}>
+                <AlertDialogContent className="glass-panel bg-white/95 border-zinc-200 backdrop-blur-xl">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('helpModal.title')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('helpModal.description')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-full border-zinc-200 hover:bg-zinc-100 hover:text-zinc-900">
+                            {t('helpModal.cancel')}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmHelpRequest}
+                            className="rounded-full bg-red-500 hover:bg-red-600 text-white font-bold"
+                        >
+                            {t('helpModal.confirm')}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

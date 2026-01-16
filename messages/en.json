@@ -1002,11 +1002,22 @@
           "default": "AI Tutor"
         },
         "header": {
+          "viewDescription": "View Description",
           "gallery": "Gallery",
-          "finish": "Finish",
+          "finish": "Finish Discussion",
           "help": "Help",
           "requesting": "Requesting...",
           "cancelHelp": "Cancel Help"
+        },
+        "descriptionModal": {
+          "topic": "Discussion Topic",
+          "close": "Close"
+        },
+        "helpModal": {
+          "title": "Confirm Help Request",
+          "description": "Do you want to request help from the AI Tutor?",
+          "confirm": "Request",
+          "cancel": "Cancel"
         },
         "stance": {
           "myStance": "MY STANCE",

@@ -1002,11 +1002,22 @@
           "default": "AI 튜터"
         },
         "header": {
-          "gallery": "답변 갤러리",
-          "finish": "토론 종료",
+          "viewDescription": "설명 보기",
+          "gallery": "참여자 갤러리",
+          "finish": "토론 마치기",
           "help": "도움 요청",
           "requesting": "요청 중...",
           "cancelHelp": "도움 요청 취소"
+        },
+        "descriptionModal": {
+          "topic": "토론 주제",
+          "close": "닫기"
+        },
+        "helpModal": {
+          "title": "도움 요청 확인",
+          "description": "AI 튜터에게 도움을 요청하시겠습니까?",
+          "confirm": "요청하기",
+          "cancel": "취소"
         },
         "stance": {
           "myStance": "내 입장",
