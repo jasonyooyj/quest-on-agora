@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Send, ArrowLeft, ArrowRight, Clock, Loader2,
     HelpCircle, MessageSquare, ThumbsUp, ThumbsDown, Minus, Users,
-    AlertCircle, CheckCircle, FileCheck
+    AlertCircle, CheckCircle, FileCheck, Info, X
 } from 'lucide-react'
 import {
     AlertDialog,
@@ -24,7 +24,6 @@ import {
 } from '@/components/ui/alert-dialog'
 import { useDiscussionSession, useDiscussionParticipants, useParticipantMessages } from '@/hooks/useDiscussion'
 import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
-
 import { useTranslations, useLocale } from 'next-intl'
 
 const getStanceIcon = (stance: string, index?: number) => {
@@ -70,6 +69,7 @@ export default function StudentDiscussionPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [showExtensionDialog, setShowExtensionDialog] = useState(false)
     const [requestingExtension, setRequestingExtension] = useState(false)
+    const [showDescriptionModal, setShowDescriptionModal] = useState(false)
 
     // Stance Selection State
     const [isConfirmingStance, setIsConfirmingStance] = useState(false)
@@ -426,21 +426,37 @@ export default function StudentDiscussionPage() {
             {/* Header */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-5 min-w-0 flex-1">
                         <Link
                             href="/student"
-                            className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-700 transition-all active:scale-90"
+                            className="w-10 h-10 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-700 transition-all active:scale-90 shrink-0"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <div>
-                            <h1 className="font-bold text-xl tracking-tight text-zinc-900 line-clamp-1">
-                                {discussion.title}
-                            </h1>
+                        <div className="min-w-0">
+                            {discussion.description ? (
+                                <button
+                                    onClick={() => setShowDescriptionModal(true)}
+                                    className="text-left group"
+                                    title={t('header.viewDescription')}
+                                >
+                                    <h1 className="font-bold text-xl tracking-tight text-zinc-900 line-clamp-2 sm:line-clamp-1 group-hover:text-primary transition-colors flex items-center gap-2">
+                                        {discussion.title}
+                                        <Info className="w-4 h-4 text-zinc-300 group-hover:text-primary shrink-0 hidden sm:inline" />
+                                    </h1>
+                                </button>
+                            ) : (
+                                <h1
+                                    className="font-bold text-xl tracking-tight text-zinc-900 line-clamp-2 sm:line-clamp-1"
+                                    title={discussion.title}
+                                >
+                                    {discussion.title}
+                                </h1>
+                            )}
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-nowrap shrink-0">
                         <Link
                             href={`/student/discussions/${discussionId}/gallery`}
                             className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-all active:scale-95"
@@ -805,6 +821,44 @@ export default function StudentDiscussionPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Description Modal */}
+            <AnimatePresence>
+                {showDescriptionModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-black/30 backdrop-blur-sm"
+                            onClick={() => setShowDescriptionModal(false)}
+                        />
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                            className="glass-panel bg-white/95 border-zinc-200 max-w-lg w-full p-6 sm:p-8 shadow-2xl relative z-10 backdrop-blur-xl max-h-[80vh] overflow-y-auto"
+                        >
+                            <button
+                                onClick={() => setShowDescriptionModal(false)}
+                                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 text-zinc-500 hover:text-zinc-700 transition-all"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                            <div className="text-xs font-black uppercase tracking-widest text-zinc-400 mb-3">
+                                {t('descriptionModal.topic')}
+                            </div>
+                            <h3 className="text-xl font-bold text-zinc-900 mb-4">{discussion.title}</h3>
+                            <div className="bg-zinc-50 rounded-2xl p-5 border border-zinc-200">
+                                <p className="text-[15px] text-zinc-600 leading-relaxed whitespace-pre-wrap">
+                                    {discussion.description}
+                                </p>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

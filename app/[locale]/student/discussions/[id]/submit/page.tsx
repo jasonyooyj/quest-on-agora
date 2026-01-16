@@ -15,7 +15,7 @@ import { useTranslations } from 'next-intl'
 import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 
 export default function SubmitPage() {
-    const t = useTranslations('Student.Dashboard.DiscussionDetail.Submit')
+    const t = useTranslations('Student.Dashboard.Submit')
     const params = useParams()
     const router = useRouter()
     const discussionId = params.id as string

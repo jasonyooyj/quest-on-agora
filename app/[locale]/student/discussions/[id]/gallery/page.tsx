@@ -58,7 +58,7 @@ const getStanceStyle = (stance: string) => {
 }
 
 export default function GalleryPage() {
-    const t = useTranslations('Student.Dashboard.DiscussionDetail.Gallery')
+    const t = useTranslations('Student.Gallery')
     const format = useFormatter()
     const params = useParams()
     const router = useRouter()

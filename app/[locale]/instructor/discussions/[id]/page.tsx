@@ -14,6 +14,7 @@ import { SettingsDialog } from '@/components/instructor/SettingsDialog'
 import { DiscussionOnboardingOverlay } from '@/components/instructor/DiscussionOnboardingOverlay'
 import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 import { useTranslations, useFormatter } from 'next-intl'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 interface Discussion {
     id: string
@@ -488,20 +489,29 @@ ${t('report.footer')}`
             {/* Header */}
             <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200 py-5 flex items-center">
                 <div className="max-w-[1920px] w-full mx-auto px-10 flex items-center justify-between">
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-5 min-w-0 flex-1">
                         <button
                             onClick={() => router.push('/instructor')}
-                            className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-all active:scale-90"
+                            className="w-11 h-11 rounded-full border border-zinc-200 flex items-center justify-center hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-all active:scale-90 shrink-0"
                         >
                             <ArrowLeft className="w-5 h-5" />
                         </button>
 
-                        <div className="h-10 w-px bg-zinc-200" />
+                        <div className="h-10 w-px bg-zinc-200 shrink-0" />
 
-                        <div className="space-y-2">
-                            <h1 className="text-xl font-bold tracking-tight text-zinc-900">
-                                {discussion.title}
-                            </h1>
+                        <div className="space-y-2 min-w-0 overflow-hidden">
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <h1 className="text-xl font-bold tracking-tight text-zinc-900 line-clamp-2 sm:line-clamp-1 cursor-default">
+                                            {discussion.title}
+                                        </h1>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="bottom" className="max-w-sm">
+                                        {discussion.title}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                             <div className="flex items-center gap-2.5">
                                 <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest ${discussion.status === 'active' ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' :
                                     discussion.status === 'closed' ? 'bg-zinc-100 text-zinc-500 border border-zinc-200' : 'bg-amber-100 text-amber-600 border border-amber-200'
@@ -527,7 +537,7 @@ ${t('report.footer')}`
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-nowrap shrink-0">
                         <button
                             onClick={toggleDiscussionStatus}
                             className={`h-11 px-5 rounded-full font-bold text-sm flex items-center gap-2.5 transition-all active:scale-95 shadow-lg ${discussion.status === 'active'
@@ -973,9 +983,9 @@ ${t('report.footer')}`
                             </div>
 
                             <div className="space-y-6">
-                                <div className="bg-zinc-50 rounded-2xl p-5 border border-zinc-200">
+                                <div className="bg-zinc-50 rounded-2xl p-5 border border-zinc-200 max-h-72 overflow-y-auto custom-scrollbar">
                                     <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-3">{t('sessionInfo.topic')}</span>
-                                    <p className="text-[15px] font-medium leading-relaxed text-zinc-600 line-clamp-4">
+                                    <p className="text-[15px] font-medium leading-relaxed text-zinc-600">
                                         {discussion.description || t('sessionInfo.noDescription')}
                                     </p>
                                 </div>
