@@ -437,8 +437,11 @@ export default function InstructorDashboard() {
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-4 mb-3">
-                          <h3 className="text-xl font-bold text-zinc-900 truncate group-hover:text-primary transition-colors">
+                        <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
+                          <h3
+                            className="text-xl font-bold text-zinc-900 truncate group-hover:text-primary transition-colors flex-1 min-w-0"
+                            title={discussion.title}
+                          >
                             {discussion.title}
                           </h3>
                           {getStatusBadge(discussion.status)}

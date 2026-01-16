@@ -68,11 +68,18 @@ interface PinnedQuote {
     } | null
 }
 
-const stanceColors: Record<string, string> = {
-    pro: 'border-emerald-200 bg-emerald-50 text-emerald-600',
-    con: 'border-rose-200 bg-rose-50 text-rose-600',
-    neutral: 'border-zinc-200 bg-zinc-50 text-zinc-600'
-}
+// Colors applied based on position in stanceOptions array (first=green, second=red, rest=gray)
+const stanceColorsByIndex = [
+    'border-emerald-200 bg-emerald-50 text-emerald-600', // First option (e.g., 찬성/Pro)
+    'border-rose-200 bg-rose-50 text-rose-600',          // Second option (e.g., 반대/Con)
+    'border-zinc-200 bg-zinc-50 text-zinc-600'           // Third+ options (e.g., 중립/Neutral)
+]
+
+const dotColorsByIndex = [
+    'bg-emerald-500', // First option
+    'bg-rose-500',    // Second option
+    'bg-zinc-400'     // Third+ options
+]
 
 export default function InstructorDiscussionPage() {
     const t = useTranslations('Instructor.DiscussionDetail')
@@ -448,8 +455,29 @@ ${t('report.footer')}`
         }
     }
 
-    const getStanceLabel = (stance: string) => {
-        return t(`participants.stance.${stance}`, { default: stance });
+    // Get stance index from stanceOptions array
+    const getStanceIndex = (stance: string | null) => {
+        if (!stance || !discussion?.settings?.stanceOptions) return -1
+        return discussion.settings.stanceOptions.indexOf(stance)
+    }
+
+    // Get color class for stance based on its position in stanceOptions
+    const getStanceColorClass = (stance: string | null) => {
+        const index = getStanceIndex(stance)
+        if (index === -1) return stanceColorsByIndex[2] // Default to gray
+        return stanceColorsByIndex[Math.min(index, 2)]
+    }
+
+    // Get dot color class for stance based on its position in stanceOptions
+    const getStanceDotColor = (stance: string | null) => {
+        const index = getStanceIndex(stance)
+        if (index === -1) return dotColorsByIndex[2] // Default to gray
+        return dotColorsByIndex[Math.min(index, 2)]
+    }
+
+    // Display stance label directly (it's already the display value from stanceOptions)
+    const getStanceLabel = (stance: string | null) => {
+        return stance || t('participants.stance.undefined')
     }
 
     if (loading) {
@@ -663,11 +691,9 @@ ${t('report.footer')}`
 
                     <div className="hidden lg:flex ml-auto items-center gap-2.5">
                         {Object.entries(stanceCounts).map(([stance, count]) => (
-                            <div key={stance} className={`px-4 py-2 rounded-2xl border font-bold text-xs flex items-center gap-2 transition-all hover:bg-zinc-100 ${stance === 'pro' ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : stance === 'con' ? 'border-rose-200 bg-rose-50 text-rose-600' : 'border-zinc-200 bg-zinc-50 text-zinc-600'}`}>
-                                <div className={`w-1.5 h-1.5 rounded-full ${stance === 'pro' ? 'bg-emerald-500' :
-                                    stance === 'con' ? 'bg-rose-500' : 'bg-zinc-400'
-                                    }`} />
-                                {getStanceLabel(stance)}: {count}
+                            <div key={stance} className={`px-4 py-2 rounded-2xl border font-bold text-xs flex items-center gap-2 transition-all hover:bg-zinc-100 ${getStanceColorClass(stance)}`}>
+                                <div className={`w-1.5 h-1.5 rounded-full ${getStanceDotColor(stance)}`} />
+                                {stance}: {count}
                             </div>
                         ))}
                     </div>
@@ -761,9 +787,9 @@ ${t('report.footer')}`
                                             {participant.stance ? (
                                                 <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest border transition-colors ${selectedParticipant === participant.id
                                                     ? 'bg-white/20 border-white/20 text-white'
-                                                    : participant.stance === 'pro' ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : participant.stance === 'con' ? 'border-rose-200 bg-rose-50 text-rose-600' : 'border-zinc-200 bg-zinc-50 text-zinc-600'
+                                                    : getStanceColorClass(participant.stance)
                                                     }`}>
-                                                    {getStanceLabel(participant.stance)}
+                                                    {participant.stance}
                                                 </span>
                                             ) : (
                                                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('participants.stance.undefined')}</span>
@@ -921,9 +947,9 @@ ${t('report.footer')}`
                                             const p = participants.find(p => p.id === selectedParticipant)
                                             if (!p) return null
                                             return (
-                                                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border font-bold text-sm ${p.stance === 'pro' ? 'border-emerald-200 bg-emerald-50 text-emerald-600' : p.stance === 'con' ? 'border-rose-200 bg-rose-50 text-rose-600' : 'border-zinc-200 bg-zinc-100 text-zinc-600'}`}>
-                                                    <div className={`w-2 h-2 rounded-full ${p.stance === 'pro' ? 'bg-emerald-500' : p.stance === 'con' ? 'bg-rose-500' : 'bg-zinc-400'}`} />
-                                                    {getStanceLabel(p.stance || '') || t('participants.details.noSelection')}
+                                                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border font-bold text-sm ${getStanceColorClass(p.stance)}`}>
+                                                    <div className={`w-2 h-2 rounded-full ${getStanceDotColor(p.stance)}`} />
+                                                    {p.stance || t('participants.details.noSelection')}
                                                 </div>
                                             )
                                         })()}
@@ -1040,9 +1066,7 @@ ${t('report.footer')}`
                                         <p className="text-sm font-medium leading-relaxed italic pr-6 text-zinc-600">&quot;{pin.quote}&quot;</p>
                                         <div className="mt-3 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                <div className={`w-1.5 h-1.5 rounded-full ${pin.participant?.stance === 'pro' ? 'bg-emerald-500' :
-                                                    pin.participant?.stance === 'con' ? 'bg-rose-500' : 'bg-zinc-400'
-                                                    }`} />
+                                                <div className={`w-1.5 h-1.5 rounded-full ${getStanceDotColor(pin.participant?.stance || null)}`} />
                                                 <span className="text-[10px] font-bold text-zinc-500">
                                                     {pin.participant?.display_name || 'Anonymous'}
                                                 </span>
