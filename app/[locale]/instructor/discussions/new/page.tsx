@@ -103,6 +103,11 @@ export default function NewDiscussionPage() {
     label: t(`phases.aiTutor.modes.${option.value}.label`),
     desc: t(`phases.aiTutor.modes.${option.value}.desc`)
   }))
+  const difficultyLabels = {
+    easy: t('phases.topic.aiGenerator.difficulty.easy'),
+    medium: t('phases.topic.aiGenerator.difficulty.medium'),
+    hard: t('phases.topic.aiGenerator.difficulty.hard'),
+  }
 
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -118,6 +123,28 @@ export default function NewDiscussionPage() {
   const [previews, setPreviews] = useState<Record<string, string>>({})
   const [isFetchingPreviews, setIsFetchingPreviews] = useState(false)
   const previewTimeoutRef = useRef<NodeJS.Timeout>(null)
+
+  const getDifficultyTag = (index: number) => {
+    if (index <= 1) {
+      return {
+        label: difficultyLabels.easy,
+        className: 'bg-emerald-100 text-emerald-700',
+        selectedClassName: 'bg-emerald-400/30 text-emerald-100',
+      }
+    }
+    if (index === 2) {
+      return {
+        label: difficultyLabels.medium,
+        className: 'bg-amber-100 text-amber-700',
+        selectedClassName: 'bg-amber-400/30 text-amber-100',
+      }
+    }
+    return {
+      label: difficultyLabels.hard,
+      className: 'bg-rose-100 text-rose-700',
+      selectedClassName: 'bg-rose-400/30 text-rose-100',
+    }
+  }
 
   // AI Topic Generation states
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
@@ -284,7 +311,7 @@ export default function NewDiscussionPage() {
       const response = await fetch('/api/discussions/generate-topics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ context: learningMaterial })
+        body: JSON.stringify({ context: learningMaterial, locale })
       })
 
       const data = await response.json()
@@ -631,61 +658,74 @@ export default function NewDiscussionPage() {
                                 </div>
 
                                 <div className="space-y-3">
-                                  {generatedTopics.map((topic, index) => (
-                                    <motion.button
-                                      key={index}
-                                      type="button"
-                                      initial={{ opacity: 0, x: -20 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      transition={{ delay: index * 0.1 }}
-                                      onClick={() => handleSelectTopic(index)}
-                                      className={`w-full p-5 rounded-xl text-left transition-all group/topic ${selectedTopicIndex === index
-                                        ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
-                                        : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
-                                        }`}
-                                    >
-                                      <div className="flex items-start gap-4">
-                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${selectedTopicIndex === index
-                                          ? 'bg-white/20 text-white'
-                                          : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
-                                          }`}>
-                                          {selectedTopicIndex === index ? (
-                                            <Check className="w-4 h-4" />
-                                          ) : (
-                                            <span className="text-sm font-bold">{index + 1}</span>
-                                          )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                          <p className={`font-bold text-sm leading-snug mb-2 ${selectedTopicIndex === index ? 'text-white' : 'text-zinc-800'
+                                  {generatedTopics.map((topic, index) => {
+                                    const difficulty = getDifficultyTag(index)
+                                    const isSelected = selectedTopicIndex === index
+
+                                    return (
+                                      <motion.button
+                                        key={index}
+                                        type="button"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        onClick={() => handleSelectTopic(index)}
+                                        className={`w-full p-5 rounded-xl text-left transition-all group/topic relative ${isSelected
+                                          ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
+                                          : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
+                                          }`}
+                                      >
+                                        <span
+                                          className={`absolute right-4 top-4 px-2 py-1 rounded-full text-[10px] font-bold tracking-wide pointer-events-none ${isSelected
+                                            ? difficulty.selectedClassName
+                                            : difficulty.className
+                                            }`}
+                                        >
+                                          {difficulty.label}
+                                        </span>
+                                        <div className="flex items-start gap-4">
+                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${isSelected
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
                                             }`}>
-                                            {topic.title}
-                                          </p>
-                                          <p className={`text-xs leading-relaxed line-clamp-2 ${selectedTopicIndex === index ? 'text-white/80' : 'text-zinc-500'
-                                            }`}>
-                                            {topic.description}
-                                          </p>
-                                          {topic.stances && (
-                                            <div className="flex items-center gap-2 mt-3">
-                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${selectedTopicIndex === index
-                                                ? 'bg-emerald-400/30 text-emerald-100'
-                                                : 'bg-emerald-100 text-emerald-700'
-                                                }`}>
-                                                {topic.stances.pro}
-                                              </span>
-                                              <span className={`text-[10px] ${selectedTopicIndex === index ? 'text-white/50' : 'text-zinc-400'
-                                                }`}>vs</span>
-                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${selectedTopicIndex === index
-                                                ? 'bg-rose-400/30 text-rose-100'
-                                                : 'bg-rose-100 text-rose-700'
-                                                }`}>
-                                                {topic.stances.con}
-                                              </span>
-                                            </div>
-                                          )}
+                                            {isSelected ? (
+                                              <Check className="w-4 h-4" />
+                                            ) : (
+                                              <span className="text-sm font-bold">{index + 1}</span>
+                                            )}
+                                          </div>
+                                          <div className="flex-1 min-w-0 pr-16">
+                                            <p className={`font-bold text-sm leading-snug mb-2 ${isSelected ? 'text-white' : 'text-zinc-800'
+                                              }`}>
+                                              {topic.title}
+                                            </p>
+                                            <p className={`text-xs leading-relaxed line-clamp-2 ${isSelected ? 'text-white/80' : 'text-zinc-500'
+                                              }`}>
+                                              {topic.description}
+                                            </p>
+                                            {topic.stances && (
+                                              <div className="flex items-center gap-2 mt-3">
+                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
+                                                  ? 'bg-emerald-400/30 text-emerald-100'
+                                                  : 'bg-emerald-100 text-emerald-700'
+                                                  }`}>
+                                                  {topic.stances.pro}
+                                                </span>
+                                                <span className={`text-[10px] ${isSelected ? 'text-white/50' : 'text-zinc-400'
+                                                  }`}>vs</span>
+                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
+                                                  ? 'bg-rose-400/30 text-rose-100'
+                                                  : 'bg-rose-100 text-rose-700'
+                                                  }`}>
+                                                  {topic.stances.con}
+                                                </span>
+                                              </div>
+                                            )}
+                                          </div>
                                         </div>
-                                      </div>
-                                    </motion.button>
-                                  ))}
+                                      </motion.button>
+                                    )
+                                  })}
                                 </div>
                               </motion.div>
                             )}

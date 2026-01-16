@@ -31,9 +31,11 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { context, fileUrl, fileName, mimeType } = body
+    const { context, fileUrl, fileName, mimeType, locale: bodyLocale } = body
 
     let textContent = context || ''
+    const acceptLanguage = request.headers.get('accept-language') || 'ko'
+    const locale = bodyLocale || (acceptLanguage.includes('en') ? 'en' : 'ko')
 
     if (fileUrl) {
       try {
@@ -80,32 +82,71 @@ export async function POST(request: NextRequest) {
       textContent.length > maxLength
         ? textContent.substring(0, maxLength) + '...'
         : textContent
+    const userPrompt =
+      locale === 'en'
+        ? `Based on the following learning material, generate discussion topics:\n\n${truncatedContent}\n\nPlease respond in English.`
+        : `다음 학습 자료를 바탕으로 토론 주제를 생성해주세요:\n\n${truncatedContent}\n\n한국어로 답변하세요.`
 
     console.log(
       '[generate-topics] Generating topics from content length:',
       truncatedContent.length
     )
 
-    const completion = await openai.chat.completions.create({
-      model: AI_MODEL,
-      messages: [
-        {
-          role: 'system',
-          content: TOPIC_GENERATION_PROMPT,
-        },
-        {
-          role: 'user',
-          content: `다음 학습 자료를 바탕으로 토론 주제를 생성해주세요:\n\n${truncatedContent}`,
-        },
-      ],
-      max_completion_tokens: 2000,
-      response_format: { type: 'json_object' },
-    })
+    const baseMessages = [
+      {
+        role: 'system' as const,
+        content: TOPIC_GENERATION_PROMPT,
+      },
+      {
+        role: 'user' as const,
+        content: userPrompt,
+      },
+    ]
 
-    const responseText = completion.choices[0]?.message?.content
+    const requestCompletion = async (extraInstruction?: string) => {
+      const completion = await openai.chat.completions.create({
+        model: AI_MODEL,
+        messages: extraInstruction
+          ? [
+              ...baseMessages,
+              { role: 'user', content: extraInstruction },
+            ]
+          : baseMessages,
+        max_completion_tokens: 2000,
+        response_format: { type: 'json_object' },
+      })
+      const choice = completion.choices[0]
+      const message = choice?.message
+      return {
+        text: message?.content?.trim() || '',
+        finishReason: choice?.finish_reason,
+        refusal: (message as { refusal?: string } | undefined)?.refusal,
+      }
+    }
+
+    let { text: responseText, finishReason, refusal } =
+      await requestCompletion()
 
     if (!responseText) {
-      throw new Error('GPT 응답이 비어있습니다.')
+      if (refusal || finishReason === 'content_filter') {
+        throw new Error(
+          '콘텐츠 안전 정책으로 인해 토론 주제를 생성할 수 없습니다.'
+        )
+      }
+
+      console.warn(
+        '[generate-topics] Empty response from model; retrying once.',
+        { finishReason }
+      )
+
+      const retry = await requestCompletion(
+        '응답이 비어있었습니다. 반드시 JSON만 출력하고 topics 배열을 비우지 마세요.'
+      )
+      responseText = retry.text
+
+      if (!responseText) {
+        throw new Error('GPT 응답이 비어있습니다.')
+      }
     }
 
     console.log('[generate-topics] GPT response:', responseText.substring(0, 200))

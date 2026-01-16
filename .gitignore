@@ -60,3 +60,4 @@ next-env.d.ts
 .agent/
 .cursor/
 .vscode/
+.git.bak/

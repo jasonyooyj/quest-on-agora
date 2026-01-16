@@ -600,6 +600,11 @@
             "generating": "AI가 주제를 분석하고 있습니다...",
             "results": "추천 토론 주제 ({count}개)",
             "selectHint": "클릭하여 선택하세요",
+            "difficulty": {
+              "easy": "쉬움",
+              "medium": "보통",
+              "hard": "어려움"
+            },
             "manualInput": "또는 직접 입력"
           },
           "topicLabel": "토론 주제",

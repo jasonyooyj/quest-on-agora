@@ -600,6 +600,11 @@
             "generating": "AI is analyzing topics...",
             "results": "Recommended Topics ({count})",
             "selectHint": "Click to select",
+            "difficulty": {
+              "easy": "Easy",
+              "medium": "Medium",
+              "hard": "Hard"
+            },
             "manualInput": "Or enter manually"
           },
           "topicLabel": "Discussion Topic",
