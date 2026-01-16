@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { updateParticipantSchema } from '@/lib/validations/discussion'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
-import { getCurrentUser, requireDiscussionOwner } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/auth'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -15,6 +15,7 @@ interface DiscussionSettings {
 }
 
 // GET /api/discussions/[id]/participants - Get participants
+// Accessible by: discussion owner (instructor) OR participants (students)
 export async function GET(request: NextRequest, { params }: RouteParams) {
     // Apply rate limiting
     const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'participants')
@@ -23,16 +24,39 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     try {
         const { id } = await params
 
-        // Verify user is authenticated, is an instructor, and owns this discussion
-        try {
-            await requireDiscussionOwner(id)
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unauthorized'
-            const status = message.includes('Forbidden') ? 403 : 401
-            return NextResponse.json({ error: message }, { status })
+        const user = await getCurrentUser()
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
         const supabase = await createSupabaseRouteClient()
+
+        // Check if user is the discussion owner (instructor)
+        const { data: discussion } = await supabase
+            .from('discussion_sessions')
+            .select('instructor_id')
+            .eq('id', id)
+            .single()
+
+        if (!discussion) {
+            return NextResponse.json({ error: 'Discussion not found' }, { status: 404 })
+        }
+
+        const isOwner = discussion.instructor_id === user.id
+
+        // If not owner, check if user is a participant
+        if (!isOwner) {
+            const { data: participant } = await supabase
+                .from('discussion_participants')
+                .select('id')
+                .eq('session_id', id)
+                .eq('student_id', user.id)
+                .single()
+
+            if (!participant) {
+                return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+            }
+        }
 
         const { data: participants, error } = await supabase
             .from('discussion_participants')

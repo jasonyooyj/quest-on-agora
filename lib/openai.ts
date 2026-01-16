@@ -35,4 +35,4 @@ export const openai = new Proxy({} as OpenAI, {
  * AI model identifier used across the app.
  * DO NOT MODIFY without explicit user approval - See CLAUDE.md
  */
-export const AI_MODEL = "gpt-5-mini";
+export const AI_MODEL = "gpt-5-mini-2025-08-07";

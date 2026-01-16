@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
 
         const chat = new ChatOpenAI({
             modelName: AI_MODEL,
-            temperature: 0.7,
             openAIApiKey: process.env.OPENAI_API_KEY,
         })
 

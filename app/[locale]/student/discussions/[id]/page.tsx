@@ -73,6 +73,8 @@ export default function StudentDiscussionPage() {
 
     // Stance Selection State
     const [isConfirmingStance, setIsConfirmingStance] = useState(false)
+    // Prevent modal reopening after stance selection (race condition with Realtime refetch)
+    const stanceSelectedRef = useRef(false)
 
     // Using React Query hooks
     const {
@@ -137,6 +139,9 @@ export default function StudentDiscussionPage() {
                 toast.error(t('toasts.stanceError'))
                 return
             }
+
+            // Mark stance as selected to prevent modal reopening from Realtime race condition
+            stanceSelectedRef.current = true
 
             // Optimistically update participant data to prevent modal from reopening
             queryClient.setQueryData(['discussion-participants', discussionId], (old: any[] = []) => {
@@ -375,11 +380,16 @@ export default function StudentDiscussionPage() {
         )
     }
 
-    // Check if stance needs to be selected
-    const needsStanceSelection = !participant?.stance && !showStanceSelector
+    // Reset stanceSelectedRef when participant.stance is confirmed from server
+    if (participant?.stance && stanceSelectedRef.current) {
+        stanceSelectedRef.current = false
+    }
+
+    // Check if stance needs to be selected (skip if stance was just selected to avoid race condition)
+    const needsStanceSelection = !participant?.stance && !showStanceSelector && !stanceSelectedRef.current
 
     // Auto-show stance selector if needed
-    if (needsStanceSelection && !showStanceSelector) {
+    if (needsStanceSelection) {
         // Use timeout to avoid bad setState during render
         setTimeout(() => setShowStanceSelector(true), 0)
     }

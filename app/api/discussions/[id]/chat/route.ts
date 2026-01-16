@@ -108,7 +108,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Initialize ChatOpenAI with streaming if requested
         const chat = new ChatOpenAI({
             modelName: AI_MODEL,
-            temperature: aiMode === 'debate' ? 0.7 : 0.5,
             openAIApiKey: process.env.OPENAI_API_KEY,
             streaming: stream,
         })

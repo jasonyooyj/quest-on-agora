@@ -72,21 +72,31 @@ export function useParticipantMessages(
               metadata: dbMessage.metadata ?? undefined,
             };
 
-            // Optimistically add the new message
+            // Update cache with the new message from server
             queryClient.setQueryData<DiscussionMessage[]>(
               ["discussion-messages", sessionId, participantId],
               (old = []) => {
                 // Check if message already exists to avoid duplicates
                 const exists = old.some((msg) => msg.id === newMessage.id);
                 if (exists) return old;
-                return [...old, newMessage];
+
+                // Remove optimistic temp messages that match the role and content
+                // This prevents duplicate display during Realtime sync
+                const filtered = old.filter((msg) => {
+                  // Keep messages with real IDs
+                  if (!msg.id.startsWith('temp-') && !msg.id.startsWith('ai-temp-')) {
+                    return true;
+                  }
+                  // Remove temp message if it matches the new message's role and content
+                  if (msg.role === newMessage.role && msg.content === newMessage.content) {
+                    return false;
+                  }
+                  return true;
+                });
+
+                return [...filtered, newMessage];
               }
             );
-
-            // Also invalidate to ensure we get the latest data from server
-            queryClient.invalidateQueries({
-              queryKey: ["discussion-messages", sessionId, participantId],
-            });
           }
         }
       )

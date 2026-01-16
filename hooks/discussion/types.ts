@@ -96,7 +96,7 @@ export const normalizePin = (
   raw: RawRecord,
   sessionId: string,
   index: number
-): PinnedQuote => ({
+): PinnedQuote & { participant?: { display_name?: string; stance?: string } } => ({
   id: raw.id,
   sessionId,
   participantId: raw.participant_id ?? undefined,
@@ -104,4 +104,5 @@ export const normalizePin = (
   displayName: raw.display_name ?? raw.participant?.display_name ?? undefined,
   pinnedAt: raw.pinned_at ?? raw.pinnedAt,
   sortOrder: raw.sort_order ?? raw.sortOrder ?? index,
+  participant: raw.participant ?? undefined,
 });

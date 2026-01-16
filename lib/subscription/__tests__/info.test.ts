@@ -239,12 +239,14 @@ describe('subscription/info', () => {
       const mockClient = {
         from: vi.fn().mockImplementation((table: string) => {
           if (table === 'organization_members') {
+            // Mock returns organization data as nested object from JOIN query
             return createChainableMock({
-              data: { organization_id: 'org-123', role: 'member' },
+              data: {
+                organization_id: 'org-123',
+                role: 'member',
+                organizations: { id: 'org-123', name: 'Test Organization' },
+              },
             })
-          }
-          if (table === 'organizations') {
-            return createChainableMock({ data: { name: 'Test Organization' } })
           }
           if (table === 'subscriptions') {
             return createChainableMock({ data: mockOrganizationSubscription })

@@ -32,9 +32,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .from('discussion_pinned_quotes')
       .select(`
         id,
-        quote,
-        context,
+        content,
+        display_name,
         pinned_at,
+        sort_order,
         participant:discussion_participants(display_name, stance)
       `)
       .eq('session_id', id)
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const adminClient = await createSupabaseAdminClient()
     const body = await request.json()
-    const { participantId, quote, context } = body
+    const { participantId, quote, displayName } = body
 
     if (!quote || !participantId) {
       return NextResponse.json(
@@ -81,15 +82,27 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
+    // Get the current max sort_order for this session
+    const { data: maxOrderData } = await adminClient
+      .from('discussion_pinned_quotes')
+      .select('sort_order')
+      .eq('session_id', id)
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .single()
+
+    const nextSortOrder = (maxOrderData?.sort_order ?? -1) + 1
+
     // Use admin client to bypass RLS for insert
     const { data: pin, error } = await adminClient
       .from('discussion_pinned_quotes')
       .insert({
         session_id: id,
         participant_id: participantId,
-        quote,
-        context: context || null,
-        pinned_at: new Date().toISOString()
+        content: quote,
+        display_name: displayName || null,
+        pinned_at: new Date().toISOString(),
+        sort_order: nextSortOrder
       })
       .select()
       .single()

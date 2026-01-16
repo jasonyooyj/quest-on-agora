@@ -1,19 +1,22 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { AlertTriangle, Info } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { AlertTriangle, Info, Sparkles } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 
 interface LimitWarningProps {
   type: 'discussion' | 'activeDiscussions'
   current: number
   limit: number | null
   className?: string
+  showUpgrade?: boolean
 }
 
-export function LimitWarning({ type, current, limit, className }: LimitWarningProps) {
+export function LimitWarning({ type, current, limit, className, showUpgrade = true }: LimitWarningProps) {
   const t = useTranslations('Subscription.limitWarning')
+  const locale = useLocale()
 
   if (limit === null) {
     // Unlimited - show info badge
@@ -51,7 +54,7 @@ export function LimitWarning({ type, current, limit, className }: LimitWarningPr
         <div className="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
           <AlertTriangle className="w-5 h-5" />
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-bold text-rose-800">
             {type === 'discussion' ? t('discussionLimitReached') : t('activeLimitReached')}
           </p>
@@ -59,6 +62,15 @@ export function LimitWarning({ type, current, limit, className }: LimitWarningPr
             {t('usedAll', { current, limit })}
           </p>
         </div>
+        {showUpgrade && (
+          <Link
+            href={`/${locale}/pricing`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-colors flex-shrink-0"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {t('upgrade')}
+          </Link>
+        )}
       </motion.div>
     )
   }
@@ -76,7 +88,7 @@ export function LimitWarning({ type, current, limit, className }: LimitWarningPr
         <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
           <AlertTriangle className="w-5 h-5" />
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-sm font-bold text-amber-800">
             {type === 'discussion' ? t('oneDiscussionLeft') : t('oneActiveLeft')}
           </p>
@@ -84,6 +96,15 @@ export function LimitWarning({ type, current, limit, className }: LimitWarningPr
             {t('used', { current, limit })}
           </p>
         </div>
+        {showUpgrade && (
+          <Link
+            href={`/${locale}/pricing`}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-colors flex-shrink-0"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            {t('upgrade')}
+          </Link>
+        )}
       </motion.div>
     )
   }

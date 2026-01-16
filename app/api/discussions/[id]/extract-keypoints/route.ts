@@ -102,7 +102,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         // Use LangChain to extract key points
         const chat = new ChatOpenAI({
             modelName: AI_MODEL,
-            temperature: 0.3,
             openAIApiKey: process.env.OPENAI_API_KEY,
         })
 

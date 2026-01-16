@@ -4,6 +4,11 @@ import { NextRequest } from 'next/server'
 // Mock all dependencies before importing route
 vi.mock('@/lib/supabase-server', () => ({
   createSupabaseRouteClient: vi.fn(),
+  createSupabaseServerClient: vi.fn(),
+}))
+
+vi.mock('@/lib/auth', () => ({
+  getCurrentUser: vi.fn(),
 }))
 
 vi.mock('@/lib/stripe', () => ({
@@ -30,8 +35,10 @@ import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createCheckoutSession as createStripeCheckout } from '@/lib/stripe'
 import { createCheckoutParams as createTossCheckout, isTossConfigured } from '@/lib/toss-payments'
 import { getPlanById, getSubscriptionInfo } from '@/lib/subscription'
+import { getCurrentUser } from '@/lib/auth'
 
 const mockCreateSupabaseRouteClient = vi.mocked(createSupabaseRouteClient)
+const mockGetCurrentUser = vi.mocked(getCurrentUser)
 const mockCreateStripeCheckout = vi.mocked(createStripeCheckout)
 const mockCreateTossCheckout = vi.mocked(createTossCheckout)
 const mockIsTossConfigured = vi.mocked(isTossConfigured)
@@ -100,13 +107,13 @@ describe('checkout API route', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     process.env.NEXT_PUBLIC_APP_URL = 'https://agora.edu'
+    // Default: user not authenticated
+    mockGetCurrentUser.mockResolvedValue(null)
   })
 
   describe('POST /api/checkout', () => {
     it('should return 401 when user is not authenticated', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient(null) as any
-      )
+      mockGetCurrentUser.mockResolvedValue(null)
 
       const request = createMockRequest({
         planId: '550e8400-e29b-41d4-a716-446655440001',
@@ -121,9 +128,12 @@ describe('checkout API route', () => {
     })
 
     it('should return 400 for invalid request body', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient({ id: 'user-123', email: 'test@example.com' }) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
 
       const request = createMockRequest({
         planId: 'invalid-uuid',
@@ -138,9 +148,12 @@ describe('checkout API route', () => {
     })
 
     it('should return 404 when plan is not found', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient({ id: 'user-123', email: 'test@example.com' }) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue(null)
 
       const request = createMockRequest({
@@ -156,9 +169,12 @@ describe('checkout API route', () => {
     })
 
     it('should return 400 when trying to subscribe to free plan', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient({ id: 'user-123', email: 'test@example.com' }) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-free',
         name: 'free',
@@ -178,9 +194,12 @@ describe('checkout API route', () => {
     })
 
     it('should return 400 for institution plan with contact info', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient({ id: 'user-123', email: 'test@example.com' }) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-institution',
         name: 'institution',
@@ -201,9 +220,12 @@ describe('checkout API route', () => {
     })
 
     it('should return 400 when user already has active subscription', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient({ id: 'user-123', email: 'test@example.com' }) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -228,12 +250,12 @@ describe('checkout API route', () => {
     })
 
     it('should create Stripe checkout session for non-Korean locale', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient(
-          { id: 'user-123', email: 'test@example.com' },
-          { name: 'Test User' }
-        ) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -275,12 +297,12 @@ describe('checkout API route', () => {
     it('should create Toss checkout params for Korean locale', async () => {
       process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY = 'toss_client_key'
 
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient(
-          { id: 'user-123', email: 'test@example.com' },
-          { name: '테스트 사용자' }
-        ) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: '테스트 사용자',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -292,9 +314,12 @@ describe('checkout API route', () => {
       } as any)
       mockIsTossConfigured.mockReturnValue(true)
       mockCreateTossCheckout.mockResolvedValue({
+        customerKey: 'agora_user-123',
         orderId: 'order_123',
         orderName: 'Pro Plan',
         amount: 29000,
+        successUrl: 'https://agora.edu/checkout/success',
+        failUrl: 'https://agora.edu/checkout/fail',
       })
 
       const request = createMockRequest({
@@ -315,12 +340,12 @@ describe('checkout API route', () => {
     })
 
     it('should fall back to Stripe when Toss is not configured', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient(
-          { id: 'user-123', email: 'test@example.com' },
-          { name: '테스트 사용자' }
-        ) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: '테스트 사용자',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -350,12 +375,12 @@ describe('checkout API route', () => {
     })
 
     it('should use explicit payment provider when specified', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient(
-          { id: 'user-123', email: 'test@example.com' },
-          { name: 'Test User' }
-        ) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -386,12 +411,12 @@ describe('checkout API route', () => {
     })
 
     it('should handle checkout errors gracefully', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue(
-        createMockSupabaseClient(
-          { id: 'user-123', email: 'test@example.com' },
-          { name: 'Test User' }
-        ) as any
-      )
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -417,21 +442,12 @@ describe('checkout API route', () => {
     })
 
     it('should return 400 when user has no email', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue({
-        auth: {
-          getUser: vi.fn().mockResolvedValue({
-            data: { user: { id: 'user-123', email: null } },
-            error: null,
-          }),
-        },
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({ data: null }),
-            }),
-          }),
-        }),
-      } as any)
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: '', // Empty email
+        name: 'Test User',
+        role: 'instructor',
+      })
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',

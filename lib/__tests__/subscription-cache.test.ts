@@ -252,8 +252,8 @@ describe('subscription-cache', () => {
       // Should be cached
       expect(getCachedSubscriptionInfo('user-123', 'ko')).not.toBeNull()
 
-      // Advance time past TTL (30 seconds)
-      vi.advanceTimersByTime(31 * 1000)
+      // Advance time past TTL (5 minutes)
+      vi.advanceTimersByTime(5 * 60 * 1000 + 1000)
 
       // Should be expired now
       const result = getCachedSubscriptionInfo('user-123', 'ko')
@@ -531,8 +531,8 @@ describe('subscription-cache', () => {
 
       expect(stats).toMatchObject({
         size: 0,
-        ttlMs: 30000, // 30 seconds
-        cleanupIntervalMs: 300000, // 5 minutes
+        ttlMs: 300000, // 5 minutes (PERF-002 optimization)
+        cleanupIntervalMs: 900000, // 15 minutes
       })
 
       const mockInfo = {
@@ -630,8 +630,8 @@ describe('subscription-cache', () => {
       setCachedSubscriptionInfo('user-1', mockInfo)
       expect(getSubscriptionCacheStats().size).toBe(1)
 
-      // Advance past TTL (30 seconds)
-      vi.advanceTimersByTime(31 * 1000)
+      // Advance past TTL (5 minutes)
+      vi.advanceTimersByTime(5 * 60 * 1000 + 1000)
 
       // Entry should be expired but not cleaned up yet
       // (cleanup happens on next cache access after 5 min interval)

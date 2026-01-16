@@ -121,7 +121,8 @@
       "oneActiveLeft": "진행 중인 토론 1개만 더 추가할 수 있습니다",
       "used": "{current}/{limit} 사용됨",
       "remaining": "{remaining}개 남음",
-      "available": "{current}/{limit} 사용 가능"
+      "available": "{current}/{limit} 사용 가능",
+      "upgrade": "업그레이드"
     },
     "featureBadge": {
       "institution": "기관 전용",

@@ -121,7 +121,8 @@
       "oneActiveLeft": "Only 1 more active discussion available",
       "used": "{current}/{limit} used",
       "remaining": "{remaining} remaining",
-      "available": "{current}/{limit} available"
+      "available": "{current}/{limit} available",
+      "upgrade": "Upgrade"
     },
     "featureBadge": {
       "institution": "Institution Only",
