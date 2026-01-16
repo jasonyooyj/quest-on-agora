@@ -30,13 +30,16 @@ import {
   ChevronDown,
   ChevronUp,
   Save,
-  RotateCcw
+  RotateCcw,
+  Lock
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
 import { Switch } from '@/components/ui/switch'
 import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
 import { useTranslations, useFormatter, useLocale } from 'next-intl'
+import { useSubscription, canCreateDiscussion } from '@/hooks/useSubscription'
+import { LimitWarning, UpgradePrompt } from '@/components/subscription'
 
 const discussionSchema = (t: any) => z.object({
   title: z.string().min(2, t('validation.titleMin')).max(100, t('validation.titleMax')),
@@ -94,7 +97,7 @@ export default function NewDiscussionPage() {
   const t = useTranslations('Instructor.NewDiscussion')
   const locale = useLocale()
   const format = useFormatter()
-  
+
   const aiModeOptions = aiModeOptionsBase.map(option => ({
     ...option,
     label: t(`phases.aiTutor.modes.${option.value}.label`),
@@ -103,6 +106,10 @@ export default function NewDiscussionPage() {
 
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+
+  // Subscription check
+  const { subscription, isLoading: isLoadingSubscription } = useSubscription()
+  const createCheck = canCreateDiscussion(subscription)
   const [anonymous, setAnonymous] = useState(true)
   const [useCustomStances, setUseCustomStances] = useState(false)
   const [stanceLabels, setStanceLabels] = useState({ pro: t('phases.environment.stances.pro'), con: t('phases.environment.stances.con') })
@@ -261,7 +268,7 @@ export default function NewDiscussionPage() {
     return () => {
       if (previewTimeoutRef.current) clearTimeout(previewTimeoutRef.current)
     }
-  }, [title, description])
+  }, [title, description, locale])
 
   const handleGenerateTopics = async () => {
     if (!learningMaterial.trim()) {
@@ -274,7 +281,7 @@ export default function NewDiscussionPage() {
     setSelectedTopicIndex(null)
 
     try {
-      const response = await fetch('/api/discussion/generate-topics', {
+      const response = await fetch('/api/discussions/generate-topics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ context: learningMaterial })
@@ -483,6 +490,37 @@ export default function NewDiscussionPage() {
               brClass: () => <br />
             })}
           </p>
+
+          {/* Limit Warning Banner */}
+          <AnimatePresence>
+            {!isLoadingSubscription && !createCheck.allowed && (
+              <UpgradePrompt
+                type={createCheck.reason === 'active_limit' ? 'activeDiscussions' : 'discussion'}
+                current={createCheck.current}
+                limit={createCheck.limit ?? undefined}
+                variant="banner"
+                className="mb-8"
+              />
+            )}
+            {!isLoadingSubscription && createCheck.allowed && subscription && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-4 mb-8"
+              >
+                <LimitWarning
+                  type="discussion"
+                  current={subscription.usage.discussionsCreatedThisMonth}
+                  limit={subscription.limits.maxDiscussionsPerMonth}
+                />
+                <LimitWarning
+                  type="activeDiscussions"
+                  current={subscription.usage.activeDiscussions}
+                  limit={subscription.limits.maxActiveDiscussions}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
             {/* Phase 1: Topic & Description */}
@@ -1062,13 +1100,18 @@ export default function NewDiscussionPage() {
             <div className="flex flex-col md:flex-row justify-center items-center gap-6 pt-12 pb-20">
               <button
                 type="submit"
-                disabled={isLoading}
-                className="h-20 w-full md:w-[350px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-xl flex items-center justify-center gap-4 transition-all hover:shadow-[0_0_60px_rgba(99,102,241,0.4)] hover:-translate-y-1.5 active:scale-95 disabled:opacity-50 group"
+                disabled={isLoading || !createCheck.allowed}
+                className="h-20 w-full md:w-[350px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-xl flex items-center justify-center gap-4 transition-all hover:shadow-[0_0_60px_rgba(99,102,241,0.4)] hover:-translate-y-1.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="w-6 h-6 animate-spin" />
                     {t('buttons.submitting')}
+                  </>
+                ) : !createCheck.allowed ? (
+                  <>
+                    <Lock className="w-6 h-6" />
+                    {t('buttons.limitReached')}
                   </>
                 ) : (
                   <>

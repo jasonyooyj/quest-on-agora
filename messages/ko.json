@@ -59,10 +59,80 @@
     "back": "대시보드로 돌아가기",
     "sections": {
       "account": "계정",
-      "preferences": "환경설정"
+      "preferences": "환경설정",
+      "subscription": "구독 및 결제"
     },
     "loading": "설정을 불러오는 중...",
     "comingSoon": "이 섹션은 준비 중입니다."
+  },
+  "Subscription": {
+    "title": "구독 플랜",
+    "upgrade": "업그레이드",
+    "upgradeToPro": "Pro로 업그레이드",
+    "individualPlan": "개인 플랜",
+    "organization": "{name} 기관 플랜",
+    "usageThisMonth": "이번 달 사용량",
+    "includedFeatures": "포함된 기능",
+    "usage": {
+      "discussions": "생성한 토론",
+      "activeDiscussions": "진행 중인 토론",
+      "maxParticipants": "토론당 참가자",
+      "perDiscussion": " (최대)"
+    },
+    "features": {
+      "analytics": "상세 분석",
+      "export": "데이터 내보내기",
+      "reports": "보고서 생성",
+      "customAiModes": "커스텀 AI 모드",
+      "prioritySupport": "우선 지원"
+    },
+    "trial": {
+      "badge": "체험 중",
+      "daysRemaining": "{days}일 남음",
+      "expiringSoon": "체험 기간이 {days}일 남았습니다",
+      "expiresOn": "{date}에 종료됩니다",
+      "subscribe": "구독하기"
+    },
+    "status": {
+      "pastDue": "결제 지연"
+    },
+    "billing": {
+      "renewsOn": "{date}에 갱신됩니다",
+      "cancelsOn": "{date}에 취소됩니다",
+      "manage": "결제 관리"
+    },
+    "upgradePrompt": {
+      "discussion": "이번 달 토론 생성 한도({current}/{limit})에 도달했습니다",
+      "activeDiscussions": "동시 진행 가능한 토론 수({current}/{limit})에 도달했습니다",
+      "participants": "토론당 최대 {limit}명까지 참여 가능합니다",
+      "feature": "{feature} 기능은 Pro 플랜에서 사용 가능합니다",
+      "default": "더 많은 기능을 사용하려면 업그레이드하세요",
+      "upgradeToUnlock": "Pro 플랜으로 업그레이드하여 한도를 늘려보세요",
+      "limitReached": "한도에 도달했습니다",
+      "viewPlans": "플랜 보기",
+      "maybeLater": "나중에"
+    },
+    "limitWarning": {
+      "unlimited": "무제한",
+      "discussionLimitReached": "이번 달 토론 생성 한도에 도달했습니다",
+      "activeLimitReached": "동시 진행 가능한 토론 수에 도달했습니다",
+      "usedAll": "{current}/{limit} 모두 사용됨",
+      "oneDiscussionLeft": "토론 1개만 더 생성할 수 있습니다",
+      "oneActiveLeft": "진행 중인 토론 1개만 더 추가할 수 있습니다",
+      "used": "{current}/{limit} 사용됨",
+      "remaining": "{remaining}개 남음",
+      "available": "{current}/{limit} 사용 가능"
+    },
+    "featureBadge": {
+      "institution": "기관 전용",
+      "proRequired": "Pro 플랜이 필요합니다",
+      "institutionRequired": "기관 플랜이 필요합니다"
+    },
+    "dashboard": {
+      "planInfo": "플랜 정보",
+      "currentPlan": "현재 플랜",
+      "usageOverview": "사용량 현황"
+    }
   },
   "Marquee": {
     "items": {
@@ -609,7 +679,8 @@
       "buttons": {
         "submit": "토론 공간 개설하기",
         "submitting": "저장 중...",
-        "cancel": "나중에 만들기 (취소)"
+        "cancel": "나중에 만들기 (취소)",
+        "limitReached": "한도 초과"
       },
       "draft": {
         "saved": "임시저장됨 · {time}",

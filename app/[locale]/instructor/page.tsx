@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslations, useFormatter } from 'next-intl'
 import {
   Plus,
@@ -17,7 +17,9 @@ import {
   LogOut,
   ArrowRight,
   Activity,
-  Link2
+  Link2,
+  Crown,
+  Zap
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -29,6 +31,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { useSubscription, canCreateDiscussion } from '@/hooks/useSubscription'
+import { SubscriptionCard, LimitWarning, UpgradePrompt } from '@/components/subscription'
 
 interface Discussion {
   id: string
@@ -50,11 +54,14 @@ interface UserProfile {
 
 export default function InstructorDashboard() {
   const t = useTranslations('Instructor.Dashboard')
+  const tSub = useTranslations('Subscription')
   const format = useFormatter()
   const router = useRouter()
   const [discussions, setDiscussions] = useState<Discussion[]>([])
   const [user, setUser] = useState<UserProfile | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const { subscription, isLoading: isLoadingSubscription } = useSubscription()
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false)
 
   const loadUserAndDiscussions = useCallback(async () => {
     try {
@@ -183,6 +190,17 @@ export default function InstructorDashboard() {
   const activeCount = discussions.filter(d => d.status === 'active').length
   const totalParticipants = discussions.reduce((acc, d) => acc + (d.participant_count || 0), 0)
 
+  // Check if user can create new discussion
+  const createCheck = canCreateDiscussion(subscription)
+
+  const handleNewDiscussion = () => {
+    if (!createCheck.allowed) {
+      setShowUpgradePrompt(true)
+      return
+    }
+    router.push('/instructor/discussions/new')
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -215,12 +233,13 @@ export default function InstructorDashboard() {
             </Link>
 
             <div className="flex items-center gap-6">
-              <Link href="/instructor/discussions/new">
-                <button className="group relative h-12 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-full px-6 transition-all hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 active:scale-95 flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
-                  <span>{t('header.newDiscussion')}</span>
-                </button>
-              </Link>
+              <button
+                onClick={handleNewDiscussion}
+                className="group relative h-12 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold rounded-full px-6 transition-all hover:shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:-translate-y-0.5 active:scale-95 flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{t('header.newDiscussion')}</span>
+              </button>
 
               <ProfileMenu
                 name={user?.name}
@@ -261,47 +280,103 @@ export default function InstructorDashboard() {
           </p>
         </motion.div>
 
-        {/* Stats */}
+        {/* Upgrade Prompt Modal */}
+        <AnimatePresence>
+          {showUpgradePrompt && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+              onClick={() => setShowUpgradePrompt(false)}
+            >
+              <motion.div onClick={(e) => e.stopPropagation()}>
+                <UpgradePrompt
+                  type={createCheck.reason === 'active_limit' ? 'activeDiscussions' : 'discussion'}
+                  current={createCheck.current}
+                  limit={createCheck.limit ?? undefined}
+                  variant="modal"
+                  onDismiss={() => setShowUpgradePrompt(false)}
+                />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Subscription Card & Stats */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16"
         >
-          <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="p-3 rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
-                <MessageCircle className="w-6 h-6" />
+          {/* Subscription Usage Card */}
+          <div className="lg:col-span-1">
+            {subscription && !isLoadingSubscription ? (
+              <SubscriptionCard subscription={subscription} compact />
+            ) : (
+              <div className="p-4 rounded-2xl border border-zinc-200 bg-white/90 animate-pulse">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-200" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-20 rounded bg-zinc-200" />
+                    <div className="h-3 w-16 rounded bg-zinc-200" />
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-2 w-full rounded bg-zinc-200" />
+                  <div className="h-2 w-3/4 rounded bg-zinc-200" />
+                </div>
               </div>
-              <span className="text-4xl font-bold tracking-tight text-zinc-900">
-                {discussions.length}
-              </span>
-            </div>
-            <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.totalSessions')}</p>
+            )}
           </div>
 
-          <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110">
-                <Activity className="w-6 h-6" />
+          {/* Stats Cards */}
+          <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                  <MessageCircle className="w-6 h-6" />
+                </div>
+                <span className="text-4xl font-bold tracking-tight text-zinc-900">
+                  {discussions.length}
+                </span>
               </div>
-              <span className="text-4xl font-bold tracking-tight text-zinc-900">
-                {activeCount}
-              </span>
+              <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.totalSessions')}</p>
             </div>
-            <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.activeSessions')}</p>
-          </div>
 
-          <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-500 transition-transform group-hover:scale-110">
-                <Users className="w-6 h-6" />
+            <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm relative">
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-500 transition-transform group-hover:scale-110">
+                  <Activity className="w-6 h-6" />
+                </div>
+                <span className="text-4xl font-bold tracking-tight text-zinc-900">
+                  {activeCount}
+                </span>
               </div>
-              <span className="text-4xl font-bold tracking-tight text-zinc-900">
-                {totalParticipants}
-              </span>
+              <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.activeSessions')}</p>
+              {subscription && (
+                <div className="absolute top-3 right-3">
+                  <LimitWarning
+                    type="activeDiscussions"
+                    current={subscription.usage.activeDiscussions}
+                    limit={subscription.limits.maxActiveDiscussions}
+                  />
+                </div>
+              )}
             </div>
-            <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.totalParticipants')}</p>
+
+            <div className="glass-panel p-8 bg-white/90 border-zinc-200 hover:border-zinc-300 transition-all group shadow-sm">
+              <div className="flex items-center justify-between mb-6">
+                <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-500 transition-transform group-hover:scale-110">
+                  <Users className="w-6 h-6" />
+                </div>
+                <span className="text-4xl font-bold tracking-tight text-zinc-900">
+                  {totalParticipants}
+                </span>
+              </div>
+              <p className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.totalParticipants')}</p>
+            </div>
           </div>
         </motion.div>
 

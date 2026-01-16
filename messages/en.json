@@ -59,10 +59,80 @@
     "back": "Back to dashboard",
     "sections": {
       "account": "Account",
-      "preferences": "Preferences"
+      "preferences": "Preferences",
+      "subscription": "Subscription & Billing"
     },
     "loading": "Loading settings...",
     "comingSoon": "This section is coming soon."
+  },
+  "Subscription": {
+    "title": "Subscription Plan",
+    "upgrade": "Upgrade",
+    "upgradeToPro": "Upgrade to Pro",
+    "individualPlan": "Individual Plan",
+    "organization": "{name} Organization Plan",
+    "usageThisMonth": "Usage This Month",
+    "includedFeatures": "Included Features",
+    "usage": {
+      "discussions": "Discussions Created",
+      "activeDiscussions": "Active Discussions",
+      "maxParticipants": "Participants per Discussion",
+      "perDiscussion": " (max)"
+    },
+    "features": {
+      "analytics": "Detailed Analytics",
+      "export": "Data Export",
+      "reports": "Report Generation",
+      "customAiModes": "Custom AI Modes",
+      "prioritySupport": "Priority Support"
+    },
+    "trial": {
+      "badge": "Trial",
+      "daysRemaining": "{days} days left",
+      "expiringSoon": "Your trial expires in {days} days",
+      "expiresOn": "Ends on {date}",
+      "subscribe": "Subscribe Now"
+    },
+    "status": {
+      "pastDue": "Past Due"
+    },
+    "billing": {
+      "renewsOn": "Renews on {date}",
+      "cancelsOn": "Cancels on {date}",
+      "manage": "Manage Billing"
+    },
+    "upgradePrompt": {
+      "discussion": "You've reached your monthly discussion limit ({current}/{limit})",
+      "activeDiscussions": "You've reached your active discussions limit ({current}/{limit})",
+      "participants": "Up to {limit} participants allowed per discussion",
+      "feature": "{feature} is available with the Pro plan",
+      "default": "Upgrade to unlock more features",
+      "upgradeToUnlock": "Upgrade to Pro to increase your limits",
+      "limitReached": "Limit Reached",
+      "viewPlans": "View Plans",
+      "maybeLater": "Maybe Later"
+    },
+    "limitWarning": {
+      "unlimited": "Unlimited",
+      "discussionLimitReached": "You've reached your monthly discussion limit",
+      "activeLimitReached": "You've reached your active discussions limit",
+      "usedAll": "{current}/{limit} all used",
+      "oneDiscussionLeft": "Only 1 discussion left to create",
+      "oneActiveLeft": "Only 1 more active discussion available",
+      "used": "{current}/{limit} used",
+      "remaining": "{remaining} remaining",
+      "available": "{current}/{limit} available"
+    },
+    "featureBadge": {
+      "institution": "Institution Only",
+      "proRequired": "Requires Pro plan",
+      "institutionRequired": "Requires Institution plan"
+    },
+    "dashboard": {
+      "planInfo": "Plan Info",
+      "currentPlan": "Current Plan",
+      "usageOverview": "Usage Overview"
+    }
   },
   "Marquee": {
     "items": {
@@ -609,7 +679,8 @@
       "buttons": {
         "submit": "Create Discussion Space",
         "submitting": "Saving...",
-        "cancel": "Create Later (Cancel)"
+        "cancel": "Create Later (Cancel)",
+        "limitReached": "Limit Reached"
       },
       "draft": {
         "saved": "Draft saved · {time}",

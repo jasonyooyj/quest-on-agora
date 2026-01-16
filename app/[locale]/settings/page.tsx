@@ -3,16 +3,19 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Settings2, Sliders, User } from "lucide-react";
+import { ArrowLeft, Settings2, Sliders, User, CreditCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getSupabaseClient } from "@/lib/supabase-client";
 import { ProfileMenuAuto } from "@/components/profile/ProfileMenuAuto";
+import { useSubscription } from "@/hooks/useSubscription";
+import { SubscriptionCard } from "@/components/subscription";
 
 export default function SettingsPage() {
   const t = useTranslations("Settings");
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { subscription, isLoading: isLoadingSubscription } = useSubscription();
 
   useEffect(() => {
     let isMounted = true;
@@ -97,6 +100,38 @@ export default function SettingsPage() {
         <div className="mb-8">
           <p className="text-zinc-600 text-lg">{t("subtitle")}</p>
         </div>
+
+        {/* Subscription Section */}
+        {role === "instructor" && (
+          <section className="mb-8">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center">
+                <CreditCard className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900">{t("sections.subscription")}</h2>
+              </div>
+            </div>
+            {subscription && !isLoadingSubscription ? (
+              <SubscriptionCard subscription={subscription} />
+            ) : (
+              <div className="glass-panel bg-white/90 border-zinc-200 p-8 rounded-3xl shadow-sm animate-pulse">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-14 h-14 rounded-2xl bg-zinc-200" />
+                  <div className="space-y-2">
+                    <div className="h-6 w-32 rounded bg-zinc-200" />
+                    <div className="h-4 w-24 rounded bg-zinc-200" />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-2 w-full rounded bg-zinc-200" />
+                  <div className="h-2 w-3/4 rounded bg-zinc-200" />
+                  <div className="h-2 w-1/2 rounded bg-zinc-200" />
+                </div>
+              </div>
+            )}
+          </section>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <section className="glass-panel bg-white/90 border-zinc-200 p-6 rounded-3xl shadow-sm">
