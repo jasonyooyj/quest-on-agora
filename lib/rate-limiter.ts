@@ -141,3 +141,44 @@ export const RATE_LIMITS = {
   // Webhooks - allow more for legitimate providers
   webhook: { limit: 100, windowSeconds: 60 }, // 100 per minute
 } as const
+
+/**
+ * Apply rate limiting to a request
+ * Returns a Response object if rate limit exceeded, null otherwise
+ *
+ * @param request - The incoming request
+ * @param config - Rate limit configuration (use RATE_LIMITS preset)
+ * @param prefix - Optional prefix for the identifier (e.g., route name)
+ * @returns Response if rate limited, null if allowed
+ */
+export function applyRateLimit(
+  request: Request,
+  config: RateLimitConfig,
+  prefix?: string
+): Response | null {
+  const clientIP = getClientIP(request)
+  const identifier = prefix ? `${prefix}:${clientIP}` : clientIP
+  const result = checkRateLimit(identifier, config)
+
+  if (!result.success) {
+    return new Response(
+      JSON.stringify({
+        error: 'Too many requests',
+        code: 'RATE_LIMIT_EXCEEDED',
+        retryAfter: Math.ceil((result.resetAt - Date.now()) / 1000),
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-RateLimit-Limit': result.limit.toString(),
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': result.resetAt.toString(),
+          'Retry-After': Math.ceil((result.resetAt - Date.now()) / 1000).toString(),
+        },
+      }
+    )
+  }
+
+  return null
+}

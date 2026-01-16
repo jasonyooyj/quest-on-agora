@@ -1,11 +1,16 @@
 import { createSupabaseRouteClient } from "@/lib/supabase-server";
 import { NextResponse } from "next/server";
 import type { DiscussionMessage } from "@/types/discussion";
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'discussion-messages')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params;
         const { searchParams } = new URL(request.url);

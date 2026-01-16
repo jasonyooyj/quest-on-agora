@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 // Create a Supabase admin client with service role key (bypasses RLS)
 function getSupabaseAdmin() {
@@ -20,6 +21,10 @@ function getSupabaseAdmin() {
 }
 
 export async function POST(request: NextRequest) {
+    // Apply rate limiting for auth endpoints
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.auth, 'auth-onboarding')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const supabase = await createSupabaseRouteClient()
 

@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createSupabaseRouteClient } from "@/lib/supabase-server";
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // GET /api/discussion/participant/[participantId]/note - Get instructor note
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ participantId: string }> }
 ) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'instructor-note')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const user = await getCurrentUser();
     if (!user) {
@@ -81,6 +86,10 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ participantId: string }> }
 ) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'instructor-note')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const user = await getCurrentUser();
     if (!user) {

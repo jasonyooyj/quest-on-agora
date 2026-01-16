@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -7,6 +8,10 @@ interface RouteParams {
 
 // GET /api/discussions/[id] - Get a specific discussion
 export async function GET(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'discussion')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()
@@ -62,6 +67,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // PATCH /api/discussions/[id] - Update a discussion
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'discussion')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()
@@ -118,6 +127,10 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/discussions/[id] - Delete a discussion
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'discussion')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()

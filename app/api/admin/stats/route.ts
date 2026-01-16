@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { isAdmin } from '@/lib/admin'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'admin-stats')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const supabase = await createSupabaseRouteClient()
 

@@ -11,6 +11,7 @@ import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createCheckoutSession as createStripeCheckout } from '@/lib/stripe'
 import { createCheckoutParams as createTossCheckout, isTossConfigured } from '@/lib/toss-payments'
 import { getPlanById, getSubscriptionInfo } from '@/lib/subscription'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { z } from 'zod'
 
 // Request validation schema
@@ -22,6 +23,10 @@ const checkoutSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'checkout')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const supabase = await createSupabaseRouteClient()
 
@@ -146,7 +151,11 @@ export async function POST(request: NextRequest) {
 /**
  * GET /api/checkout - Get available plans for checkout
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'checkout')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const supabase = await createSupabaseRouteClient()
 

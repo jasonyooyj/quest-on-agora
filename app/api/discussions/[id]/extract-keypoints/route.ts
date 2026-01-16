@@ -5,6 +5,7 @@ import { StringOutputParser } from "@langchain/core/output_parsers"
 import { RunnableSequence } from "@langchain/core/runnables"
 import { AI_MODEL } from '@/lib/openai'
 import { KEY_POINTS_EXTRACTION_PROMPT } from '@/lib/prompts'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -13,6 +14,10 @@ interface RouteParams {
 // POST /api/discussions/[id]/extract-keypoints
 // Extract key discussion points from conversation history for final reflection
 export async function POST(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting for AI endpoints
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ai, 'extract-keypoints')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id: sessionId } = await params
         const supabase = await createSupabaseRouteClient()

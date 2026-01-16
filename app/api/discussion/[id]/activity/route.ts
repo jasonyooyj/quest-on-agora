@@ -1,10 +1,15 @@
 import { createSupabaseRouteClient } from "@/lib/supabase-server";
 import { NextResponse } from "next/server";
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export async function GET(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'activity')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params;
         const supabase = await createSupabaseRouteClient();

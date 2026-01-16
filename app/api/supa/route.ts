@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentUser } from "@/lib/auth";
 import { compressData } from "@/lib/compression";
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 
 // Lazy-load Supabase client to avoid build-time errors
@@ -17,6 +18,10 @@ function getSupabaseClient() {
 }
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'supa')
+  if (rateLimitResponse) return rateLimitResponse
+
   let supabase;
   try {
     supabase = getSupabaseClient();

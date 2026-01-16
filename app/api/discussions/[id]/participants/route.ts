@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { updateParticipantSchema } from '@/lib/validations/discussion'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -14,6 +15,10 @@ interface DiscussionSettings {
 
 // GET /api/discussions/[id]/participants - Get participants
 export async function GET(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'participants')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()
@@ -55,6 +60,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // POST /api/discussions/[id]/participants - Join a discussion
 export async function POST(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'participants')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()
@@ -142,6 +151,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
 // PATCH /api/discussions/[id]/participants - Update participant status
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'participants')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()

@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { createSupabaseRouteClient } from "@/lib/supabase-server";
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 // 프로필 조회
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'student-profile')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const user = await getCurrentUser();
 
@@ -59,6 +64,10 @@ export async function GET() {
 
 // 프로필 생성/업데이트
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'student-profile')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const user = await getCurrentUser();
 

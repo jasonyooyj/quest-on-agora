@@ -8,6 +8,7 @@ import { HumanMessage, SystemMessage, AIMessage } from "@langchain/core/messages
 import { AI_MODEL } from '@/lib/openai'
 import { sendMessageSchema } from '@/lib/validations/discussion'
 import { IterableReadableStream } from "@langchain/core/utils/stream"
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -26,6 +27,10 @@ import { getDiscussionPromptTemplate, getWrapupPromptTemplate } from '@/lib/prom
 // Now handling via imported getDiscussionSystemPrompt
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting for AI endpoints
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ai, 'ai-chat')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()

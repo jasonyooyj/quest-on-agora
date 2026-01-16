@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { isAdmin } from '@/lib/admin'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 // Default settings
 const DEFAULT_SETTINGS = {
@@ -14,7 +15,11 @@ const DEFAULT_SETTINGS = {
   maxParticipantsPerDiscussion: 100
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'admin-settings')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const supabase = await createSupabaseRouteClient()
 
@@ -59,6 +64,10 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'admin-settings')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const supabase = await createSupabaseRouteClient()
 

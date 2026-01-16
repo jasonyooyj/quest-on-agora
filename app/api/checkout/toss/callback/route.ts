@@ -16,6 +16,7 @@ import {
 } from '@/lib/toss-payments'
 import { createSubscription, getPlanById } from '@/lib/subscription'
 import { z } from 'zod'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 // Request validation schema for one-time payment confirmation
 const confirmSchema = z.object({
@@ -35,6 +36,10 @@ const billingKeySchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'toss-callback')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const supabase = await createSupabaseRouteClient()
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
   params: Promise<{ code: string }>
@@ -13,6 +14,10 @@ interface DiscussionSettings {
 
 // POST /api/join/[code] - Join a discussion via join code
 export async function POST(request: NextRequest, { params }: RouteParams) {
+  // Apply rate limiting to prevent brute force attacks on join codes
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.join, 'join')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const { code } = await params
     const joinCode = code.toUpperCase()

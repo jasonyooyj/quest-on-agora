@@ -10,8 +10,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createCustomerPortalSession } from '@/lib/stripe'
 import { getSubscriptionInfo } from '@/lib/subscription'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'billing-portal')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const supabase = await createSupabaseRouteClient()
 

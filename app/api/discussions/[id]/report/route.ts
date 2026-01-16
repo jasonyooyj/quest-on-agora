@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { openai, AI_MODEL } from '@/lib/openai'
 import { DISCUSSION_REPORT_SYSTEM_PROMPT } from '@/lib/prompts'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -24,6 +25,10 @@ interface Message {
 
 // GET /api/discussions/[id]/report - Generate discussion report
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  // Apply rate limiting for AI endpoints
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ai, 'report')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const { id } = await params
     const supabase = await createSupabaseRouteClient()

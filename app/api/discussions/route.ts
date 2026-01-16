@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createDiscussionSchema } from '@/lib/validations/discussion'
 import { checkLimitAccess, incrementUsage, getSubscriptionInfo } from '@/lib/subscription'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 // Types for Supabase responses
 interface DiscussionSession {
@@ -26,7 +27,11 @@ interface Participation {
 }
 
 // GET /api/discussions - Get all discussions for current user
-export async function GET() {
+export async function GET(request: NextRequest) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'discussions')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const supabase = await createSupabaseRouteClient()
 
@@ -103,6 +108,10 @@ export async function GET() {
 
 // POST /api/discussions - Create a new discussion
 export async function POST(request: NextRequest) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'discussions')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const supabase = await createSupabaseRouteClient()
 

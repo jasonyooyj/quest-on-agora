@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { openai, AI_MODEL } from "@/lib/openai";
 import { TOPIC_GENERATION_PROMPT } from '@/lib/prompts'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter';
 
 export const runtime = "nodejs";
 
@@ -15,6 +16,10 @@ interface GeneratedTopic {
 }
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting for AI endpoints
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ai, 'generate-topics')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     // 인증 확인
     const user = await getCurrentUser();

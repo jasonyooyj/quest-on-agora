@@ -4,6 +4,7 @@ import { PromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
 import { RunnableSequence } from "@langchain/core/runnables"
 import { AI_MODEL } from '@/lib/openai'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 // Standard prompts from chat route
 import { getDiscussionPromptTemplate } from '@/lib/prompts'
@@ -12,6 +13,10 @@ import { getDiscussionPromptTemplate } from '@/lib/prompts'
 // Now handling via imported getDiscussionSystemPrompt
 
 export async function POST(request: NextRequest) {
+    // Apply rate limiting for AI endpoints
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.ai, 'discussion-preview')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const body = await request.json()
         const { title, description, locale } = body

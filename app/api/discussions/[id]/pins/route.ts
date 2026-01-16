@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -7,6 +8,10 @@ interface RouteParams {
 
 // GET /api/discussions/[id]/pins - Get pinned quotes
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'pins')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const { id } = await params
     const supabase = await createSupabaseRouteClient()
@@ -56,6 +61,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // POST /api/discussions/[id]/pins - Pin a quote
 export async function POST(request: NextRequest, { params }: RouteParams) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'pins')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const { id } = await params
     const supabase = await createSupabaseRouteClient()
@@ -115,6 +124,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/discussions/[id]/pins - Unpin a quote
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'pins')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const { id } = await params
     const supabase = await createSupabaseRouteClient()

@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 interface RouteParams {
     params: Promise<{ id: string }>
@@ -9,6 +10,10 @@ interface RouteParams {
 
 // GET /api/discussions/[id]/comments - Get comments for a participant
 export async function GET(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'comments')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id: sessionId } = await params
         const supabase = await createSupabaseRouteClient()
@@ -40,6 +45,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 // POST /api/discussions/[id]/comments - Add a comment
 export async function POST(request: NextRequest, { params }: RouteParams) {
+    // Apply rate limiting
+    const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'comments')
+    if (rateLimitResponse) return rateLimitResponse
+
     try {
         const { id: sessionId } = await params
         const supabase = await createSupabaseRouteClient()
