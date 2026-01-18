@@ -19,7 +19,7 @@ app/
 │   ├── instructor/        # 강사 대시보드
 │   ├── student/           # 학생 대시보드
 │   ├── admin/             # 관리자 패널
-│   ├── join/[code]/       # 토론 참여 (비인증 지원)
+│   ├── join/[code]/       # 토론 참여
 │   └── pricing/           # 구독 가격
 ├── api/
 │   ├── discussions/       # 토론 CRUD, 채팅, 갤러리

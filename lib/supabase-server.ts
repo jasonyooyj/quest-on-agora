@@ -64,9 +64,13 @@ export async function createSupabaseRouteClient() {
 }
 
 /**
- * Create an admin Supabase client using the service role key.
+ * Admin client singleton instance (PERF-003 optimization).
+ * The admin client uses service role key and doesn't need per-request state,
+ * so we can reuse a single instance across all requests.
  */
-export const createSupabaseAdminClient = async () => {
+let adminClientInstance: Awaited<ReturnType<typeof createAdminClientInternal>> | null = null
+
+function createAdminClientInternal() {
     return createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -77,4 +81,15 @@ export const createSupabaseAdminClient = async () => {
             },
         }
     )
+}
+
+/**
+ * Create an admin Supabase client using the service role key.
+ * Uses singleton pattern to avoid creating new clients on every call.
+ */
+export const createSupabaseAdminClient = async () => {
+    if (!adminClientInstance) {
+        adminClientInstance = createAdminClientInternal()
+    }
+    return adminClientInstance
 }
