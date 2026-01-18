@@ -1,4 +1,4 @@
-Version: 0.12.8
+Version: 0.12.9
 
 # Quest on Agora - AI 토론 교육 플랫폼
 
