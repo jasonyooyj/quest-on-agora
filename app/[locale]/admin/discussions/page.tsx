@@ -284,7 +284,7 @@ export default function AdminDiscussionsPage() {
                           강사: {discussion.instructor?.name || 'Unknown'}
                         </span>
                         <span>
-                          참여 코드: {discussion.join_code}
+                          참여 코드: <span className="font-mono">{discussion.join_code}</span>
                         </span>
                         <span>
                           {format(new Date(discussion.created_at), 'yyyy.MM.dd', { locale: ko })}

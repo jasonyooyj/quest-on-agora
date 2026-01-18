@@ -247,7 +247,7 @@ export default function AdminDiscussionDetailPage({
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 rounded-lg hover:bg-zinc-200 transition-colors"
               >
                 <Copy className="w-4 h-4" />
-                참여 코드: {discussion.join_code}
+                참여 코드: <span className="font-mono">{discussion.join_code}</span>
               </button>
               <span className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4" />

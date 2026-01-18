@@ -58,7 +58,7 @@ export function DiscussionSessionHeader({
   const { closeSession, updateSettings } = useSessionActions(session.id);
 
   const handleCopyJoinLink = async () => {
-    const joinUrl = `${window.location.origin}/join?code=${session.joinCode}`;
+    const joinUrl = `${window.location.origin}/join/${session.joinCode}`;
     try {
       await navigator.clipboard.writeText(joinUrl);
       toast.success("참여 링크가 복사되었습니다");

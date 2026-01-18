@@ -554,7 +554,7 @@ ${t('report.footer')}`
                                     className="px-3 py-1.5 rounded-full bg-zinc-100 border border-zinc-200 text-xs font-bold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200 transition-all flex items-center gap-2"
                                 >
                                     <Copy className="w-3.5 h-3.5 opacity-50" />
-                                    {discussion.join_code}
+                                    <span className="font-mono tracking-wider">{discussion.join_code}</span>
                                 </button>
                                 <button
                                     onClick={copyJoinUrl}
