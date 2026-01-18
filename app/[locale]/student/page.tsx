@@ -110,8 +110,6 @@ export default function StudentDashboard() {
           status: p.session.status,
           created_at: p.session.created_at,
           my_stance: p.stance,
-          created_at: p.session.created_at,
-          my_stance: p.stance,
           is_submitted: p.is_submitted,
           settings: p.session.settings
         })) || []

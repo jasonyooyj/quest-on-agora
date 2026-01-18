@@ -66,11 +66,9 @@ async function verifyPrompts() {
     console.log("\n--- 2. Testing Topic Generation Prompt ---\n");
 
     const dummyContext = "Artificial Intelligence (AI) is intelligence demonstrated by machines, as opposed to natural intelligence displayed by animals including humans.";
-    const locale = 'ko';
 
-    const userPrompt = locale === 'en'
-        ? `Based on the following learning material, generate discussion topics:\n\n${dummyContext}\n\nPlease respond in English.`
-        : `다음 학습 자료를 바탕으로 토론 주제를 생성해주세요:\n\n${dummyContext}\n\n한국어로 답변하세요.`;
+    // Using Korean locale for testing
+    const userPrompt = `다음 학습 자료를 바탕으로 토론 주제를 생성해주세요:\n\n${dummyContext}\n\n한국어로 답변하세요.`;
 
     // Simulation of full prompt sent to Gemini
     const fullPrompt = `${TOPIC_GENERATION_PROMPT}\n\n${userPrompt}`;

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getSubscriptionInfo } from '@/lib/subscription/info'
 import { getAvailablePlans } from '@/lib/subscription/plans'
 import { getCurrentUser } from '@/lib/auth'
+import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,6 +11,10 @@ export const dynamic = 'force-dynamic'
  * Returns subscription info for the current user including plan, limits, and usage
  */
 export async function GET(request: Request) {
+  // Apply rate limiting
+  const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'subscription')
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const user = await getCurrentUser()
     if (!user) {
