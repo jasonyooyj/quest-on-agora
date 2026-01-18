@@ -1,0 +1,163 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Stage 1: Validate code (lint, type check, build)
+  validate:
+    name: Validate Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Build verification
+        run: npm run build
+
+  # Stage 2: Run unit tests
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run unit tests
+        run: npm run test
+
+  # Stage 3: Preview deployment for PRs
+  preview:
+    name: Preview Deployment
+    runs-on: ubuntu-latest
+    needs: [validate, test]
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel Preview
+        uses: vercel/actions/deploy-preview@v5
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        id: preview
+
+      - name: Comment PR with Preview URL
+        uses: actions/github-script@v7
+        if: steps.preview.outcome == 'success'
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Preview deployment ready\n\n[Visit Preview](${{ steps.preview.outputs.preview-url }})\n\nYou can test the changes here before merging.`
+            })
+
+  # Stage 4: Production deployment (main only)
+  deploy:
+    name: Production Deployment
+    runs-on: ubuntu-latest
+    needs: [validate, test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://quest-on-agora.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel Production
+        uses: vercel/actions/deploy-production@v5
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        id: deploy
+
+      - name: Check deployment health
+        run: |
+          echo "Waiting for deployment to be ready..."
+          sleep 10
+          for i in {1..5}; do
+            if curl -f https://quest-on-agora.vercel.app/api/health; then
+              echo "✅ Health check passed"
+              exit 0
+            fi
+            echo "Attempt $i/5 failed, retrying..."
+            sleep 5
+          done
+          echo "❌ Health check failed after 5 attempts"
+          exit 1
+
+      - name: Notify Slack (Success)
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ Production deployment successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🚀 *Production Deployment Successful*\nCommit: <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\nAuthor: ${{ github.actor }}\nURL: https://quest-on-agora.vercel.app"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+      - name: Notify Slack (Failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "❌ Production deployment failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🚨 *Production Deployment Failed*\nCommit: <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\nAuthor: ${{ github.actor }}\n\nCheck logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
