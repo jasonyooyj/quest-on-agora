@@ -104,7 +104,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             .single()
 
         const settings = discussion.settings as DiscussionSettings | null
-        const stanceLabel = participant?.stance ? settings?.stanceLabels?.[participant.stance] : undefined
+        // Use custom label if available, fallback to raw stance key, then to '미정'
+        const stanceLabel = participant?.stance
+            ? (settings?.stanceLabels?.[participant.stance] || participant.stance)
+            : '미정'
         const aiMode = settings?.aiMode || 'socratic'
         const userTurns = history?.filter(m => m.role === 'user').length || 0
         // If duration is null (unlimited), maxTurns should be ignored
@@ -133,8 +136,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                     try {
                         let aiStream: IterableReadableStream<string>
 
-                        // Unified LinkChain Logic for ALL modes
-                        const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
+                        // Convert history to LangChain message format for proper placeholder injection
+                        const historyMessages = history?.map(m =>
+                            m.role === 'user'
+                                ? new HumanMessage(m.content)
+                                : new AIMessage(m.content)
+                        ) || []
 
                         // Determine if this is a starting message or a response
                         const isStarting = !userTurns && (!userMessage || userMessage.trim() === '')
@@ -154,8 +161,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                         aiStream = await chain.stream({
                             discussionTitle: discussion.title,
                             description: discussion.description || '',
-                            studentStance: stanceLabel || 'Unknown',
-                            history: historyText,
+                            studentStance: stanceLabel,
+                            history: historyMessages,
                             input: inputMessage,
                             language
                         })
@@ -207,8 +214,12 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         const isStarting = !userTurns && (!userMessage || userMessage.trim() === '')
         const inputMessage = userMessage || '' // Ensure string for template
 
-        // Unified Logic for Non-streaming
-        const historyText = history?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n') || ''
+        // Convert history to LangChain message format for proper placeholder injection
+        const historyMessages = history?.map(m =>
+            m.role === 'user'
+                ? new HumanMessage(m.content)
+                : new AIMessage(m.content)
+        ) || []
 
         // Use wrap-up prompt if this is the final turn
         const promptTemplate = isClosing
@@ -224,8 +235,8 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         aiResponse = await chain.invoke({
             discussionTitle: discussion.title,
             description: discussion.description || '',
-            studentStance: stanceLabel || 'Unknown',
-            history: historyText,
+            studentStance: stanceLabel,
+            history: historyMessages,
             input: inputMessage,
             language
         })

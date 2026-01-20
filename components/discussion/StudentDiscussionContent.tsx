@@ -99,10 +99,10 @@ export function StudentDiscussionContent({
 
     const supabase = getSupabaseClient()
 
-    // For preview mode, find participant by is_preview flag
+    // For preview mode, find participant by isPreview flag
     // For regular mode, find by student_id
     const participant = isPreview
-        ? participants?.find(p => p.studentId === userId && (p as any).isPreview === true)
+        ? participants?.find(p => p.studentId === userId && p.isPreview === true)
         : participants?.find(p => p.studentId === userId)
 
     const {
@@ -542,7 +542,7 @@ export function StudentDiscussionContent({
             </header>
 
             {/* Stance Bar */}
-            <div className="bg-zinc-50 border-b border-zinc-200 backdrop-blur-sm relative z-40">
+            <div className="bg-zinc-50/80 border-b border-zinc-200 backdrop-blur-xl sticky top-16 sm:top-20 z-40">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <span className="text-xs sm:text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stance.yourStance')}</span>
@@ -725,7 +725,17 @@ export function StudentDiscussionContent({
 
                             <div className="grid gap-3 sm:gap-4">
                                 {(discussion.settings.stanceOptions || ['pro', 'con', 'neutral']).map((option, index) => {
+                                    // Only show description if using default stance labels
+                                    // If instructor customized the labels, hide the description
                                     const getStanceDescription = (stance: string) => {
+                                        const customLabel = discussion.settings?.stanceLabels?.[stance]
+                                        const defaultLabel = defaultStanceLabels[stance]
+
+                                        // If it's a custom stance (not pro/con/neutral) or label was customized, no description
+                                        if (!['pro', 'con', 'neutral'].includes(stance)) return ''
+                                        if (customLabel && customLabel !== defaultLabel) return ''
+
+                                        // Default stances with default labels - show description
                                         if (stance === 'pro') return t('StanceModal.options.pro')
                                         if (stance === 'con') return t('StanceModal.options.con')
                                         if (stance === 'neutral') return t('StanceModal.options.neutral')

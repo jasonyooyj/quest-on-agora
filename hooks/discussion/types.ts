@@ -64,6 +64,7 @@ export const normalizeParticipant = (raw: RawRecord): DiscussionParticipant => {
     needsHelp: raw.needs_help,
     helpRequestedAt: raw.help_requested_at ?? undefined,
     messageCount: raw.message_count ?? undefined,
+    isPreview: raw.is_preview ?? undefined,
   };
 };
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { CheckCircle, AlertCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface DemoParticipantItemProps {
   name: string
@@ -18,13 +19,6 @@ const getStanceStyle = (stance: string) => {
   return 'border-zinc-200 bg-zinc-50 text-zinc-500'
 }
 
-const getStanceLabel = (stance: string) => {
-  if (stance === 'pro') return '찬성'
-  if (stance === 'con') return '반대'
-  if (stance === 'neutral') return '중립'
-  return stance
-}
-
 export default function DemoParticipantItem({
   name,
   stance,
@@ -34,6 +28,15 @@ export default function DemoParticipantItem({
   selected = false,
   compact = false
 }: DemoParticipantItemProps) {
+  const t = useTranslations('Student.Dashboard.DiscussionDetail')
+
+  const getStanceLabel = (stance: string) => {
+    if (stance === 'pro') return t('stanceLabels.pro')
+    if (stance === 'con') return t('stanceLabels.con')
+    if (stance === 'neutral') return t('stanceLabels.neutral')
+    return stance
+  }
+
   return (
     <div className={`${compact ? 'p-2.5' : 'p-3'} rounded-xl border transition-all ${
       selected

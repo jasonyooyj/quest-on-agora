@@ -1,19 +1,28 @@
+"use client";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { ko } from "date-fns/locale";
+import { ko, enUS } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
 import type { DiscussionParticipant } from "@/types/discussion";
 
 interface StudentDetailHeaderProps {
     participant: DiscussionParticipant;
     isAnonymous: boolean;
+    stanceLabels?: Record<string, string>;
 }
 
 export function StudentDetailHeader({
     participant,
     isAnonymous,
+    stanceLabels,
 }: StudentDetailHeaderProps) {
+    const t = useTranslations('Instructor.DiscussionDetail');
+    const locale = useLocale();
+    const dateLocale = locale === 'ko' ? ko : enUS;
+
     const getDisplayName = () => {
         if (isAnonymous) {
             return (
@@ -27,37 +36,38 @@ export function StudentDetailHeader({
         );
     };
 
+    const getStanceLabel = (stance: string) => {
+        // Use custom labels if provided, otherwise fall back to translations
+        if (stanceLabels?.[stance]) return stanceLabels[stance];
+        if (stance === 'pro') return t('participants.stance.pro');
+        if (stance === 'con') return t('participants.stance.con');
+        if (stance === 'neutral') return t('participants.stance.neutral');
+        return stance;
+    };
+
+    const getStanceColorClass = (stance: string) => {
+        if (stance === 'pro') return 'bg-blue-100 text-blue-700 border-blue-200';
+        if (stance === 'con') return 'bg-red-100 text-red-700 border-red-200';
+        if (stance === 'neutral') return 'bg-slate-100 text-slate-700 border-slate-200';
+        return 'bg-zinc-100 text-zinc-700 border-zinc-200';
+    };
+
     const getStanceBadge = () => {
         if (!participant.isSubmitted) {
             return (
                 <Badge variant="outline" className="text-muted-foreground">
-                    미제출
+                    {t('participants.stance.unselected')}
                 </Badge>
             );
         }
 
-        switch (participant.stance) {
-            case "pro":
-                return (
-                    <Badge className="bg-blue-100 text-blue-700 border-blue-200">
-                        찬성
-                    </Badge>
-                );
-            case "con":
-                return (
-                    <Badge className="bg-red-100 text-red-700 border-red-200">
-                        반대
-                    </Badge>
-                );
-            case "neutral":
-                return (
-                    <Badge className="bg-slate-100 text-slate-700 border-slate-200">
-                        중립
-                    </Badge>
-                );
-            default:
-                return null;
-        }
+        if (!participant.stance) return null;
+
+        return (
+            <Badge className={getStanceColorClass(participant.stance)}>
+                {getStanceLabel(participant.stance)}
+            </Badge>
+        );
     };
 
     return (
@@ -78,7 +88,7 @@ export function StudentDetailHeader({
                         <span className="font-semibold truncate">{getDisplayName()}</span>
                         {getStanceBadge()}
                         {participant.isOnline && (
-                            <span className="text-xs text-green-600">온라인</span>
+                            <span className="text-xs text-green-600">{t('participants.online')}</span>
                         )}
                     </div>
                     {!isAnonymous && participant.studentNumber && (
@@ -88,10 +98,10 @@ export function StudentDetailHeader({
                         </div>
                     )}
                     <div className="text-xs text-muted-foreground mt-0.5">
-                        마지막 활동:{" "}
+                        {t('participants.lastActive')}{" "}
                         {formatDistanceToNow(new Date(participant.lastActiveAt), {
                             addSuffix: true,
-                            locale: ko,
+                            locale: dateLocale,
                         })}
                     </div>
                 </div>
@@ -105,7 +115,7 @@ export function StudentDetailHeader({
                         className="bg-amber-50 text-amber-700 border-amber-200"
                     >
                         <AlertTriangle className="w-3 h-3 mr-1" />
-                        도움 요청 중
+                        {t('participants.helpRequesting')}
                     </Badge>
                 ) : participant.helpRequestedAt ? (
                     <Badge
@@ -113,7 +123,7 @@ export function StudentDetailHeader({
                         className="bg-amber-50/50 text-amber-600/80 border-amber-200/50"
                     >
                         <AlertTriangle className="w-3 h-3 mr-1 opacity-70" />
-                        도움 요청 취소됨
+                        {t('participants.helpCancelled')}
                     </Badge>
                 ) : null}
             </div>

@@ -680,7 +680,7 @@ ${t('report.footer')}`
             )}
 
             {/* Stats Bar */}
-            <div className="bg-zinc-50 border-b border-zinc-200 backdrop-blur-sm relative z-40">
+            <div className="bg-zinc-50/80 border-b border-zinc-200 backdrop-blur-xl sticky top-[68px] z-40">
                 <div className="max-w-[1920px] w-full mx-auto px-4 sm:px-6 lg:px-10 py-3 sm:py-4 flex flex-wrap items-center gap-4 sm:gap-6 lg:gap-8">
                     <div className="flex items-center gap-3 sm:gap-4">
                         <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
