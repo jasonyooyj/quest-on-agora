@@ -499,6 +499,24 @@ ${t('report.footer')}`
         return stance
     }
 
+    // Get display name based on anonymous setting
+    const getParticipantDisplayName = (participant: Participant, index: number) => {
+        const isAnonymous = discussion?.settings?.anonymous
+        if (isAnonymous) {
+            // In anonymous mode, show only display_name (anonymous identifier)
+            return participant.display_name || `Student ${index + 1}`
+        }
+        // In non-anonymous mode, we could show real name if available
+        // For now, display_name is the primary identifier
+        return participant.display_name || `Student ${index + 1}`
+    }
+
+    // Get avatar initial based on anonymous setting
+    const getParticipantInitial = (participant: Participant, index: number) => {
+        const name = getParticipantDisplayName(participant, index)
+        return name.charAt(0) || String(index + 1)
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
@@ -793,13 +811,13 @@ ${t('report.footer')}`
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
                                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${selectedParticipant === participant.id ? 'bg-white/20' : 'bg-zinc-100'}`}>
-                                                    {(participant.display_name || '').charAt(0) || index + 1}
+                                                    {getParticipantInitial(participant, index)}
                                                 </div>
                                                 <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white ${participant.is_online ? 'bg-emerald-500' : 'bg-zinc-400'}`} />
                                             </div>
                                             <div className="text-left">
                                                 <div className="font-bold text-sm leading-tight">
-                                                    {participant.display_name || `Student ${index + 1}`}
+                                                    {getParticipantDisplayName(participant, index)}
                                                 </div>
                                                 <div className={`text-[10px] font-medium mt-0.5 uppercase tracking-widest ${selectedParticipant === participant.id ? 'opacity-60' : 'text-zinc-500'}`}>
                                                     {participant.is_online ? t('participants.online') : t('participants.offline')}
@@ -861,7 +879,11 @@ ${t('report.footer')}`
                             <div>
                                 <h2 className="text-lg font-bold tracking-tight text-zinc-900">
                                     {selectedParticipant
-                                        ? t('chat.individualTitle', { name: participants.find(p => p.id === selectedParticipant)?.display_name || 'Student' })
+                                        ? t('chat.individualTitle', { name: (() => {
+                                            const idx = participants.findIndex(p => p.id === selectedParticipant)
+                                            const p = participants[idx]
+                                            return p ? getParticipantDisplayName(p, idx) : 'Student'
+                                        })() })
                                         : t('chat.allTitle')}
                                 </h2>
                                 <p className="text-xs text-zinc-500 font-medium">
@@ -963,10 +985,18 @@ ${t('report.footer')}`
                             >
                                 <div className="flex items-center gap-4 mb-8">
                                     <div className="w-16 h-16 rounded-[1.5rem] bg-primary/10 border border-primary/20 flex items-center justify-center text-primary text-2xl font-bold">
-                                        {(participants.find(p => p.id === selectedParticipant)?.display_name || 'H')[0]}
+                                        {(() => {
+                                            const idx = participants.findIndex(p => p.id === selectedParticipant)
+                                            const p = participants[idx]
+                                            return p ? getParticipantInitial(p, idx) : 'H'
+                                        })()}
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-bold tracking-tight text-zinc-900">{participants.find(p => p.id === selectedParticipant)?.display_name || t('participants.details.title')}</h3>
+                                        <h3 className="text-xl font-bold tracking-tight text-zinc-900">{(() => {
+                                            const idx = participants.findIndex(p => p.id === selectedParticipant)
+                                            const p = participants[idx]
+                                            return p ? getParticipantDisplayName(p, idx) : t('participants.details.title')
+                                        })()}</h3>
                                         <p className="text-xs text-zinc-500 font-medium uppercase tracking-widest mt-0.5">{t('participants.details.selected')}</p>
                                     </div>
                                 </div>
