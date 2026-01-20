@@ -582,6 +582,28 @@
       },
       "loading": "로딩 중..."
     },
+    "Preview": {
+      "banner": "미리보기 모드 - 학생 체험 중입니다",
+      "exit": "미리보기 종료",
+      "loading": "로딩 중...",
+      "creating": "미리보기 준비 중...",
+      "backToInstructor": "강사 대시보드로",
+      "errors": {
+        "title": "오류",
+        "notFound": "토론을 찾을 수 없습니다",
+        "notOwner": "이 토론의 소유자만 미리보기를 사용할 수 있습니다",
+        "createFailed": "미리보기 생성에 실패했습니다"
+      },
+      "exitDialog": {
+        "title": "미리보기 종료",
+        "description": "미리보기를 종료하면 이 세션의 데이터가 삭제됩니다. 종료하시겠습니까?",
+        "cancel": "계속 체험하기",
+        "confirm": "종료하기",
+        "exiting": "종료 중..."
+      },
+      "exitSuccess": "미리보기가 종료되었습니다",
+      "exitError": "미리보기 종료 중 오류가 발생했습니다"
+    },
     "NewDiscussion": {
       "header": "Create Discussion",
       "title": "새로운 토론 시작하기",
@@ -739,7 +761,8 @@
         "pin": "핀하기",
         "unpin": "핀 해제",
         "sendInstruction": "개별 지시 보내기",
-        "sendWarning": "경고/알람 발송"
+        "sendWarning": "경고/알람 발송",
+        "preview": "학생 체험"
       },
       "stats": {
         "participants": "참여자",

@@ -26,10 +26,12 @@ export async function GET(
 
     const supabase = await createSupabaseRouteClient()
 
+    // Exclude preview participants from stance distribution
     const { data: participants, error } = await supabase
       .from('discussion_participants')
       .select('stance, is_submitted')
       .eq('session_id', id)
+      .eq('is_preview', false)
 
     if (error) {
       console.error('Error fetching participants for stances:', error)

@@ -55,11 +55,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Discussion not found' }, { status: 404 })
     }
 
-    // Get participants
+    // Get participants (excluding preview participants)
     const { data: participants } = await supabase
       .from('discussion_participants')
       .select('id, display_name, stance, stance_statement, is_submitted')
       .eq('session_id', id)
+      .eq('is_preview', false)
 
     // Get messages
     const { data: messages } = await supabase

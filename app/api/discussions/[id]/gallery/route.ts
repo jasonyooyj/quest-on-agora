@@ -36,7 +36,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             return NextResponse.json({ error: 'Discussion not found' }, { status: 404 })
         }
 
-        // Get all submitted participants
+        // Get all submitted participants (excluding preview participants)
         const { data: participants, error } = await supabase
             .from('discussion_participants')
             .select(`
@@ -50,6 +50,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             `)
             .eq('session_id', sessionId)
             .eq('is_submitted', true)
+            .eq('is_preview', false)
             .order('created_at', { ascending: true })
 
         if (error) {

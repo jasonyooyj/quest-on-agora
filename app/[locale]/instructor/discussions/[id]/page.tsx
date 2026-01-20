@@ -8,8 +8,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
     Users, MessageSquare, Play, Pause, Clock,
     Copy, ArrowLeft, Settings, BarChart3,
-    AlertCircle, CheckCircle, User, Quote, X, Loader2, Link2, Info
+    AlertCircle, CheckCircle, User, Quote, X, Loader2, Link2, Info, Eye
 } from 'lucide-react'
+import Link from 'next/link'
 import { SettingsDialog } from '@/components/instructor/SettingsDialog'
 import { DiscussionOnboardingOverlay } from '@/components/instructor/DiscussionOnboardingOverlay'
 import { ProfileMenuAuto } from '@/components/profile/ProfileMenuAuto'
@@ -45,6 +46,7 @@ interface Participant {
     extension_requested_at: string | null
     last_active_at: string
     student_id: string
+    is_preview?: boolean
 }
 
 interface Message {
@@ -498,12 +500,13 @@ ${t('report.footer')}`
 
     if (!discussion) return null
 
-    // Stats calculations
-    const onlineCount = participants.filter(p => p.is_online).length
-    const submittedCount = participants.filter(p => p.is_submitted).length
-    const needsHelpCount = participants.filter(p => p.needs_help).length
-    const extensionCount = participants.filter(p => p.requested_extension).length
-    const stanceCounts = participants.reduce((acc, p) => {
+    // Stats calculations (exclude preview participants)
+    const realParticipants = participants.filter(p => !p.is_preview)
+    const onlineCount = realParticipants.filter(p => p.is_online).length
+    const submittedCount = realParticipants.filter(p => p.is_submitted).length
+    const needsHelpCount = realParticipants.filter(p => p.needs_help).length
+    const extensionCount = realParticipants.filter(p => p.requested_extension).length
+    const stanceCounts = realParticipants.reduce((acc, p) => {
         if (p.stance) acc[p.stance] = (acc[p.stance] || 0) + 1
         return acc
     }, {} as Record<string, number>)
@@ -605,6 +608,14 @@ ${t('report.footer')}`
                                 </>
                             )}
                         </button>
+                        <Link
+                            href={`/instructor/discussions/${discussionId}/preview`}
+                            className="h-11 px-5 rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 font-bold text-sm flex items-center gap-2.5 transition-all hover:bg-zinc-200 active:scale-95"
+                            title={t('actions.preview')}
+                        >
+                            <Eye className="w-4 h-4" />
+                            {t('actions.preview')}
+                        </Link>
                         <button
                             onClick={() => setShowSettings(true)}
                             className="w-11 h-11 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center hover:bg-zinc-200 text-zinc-500 hover:text-zinc-900 transition-all active:scale-90"
@@ -643,7 +654,7 @@ ${t('report.footer')}`
                         <div>
                             <p className="text-xs sm:text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.participants')}</p>
                             <p className="font-bold flex items-center gap-2 text-zinc-900 text-sm sm:text-base">
-                                {participants.length} <span className="text-xs text-emerald-500">({onlineCount} {t('stats.online')})</span>
+                                {realParticipants.length} <span className="text-xs text-emerald-500">({onlineCount} {t('stats.online')})</span>
                             </p>
                         </div>
                     </div>
@@ -657,7 +668,7 @@ ${t('report.footer')}`
                         <div>
                             <p className="text-xs sm:text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest">{t('stats.submissions')}</p>
                             <p className="font-bold mb-0 leading-tight text-zinc-900 text-sm sm:text-base">
-                                {submittedCount} <span className="text-xs text-zinc-500 font-medium">/ {participants.length}</span>
+                                {submittedCount} <span className="text-xs text-zinc-500 font-medium">/ {realParticipants.length}</span>
                             </p>
                         </div>
                     </div>

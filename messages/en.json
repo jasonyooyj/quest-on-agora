@@ -582,6 +582,28 @@
       },
       "loading": "Loading..."
     },
+    "Preview": {
+      "banner": "Preview Mode - Experiencing as Student",
+      "exit": "Exit Preview",
+      "loading": "Loading...",
+      "creating": "Preparing preview...",
+      "backToInstructor": "Back to Dashboard",
+      "errors": {
+        "title": "Error",
+        "notFound": "Discussion not found",
+        "notOwner": "Only the discussion owner can use preview mode",
+        "createFailed": "Failed to create preview"
+      },
+      "exitDialog": {
+        "title": "Exit Preview",
+        "description": "Exiting preview will delete this session's data. Are you sure you want to exit?",
+        "cancel": "Continue Preview",
+        "confirm": "Exit",
+        "exiting": "Exiting..."
+      },
+      "exitSuccess": "Preview ended",
+      "exitError": "Error ending preview"
+    },
     "NewDiscussion": {
       "header": "Create Discussion",
       "title": "Start New Discussion",
@@ -739,7 +761,8 @@
         "pin": "Pin Quote",
         "unpin": "Unpin",
         "sendInstruction": "Send Instruction",
-        "sendWarning": "Send Warning"
+        "sendWarning": "Send Warning",
+        "preview": "Student Preview"
       },
       "stats": {
         "participants": "Participants",

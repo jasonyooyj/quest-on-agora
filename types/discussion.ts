@@ -52,6 +52,7 @@ export interface DiscussionParticipant {
   needsHelp: boolean;
   helpRequestedAt?: string; // When help was first requested (never cleared)
   messageCount?: number;
+  isPreview?: boolean; // True for instructor preview participants
 }
 
 export interface DiscussionMessage {
