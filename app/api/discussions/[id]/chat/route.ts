@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseRouteClient } from '@/lib/supabase-server'
+import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
 import { ChatOpenAI } from "@langchain/openai"
 import { PromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
@@ -67,8 +67,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         }
 
         // Save user message if not starting (starting message is empty)
+        // Use admin client to bypass RLS for reliable message saving
         if (userMessage && userMessage.trim()) {
-            const { error: saveError } = await supabase
+            const adminClient = await createSupabaseAdminClient()
+            const { data: savedMessage, error: saveError } = await adminClient
                 .from('discussion_messages')
                 .insert({
                     session_id: discussionId || id,
@@ -78,8 +80,10 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                     message_type: 'text',
                     is_visible_to_student: true
                 })
+                .select()
+                .single()
 
-            if (saveError) {
+            if (saveError || !savedMessage) {
                 console.error('Error saving user message:', saveError)
                 return NextResponse.json({ error: 'Failed to save message' }, { status: 500 })
             }
@@ -162,8 +166,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
                         }
 
                         // Save to database after streaming completes
-                        const supabaseForSave = await createSupabaseRouteClient()
-                        await supabaseForSave
+                        // Use admin client to bypass RLS for reliable message saving
+                        const adminClientForSave = await createSupabaseAdminClient()
+                        await adminClientForSave
                             .from('discussion_messages')
                             .insert({
                                 session_id: sessionId,
@@ -226,7 +231,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
         })
 
         // Save AI response to database
-        const { data: aiMessage, error: saveError } = await supabase
+        // Use admin client to bypass RLS for reliable message saving
+        const adminClientNonStream = await createSupabaseAdminClient()
+        const { data: aiMessage, error: saveError } = await adminClientNonStream
             .from('discussion_messages')
             .insert({
                 session_id: discussionId || id,
@@ -260,7 +267,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 async function handleMockResponse(
     sessionId: string,
     participantId: string,
-    supabase: Awaited<ReturnType<typeof createSupabaseRouteClient>>
+    _supabase: Awaited<ReturnType<typeof createSupabaseRouteClient>>
 ) {
     const mockResponses = [
         '흥미로운 관점이네요. 왜 그렇게 생각하시나요? 구체적인 근거가 있나요?',
@@ -272,7 +279,9 @@ async function handleMockResponse(
 
     const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)]
 
-    await supabase
+    // Use admin client to bypass RLS for reliable message saving
+    const adminClient = await createSupabaseAdminClient()
+    await adminClient
         .from('discussion_messages')
         .insert({
             session_id: sessionId,

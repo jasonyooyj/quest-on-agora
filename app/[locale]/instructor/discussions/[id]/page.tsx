@@ -26,6 +26,7 @@ interface Discussion {
     settings: {
         anonymous: boolean
         stanceOptions: string[]
+        stanceLabels?: Record<string, string>
         aiMode: string
         maxTurns?: number | null
         duration?: number | null
@@ -117,6 +118,15 @@ export default function InstructorDiscussionPage() {
             toast.error(t('toasts.loadError'))
             router.push('/instructor')
             return
+        }
+
+        // Ensure settings is parsed as object (handle edge case where it might be a string)
+        if (data && typeof data.settings === 'string') {
+            try {
+                data.settings = JSON.parse(data.settings)
+            } catch (e) {
+                console.error('Failed to parse discussion settings:', e)
+            }
         }
 
         setDiscussion(data)
@@ -477,9 +487,16 @@ ${t('report.footer')}`
         return dotColorsByIndex[Math.min(index, 2)]
     }
 
-    // Display stance label directly (it's already the display value from stanceOptions)
+    // Display stance label from stanceLabels settings or fall back to the stance key
     const getStanceLabel = (stance: string | null) => {
-        return stance || t('participants.stance.undefined')
+        if (!stance) return t('participants.stance.undefined')
+        // Safely access stanceLabels and return custom label if available
+        const settings = discussion?.settings
+        const stanceLabels = settings?.stanceLabels
+        if (stanceLabels && typeof stanceLabels === 'object' && stance in stanceLabels) {
+            return stanceLabels[stance]
+        }
+        return stance
     }
 
     if (loading) {
@@ -707,7 +724,7 @@ ${t('report.footer')}`
                         {Object.entries(stanceCounts).map(([stance, count]) => (
                             <div key={stance} className={`px-4 py-2 rounded-2xl border font-bold text-xs flex items-center gap-2 transition-all hover:bg-zinc-100 ${getStanceColorClass(stance)}`}>
                                 <div className={`w-1.5 h-1.5 rounded-full ${getStanceDotColor(stance)}`} />
-                                {stance}: {count}
+                                {getStanceLabel(stance)}: {count}
                             </div>
                         ))}
                     </div>
@@ -803,7 +820,7 @@ ${t('report.footer')}`
                                                     ? 'bg-white/20 border-white/20 text-white'
                                                     : getStanceColorClass(participant.stance)
                                                     }`}>
-                                                    {participant.stance}
+                                                    {getStanceLabel(participant.stance)}
                                                 </span>
                                             ) : (
                                                 <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{t('participants.stance.undefined')}</span>
@@ -963,7 +980,7 @@ ${t('report.footer')}`
                                             return (
                                                 <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border font-bold text-sm ${getStanceColorClass(p.stance)}`}>
                                                     <div className={`w-2 h-2 rounded-full ${getStanceDotColor(p.stance)}`} />
-                                                    {p.stance || t('participants.details.noSelection')}
+                                                    {getStanceLabel(p.stance)}
                                                 </div>
                                             )
                                         })()}
