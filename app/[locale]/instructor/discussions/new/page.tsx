@@ -15,6 +15,7 @@ import {
   Settings2,
   Users,
   EyeOff,
+  Eye,
   Clock,
   Plus,
   AlertCircle,
@@ -112,6 +113,7 @@ export default function NewDiscussionPage() {
 
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false)
 
   // Subscription check
   const { subscription, isLoading: isLoadingSubscription } = useSubscription()
@@ -356,64 +358,71 @@ export default function NewDiscussionPage() {
     toast.success(t('phases.topic.aiGenerator.selectHint'))
   }
 
+  // Shared discussion creation logic
+  const createDiscussion = async (data: DiscussionFormInput) => {
+    const supabase = getSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      router.push('/login')
+      return null
+    }
+
+    const joinCode = generateJoinCode()
+    const maxTurns = duration === null ? null : Math.max(5, duration)
+
+    const labels: Record<string, string> = {
+      pro: stanceLabels.pro,
+      con: stanceLabels.con,
+      neutral: t('phases.environment.stances.neutral', { default: 'Neutral' })
+    }
+
+    const stanceOptions = ['pro', 'con']
+    if (includeNeutral) {
+      stanceOptions.push('neutral')
+    }
+
+    additionalStances.forEach((label, index) => {
+      const id = `stance_${String.fromCharCode(99 + index)}`
+      labels[id] = label
+      stanceOptions.push(id)
+    })
+
+    const { data: discussion, error } = await supabase
+      .from('discussion_sessions')
+      .insert({
+        instructor_id: user.id,
+        title: data.title,
+        description: data.description || null,
+        status: 'draft',
+        join_code: joinCode,
+        settings: {
+          anonymous: anonymous,
+          stanceOptions,
+          stanceLabels: labels,
+          aiMode: data.aiMode,
+          maxTurns,
+          duration,
+        },
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error creating discussion:', error)
+      toast.error(t('toasts.createError'))
+      return null
+    }
+
+    // Clear draft on successful creation
+    clearDraft()
+    return discussion
+  }
+
   const onSubmit = async (data: DiscussionFormInput) => {
     setIsLoading(true)
     try {
-      const supabase = getSupabaseClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login')
-        return
-      }
-
-      const joinCode = generateJoinCode()
-      const maxTurns = duration === null ? null : Math.max(5, duration)
-
-      const labels: Record<string, string> = {
-        pro: stanceLabels.pro,
-        con: stanceLabels.con,
-        neutral: t('phases.environment.stances.neutral', { default: 'Neutral' })
-      }
-
-      const stanceOptions = ['pro', 'con']
-      if (includeNeutral) {
-        stanceOptions.push('neutral')
-      }
-
-      additionalStances.forEach((label, index) => {
-        const id = `stance_${String.fromCharCode(99 + index)}`
-        labels[id] = label
-        stanceOptions.push(id)
-      })
-
-      const { data: discussion, error } = await supabase
-        .from('discussion_sessions')
-        .insert({
-          instructor_id: user.id,
-          title: data.title,
-          description: data.description || null,
-          status: 'draft',
-          join_code: joinCode,
-          settings: {
-            anonymous: anonymous,
-            stanceOptions,
-            stanceLabels: labels,
-            aiMode: data.aiMode,
-            maxTurns,
-            duration,
-          },
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Error creating discussion:', error)
-        toast.error(t('toasts.createError'))
-        return
-      }
-
-      // Clear draft on successful creation
-      clearDraft()
+      const discussion = await createDiscussion(data)
+      if (!discussion) return
 
       toast.success(t('toasts.success'))
       router.push(`/instructor/discussions/${discussion.id}`)
@@ -422,6 +431,32 @@ export default function NewDiscussionPage() {
       toast.error(t('toasts.createError'))
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const onPreview = async (data: DiscussionFormInput) => {
+    setIsPreviewLoading(true)
+    try {
+      const discussion = await createDiscussion(data)
+      if (!discussion) return
+
+      // Create preview participant and redirect to preview page
+      const previewResponse = await fetch(`/api/discussions/${discussion.id}/preview`, {
+        method: 'POST',
+      })
+
+      if (!previewResponse.ok) {
+        toast.error(t('toasts.createError'))
+        return
+      }
+
+      toast.success(t('toasts.success'))
+      router.push(`/instructor/discussions/${discussion.id}/preview`)
+    } catch (error) {
+      console.error('Error:', error)
+      toast.error(t('toasts.createError'))
+    } finally {
+      setIsPreviewLoading(false)
     }
   }
 
@@ -1163,7 +1198,7 @@ export default function NewDiscussionPage() {
             <div className="flex flex-col md:flex-row justify-center items-center gap-6 pt-12 pb-20">
               <button
                 type="submit"
-                disabled={isLoading || !createCheck.allowed}
+                disabled={isLoading || isPreviewLoading || !createCheck.allowed}
                 className="h-20 w-full md:w-[350px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-xl flex items-center justify-center gap-4 transition-all hover:shadow-[0_0_60px_rgba(99,102,241,0.4)] hover:-translate-y-1.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {isLoading ? (
@@ -1180,6 +1215,24 @@ export default function NewDiscussionPage() {
                   <>
                     {t('buttons.submit')}
                     <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit(onPreview)}
+                disabled={isLoading || isPreviewLoading || !createCheck.allowed}
+                className="h-16 w-full md:w-[200px] rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 font-bold text-lg flex items-center justify-center gap-3 transition-all hover:bg-zinc-200 hover:border-zinc-300 hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                {isPreviewLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    {t('buttons.previewSubmitting')}
+                  </>
+                ) : (
+                  <>
+                    <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    {t('buttons.preview')}
                   </>
                 )}
               </button>

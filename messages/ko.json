@@ -718,6 +718,8 @@
       "buttons": {
         "submit": "토론 공간 개설하기",
         "submitting": "저장 중...",
+        "preview": "미리보기",
+        "previewSubmitting": "생성 후 미리보기 준비 중...",
         "cancel": "나중에 만들기 (취소)",
         "limitReached": "한도 초과"
       },
@@ -779,11 +781,15 @@
         "emptyDesc": "참여 코드를 공유하여 학생들을 초대하세요",
         "online": "온라인",
         "offline": "오프라인",
+        "lastActive": "마지막 활동:",
+        "helpRequesting": "도움 요청 중",
+        "helpCancelled": "도움 요청 해제됨",
         "stance": {
           "pro": "찬성",
           "con": "반대",
           "neutral": "중립",
-          "undefined": "입장 미정"
+          "undefined": "입장 미정",
+          "unselected": "미제출"
         },
         "details": {
           "title": "학생 정보",
@@ -1001,9 +1007,10 @@
           "title": "입장을 선택하세요",
           "description": "이번 토론에서 취할 입장을 선택해주세요. \n선택한 한 입장에 따라 {name}와 심도 있는 논술을 나눕니다.",
           "options": {
-            "pro": "찬성 입장에서 논리를 펼칩니다",
-            "con": "반대 입장에서 비판합니다",
-            "neutral": "중립적인 입장에서 탐구합니다"
+            "pro": "동의하는 입장에서 논리를 펼칩니다",
+            "con": "반론을 제기하는 입장에서 비판합니다",
+            "neutral": "양측의 의견을 중립적으로 탐구합니다",
+            "custom": "이 입장에서 자신의 논리를 펼칩니다"
           },
           "reselect": "다른 입장 선택하기",
           "statementTitle": "입장 설명 작성",

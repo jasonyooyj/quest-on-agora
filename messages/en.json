@@ -718,6 +718,8 @@
       "buttons": {
         "submit": "Create Discussion Space",
         "submitting": "Saving...",
+        "preview": "Preview",
+        "previewSubmitting": "Creating and preparing preview...",
         "cancel": "Create Later (Cancel)",
         "limitReached": "Limit Reached"
       },
@@ -779,11 +781,15 @@
         "emptyDesc": "Share the join code to invite students",
         "online": "Online",
         "offline": "Offline",
+        "lastActive": "Last active:",
+        "helpRequesting": "Help requested",
+        "helpCancelled": "Help request cleared",
         "stance": {
           "pro": "Pro",
           "con": "Con",
           "neutral": "Neutral",
-          "undefined": "Undefined"
+          "undefined": "Undefined",
+          "unselected": "Not submitted"
         },
         "details": {
           "title": "Student Info",
@@ -1003,7 +1009,8 @@
           "options": {
             "pro": "Argue from the supporting side",
             "con": "Critique from the opposing side",
-            "neutral": "Explore from a neutral perspective"
+            "neutral": "Explore from a neutral perspective",
+            "custom": "Argue from this position"
           },
           "reselect": "Choose Different Stance",
           "statementTitle": "Write Stance Statement",
