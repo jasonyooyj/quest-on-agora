@@ -12,6 +12,7 @@ import { getSupabaseClient } from '@/lib/supabase-client'
 import { getURL } from '@/lib/utils'
 import { toast } from 'sonner'
 import GoogleIcon from '@/components/icons/GoogleIcon'
+import KakaoIcon from '@/components/icons/KakaoIcon'
 import { useTranslations } from 'next-intl'
 
 function LoginForm() {
@@ -135,7 +136,7 @@ function LoginForm() {
                     </p>
                 </div>
 
-                {/* OAuth Buttons */}
+                {/* OAuth Buttons - Google, Kakao (카카오 로그인) */}
                 <div className="grid grid-cols-1 gap-4 mb-10">
                     <button
                         type="button"
@@ -149,6 +150,20 @@ function LoginForm() {
                             <GoogleIcon className="w-5 h-5" />
                         )}
                         <span className="text-sm font-roboto">{t('googleBtn')}</span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => handleOAuthSignIn('kakao')}
+                        disabled={isLoading || oauthLoading !== null}
+                        className="group relative flex items-center justify-center gap-3 w-full py-3.5 rounded-full bg-[#FEE500] border border-[#FEE500] text-[#191919] font-medium transition-all hover:bg-[#f5d900] hover:border-[#f5d900] hover:shadow-md active:scale-[0.98]"
+                        aria-label={t('kakaoBtn')}
+                    >
+                        {oauthLoading === 'kakao' ? (
+                            <Loader2 className="w-5 h-5 animate-spin text-[#191919]" />
+                        ) : (
+                            <KakaoIcon className="w-5 h-5" />
+                        )}
+                        <span className="text-sm font-medium">{t('kakaoBtn')}</span>
                     </button>
                 </div>
 

@@ -19,8 +19,8 @@ test.describe('Authentication', () => {
       const submitButton = page.getByRole('button', { name: /로그인/ }).last();
       await submitButton.click();
 
-      // Wait for error toast message
-      await expect(page.getByText(/Invalid|잘못된|error|실패|login credentials/i)).toBeVisible({ timeout: 10000 });
+      // Wait for error toast message (한국어: 올바르지 않습니다 / 영어: Invalid)
+      await expect(page.getByText(/Invalid|잘못된|error|실패|login credentials|올바르지 않습니다|비밀번호가/i)).toBeVisible({ timeout: 10000 });
     });
 
     test('should have link to register page', async ({ page }) => {
@@ -30,7 +30,7 @@ test.describe('Authentication', () => {
       await expect(registerLink).toBeVisible();
     });
 
-    test('should have OAuth buttons', async ({ page }) => {
+    test('should have OAuth buttons (Google, Kakao)', async ({ page }) => {
       await page.goto('/ko/login');
 
       await expect(page.getByRole('button', { name: /Google로 계속하기/ })).toBeVisible();

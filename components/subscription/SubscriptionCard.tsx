@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useTranslations, useFormatter } from 'next-intl'
 import { UsageMeter } from './UsageMeter'
-import type { SubscriptionInfo, SubscriptionPlan } from '@/types/subscription'
+import type { PlanName, SubscriptionInfo, SubscriptionPlan } from '@/types/subscription'
 import { cn } from '@/lib/utils'
 
 interface SubscriptionCardProps {
@@ -26,15 +26,17 @@ interface SubscriptionCardProps {
   className?: string
 }
 
-const planIcons = {
+const planIcons: Record<PlanName, typeof Sparkles> = {
   free: Sparkles,
   pro: Zap,
+  max: Crown,
   institution: Building2,
 }
 
-const planColors = {
+const planColors: Record<PlanName, string> = {
   free: 'from-zinc-500 to-zinc-600',
   pro: 'from-indigo-500 to-purple-600',
+  max: 'from-rose-500 to-pink-600',
   institution: 'from-amber-500 to-orange-600',
 }
 

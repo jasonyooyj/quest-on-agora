@@ -205,6 +205,7 @@ function buildSubscriptionInfo(
   const displayNames: Record<PlanName, { ko: string; en: string }> = {
     free: { ko: '무료', en: 'Free' },
     pro: { ko: 'Pro', en: 'Pro' },
+    max: { ko: 'Max', en: 'Max' },
     institution: { ko: '기관', en: 'Institution' },
   }
 
