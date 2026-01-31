@@ -1,13 +1,12 @@
 /**
  * Billing Portal API Route
  *
- * POST /api/billing/portal - Create a Stripe Customer Portal session
+ * POST /api/billing/portal - Get billing management information
  *
- * Redirects users to Stripe's hosted billing management portal
+ * For Toss Payments subscriptions, returns information for in-app management
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createCustomerPortalSession } from '@/lib/stripe'
 import { getSubscriptionInfo } from '@/lib/subscription'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { getCurrentUser } from '@/lib/auth'
@@ -24,35 +23,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
     }
 
-    // Check if user has a Stripe subscription
+    // Get subscription info
     const subscription = await getSubscriptionInfo(user.id)
 
-    if (subscription.paymentProvider !== 'stripe') {
+    if (!subscription.isActive || subscription.planName === 'free') {
       return NextResponse.json({
-        error: 'Stripe 구독만 이 포털을 사용할 수 있습니다.',
-        provider: subscription.paymentProvider,
-      }, { status: 400 })
+        error: '활성 구독이 없습니다.',
+      }, { status: 404 })
     }
 
-    // Get return URL from request or use default
-    const body = await request.json().catch(() => ({}))
-    const returnUrl = body.returnUrl || `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing`
-
-    // Create portal session
-    const portalUrl = await createCustomerPortalSession(user.id, returnUrl)
-
-    return NextResponse.json({ url: portalUrl })
+    // For Toss subscriptions, return info for in-app management
+    // Toss doesn't have an external portal like Stripe
+    return NextResponse.json({
+      provider: 'toss',
+      subscription: {
+        planName: subscription.planName,
+        planDisplayName: subscription.planDisplayName,
+        billingInterval: subscription.billingInterval,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+        cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
+      },
+      // In-app management URL
+      managementUrl: `${process.env.NEXT_PUBLIC_APP_URL}/settings/billing`,
+    })
   } catch (error) {
     console.error('Portal session error:', error)
 
-    const message = error instanceof Error ? error.message : '포털 세션 생성에 실패했습니다.'
-
-    // Check if it's a "no customer found" error
-    if (message.includes('No Stripe customer found')) {
-      return NextResponse.json({
-        error: '구독 정보를 찾을 수 없습니다.',
-      }, { status: 404 })
-    }
+    const message = error instanceof Error ? error.message : '구독 정보를 불러오는데 실패했습니다.'
 
     return NextResponse.json(
       { error: message },

@@ -232,7 +232,7 @@ function buildSubscriptionInfo(
     organizationId,
     organizationName,
     billingInterval: subscription?.billing_interval as 'monthly' | 'yearly' | null,
-    paymentProvider: subscription?.payment_provider as 'stripe' | 'toss' | null,
+    paymentProvider: subscription?.payment_provider as 'toss' | null,
   }
 }
 

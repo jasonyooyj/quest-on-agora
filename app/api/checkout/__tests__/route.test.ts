@@ -11,10 +11,6 @@ vi.mock('@/lib/auth', () => ({
   getCurrentUser: vi.fn(),
 }))
 
-vi.mock('@/lib/stripe', () => ({
-  createCheckoutSession: vi.fn(),
-}))
-
 vi.mock('@/lib/toss-payments', () => ({
   createCheckoutParams: vi.fn(),
   isTossConfigured: vi.fn(),
@@ -32,14 +28,12 @@ vi.mock('@/lib/rate-limiter', () => ({
 
 import { POST, GET } from '../route'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
-import { createCheckoutSession as createStripeCheckout } from '@/lib/stripe'
 import { createCheckoutParams as createTossCheckout, isTossConfigured } from '@/lib/toss-payments'
 import { getPlanById, getSubscriptionInfo } from '@/lib/subscription'
 import { getCurrentUser } from '@/lib/auth'
 
 const mockCreateSupabaseRouteClient = vi.mocked(createSupabaseRouteClient)
 const mockGetCurrentUser = vi.mocked(getCurrentUser)
-const mockCreateStripeCheckout = vi.mocked(createStripeCheckout)
 const mockCreateTossCheckout = vi.mocked(createTossCheckout)
 const mockIsTossConfigured = vi.mocked(isTossConfigured)
 const mockGetPlanById = vi.mocked(getPlanById)
@@ -147,6 +141,27 @@ describe('checkout API route', () => {
       expect(data.error).toBe('잘못된 요청입니다.')
     })
 
+    it('should return 500 when Toss is not configured', async () => {
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
+      mockIsTossConfigured.mockReturnValue(false)
+
+      const request = createMockRequest({
+        planId: '550e8400-e29b-41d4-a716-446655440001',
+        billingInterval: 'monthly',
+      })
+
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(500)
+      expect(data.error).toBe('결제 시스템이 설정되지 않았습니다.')
+    })
+
     it('should return 404 when plan is not found', async () => {
       mockGetCurrentUser.mockResolvedValue({
         id: 'user-123',
@@ -154,6 +169,7 @@ describe('checkout API route', () => {
         name: 'Test User',
         role: 'instructor',
       })
+      mockIsTossConfigured.mockReturnValue(true)
       mockGetPlanById.mockResolvedValue(null)
 
       const request = createMockRequest({
@@ -175,6 +191,7 @@ describe('checkout API route', () => {
         name: 'Test User',
         role: 'instructor',
       })
+      mockIsTossConfigured.mockReturnValue(true)
       mockGetPlanById.mockResolvedValue({
         id: 'plan-free',
         name: 'free',
@@ -200,6 +217,7 @@ describe('checkout API route', () => {
         name: 'Test User',
         role: 'instructor',
       })
+      mockIsTossConfigured.mockReturnValue(true)
       mockGetPlanById.mockResolvedValue({
         id: 'plan-institution',
         name: 'institution',
@@ -226,6 +244,7 @@ describe('checkout API route', () => {
         name: 'Test User',
         role: 'instructor',
       })
+      mockIsTossConfigured.mockReturnValue(true)
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -249,51 +268,6 @@ describe('checkout API route', () => {
       expect(data.redirectTo).toBe('/settings/billing')
     })
 
-    it('should create Stripe checkout session for non-Korean locale', async () => {
-      mockGetCurrentUser.mockResolvedValue({
-        id: 'user-123',
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'instructor',
-      })
-      mockGetPlanById.mockResolvedValue({
-        id: 'plan-pro',
-        name: 'pro',
-        tier: 1,
-      } as any)
-      mockGetSubscriptionInfo.mockResolvedValue({
-        planName: 'free',
-        isActive: true,
-      } as any)
-      mockIsTossConfigured.mockReturnValue(false)
-      mockCreateStripeCheckout.mockResolvedValue({
-        sessionId: 'cs_test_123',
-        url: 'https://checkout.stripe.com/cs_test_123',
-      })
-
-      const request = createMockRequest({
-        planId: '550e8400-e29b-41d4-a716-446655440001',
-        billingInterval: 'monthly',
-        locale: 'en',
-      })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(data.provider).toBe('stripe')
-      expect(data.sessionId).toBe('cs_test_123')
-      expect(data.url).toBe('https://checkout.stripe.com/cs_test_123')
-      expect(mockCreateStripeCheckout).toHaveBeenCalledWith(expect.objectContaining({
-        userId: 'user-123',
-        userEmail: 'test@example.com',
-        planId: '550e8400-e29b-41d4-a716-446655440001',
-        billingInterval: 'monthly',
-        locale: 'en',
-        trialDays: 14,
-      }))
-    })
-
     it('should create Toss checkout params for Korean locale', async () => {
       process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY = 'toss_client_key'
 
@@ -303,6 +277,7 @@ describe('checkout API route', () => {
         name: '테스트 사용자',
         role: 'instructor',
       })
+      mockIsTossConfigured.mockReturnValue(true)
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -312,7 +287,6 @@ describe('checkout API route', () => {
         planName: 'free',
         isActive: true,
       } as any)
-      mockIsTossConfigured.mockReturnValue(true)
       mockCreateTossCheckout.mockResolvedValue({
         customerKey: 'agora_user-123',
         orderId: 'order_123',
@@ -339,77 +313,6 @@ describe('checkout API route', () => {
       expect(data.clientKey).toBe('toss_client_key')
     })
 
-    it('should fall back to Stripe when Toss is not configured', async () => {
-      mockGetCurrentUser.mockResolvedValue({
-        id: 'user-123',
-        email: 'test@example.com',
-        name: '테스트 사용자',
-        role: 'instructor',
-      })
-      mockGetPlanById.mockResolvedValue({
-        id: 'plan-pro',
-        name: 'pro',
-        tier: 1,
-      } as any)
-      mockGetSubscriptionInfo.mockResolvedValue({
-        planName: 'free',
-        isActive: true,
-      } as any)
-      mockIsTossConfigured.mockReturnValue(false)
-      mockCreateStripeCheckout.mockResolvedValue({
-        sessionId: 'cs_test_123',
-        url: 'https://checkout.stripe.com/cs_test_123',
-      })
-
-      const request = createMockRequest({
-        planId: '550e8400-e29b-41d4-a716-446655440001',
-        billingInterval: 'monthly',
-        locale: 'ko',
-      })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(data.provider).toBe('stripe')
-    })
-
-    it('should use explicit payment provider when specified', async () => {
-      mockGetCurrentUser.mockResolvedValue({
-        id: 'user-123',
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'instructor',
-      })
-      mockGetPlanById.mockResolvedValue({
-        id: 'plan-pro',
-        name: 'pro',
-        tier: 1,
-      } as any)
-      mockGetSubscriptionInfo.mockResolvedValue({
-        planName: 'free',
-        isActive: true,
-      } as any)
-      mockIsTossConfigured.mockReturnValue(true)
-      mockCreateStripeCheckout.mockResolvedValue({
-        sessionId: 'cs_test_123',
-        url: 'https://checkout.stripe.com/cs_test_123',
-      })
-
-      const request = createMockRequest({
-        planId: '550e8400-e29b-41d4-a716-446655440001',
-        billingInterval: 'monthly',
-        locale: 'ko',
-        paymentProvider: 'stripe', // Force Stripe even for Korean locale
-      })
-
-      const response = await POST(request)
-      const data = await response.json()
-
-      expect(response.status).toBe(200)
-      expect(data.provider).toBe('stripe')
-    })
-
     it('should handle checkout errors gracefully', async () => {
       mockGetCurrentUser.mockResolvedValue({
         id: 'user-123',
@@ -417,6 +320,7 @@ describe('checkout API route', () => {
         name: 'Test User',
         role: 'instructor',
       })
+      mockIsTossConfigured.mockReturnValue(true)
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -426,8 +330,7 @@ describe('checkout API route', () => {
         planName: 'free',
         isActive: true,
       } as any)
-      mockIsTossConfigured.mockReturnValue(false)
-      mockCreateStripeCheckout.mockRejectedValue(new Error('Stripe API error'))
+      mockCreateTossCheckout.mockRejectedValue(new Error('Toss API error'))
 
       const request = createMockRequest({
         planId: '550e8400-e29b-41d4-a716-446655440001',
@@ -438,7 +341,7 @@ describe('checkout API route', () => {
       const data = await response.json()
 
       expect(response.status).toBe(500)
-      expect(data.error).toBe('Stripe API error')
+      expect(data.error).toBe('Toss API error')
     })
 
     it('should return 400 when user has no email', async () => {
@@ -448,6 +351,7 @@ describe('checkout API route', () => {
         name: 'Test User',
         role: 'instructor',
       })
+      mockIsTossConfigured.mockReturnValue(true)
       mockGetPlanById.mockResolvedValue({
         id: 'plan-pro',
         name: 'pro',
@@ -473,8 +377,6 @@ describe('checkout API route', () => {
 
   describe('GET /api/checkout', () => {
     it('should return available plans and providers', async () => {
-      process.env.STRIPE_SECRET_KEY = 'sk_test_123'
-
       mockCreateSupabaseRouteClient.mockResolvedValue({
         from: vi.fn().mockImplementation((table: string) => {
           if (table === 'subscription_plans') {
@@ -505,7 +407,6 @@ describe('checkout API route', () => {
       expect(response.status).toBe(200)
       expect(data.plans).toHaveLength(3)
       expect(data.providers).toEqual({
-        stripe: true,
         toss: true,
       })
     })

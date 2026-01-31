@@ -3,12 +3,11 @@
  *
  * POST /api/checkout - Create a checkout session for subscription
  *
- * Supports both Stripe and Toss Payments based on locale/preference
+ * Uses Toss Payments for all payments (domestic and international)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
-import { createCheckoutSession as createStripeCheckout } from '@/lib/stripe'
 import { createCheckoutParams as createTossCheckout, isTossConfigured } from '@/lib/toss-payments'
 import { getPlanById, getSubscriptionInfo } from '@/lib/subscription'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
@@ -19,7 +18,6 @@ import { getCurrentUser } from '@/lib/auth'
 const checkoutSchema = z.object({
   planId: z.string().uuid(),
   billingInterval: z.enum(['monthly', 'yearly']),
-  paymentProvider: z.enum(['stripe', 'toss']).optional(),
   locale: z.enum(['ko', 'en']).optional().default('ko'),
 })
 
@@ -47,7 +45,11 @@ export async function POST(request: NextRequest) {
     }
 
     const { planId, billingInterval, locale } = validation.data
-    let { paymentProvider } = validation.data
+
+    // Check if Toss is configured
+    if (!isTossConfigured()) {
+      return NextResponse.json({ error: '결제 시스템이 설정되지 않았습니다.' }, { status: 500 })
+    }
 
     // Get plan details
     const plan = await getPlanById(planId)
@@ -76,11 +78,6 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Determine payment provider based on locale if not specified
-    if (!paymentProvider) {
-      paymentProvider = locale === 'ko' && isTossConfigured() ? 'toss' : 'stripe'
-    }
-
     // Get user email
     const userEmail = user.email
     if (!userEmail) {
@@ -91,42 +88,22 @@ export async function POST(request: NextRequest) {
     const successUrl = `${baseUrl}/${locale}/checkout/success`
     const cancelUrl = `${baseUrl}/${locale}/pricing`
 
-    if (paymentProvider === 'toss') {
-      // Toss Payments flow
-      const tossParams = await createTossCheckout({
-        userId: user.id,
-        userEmail,
-        userName: user.name || undefined,
-        planId,
-        billingInterval,
-        successUrl,
-        failUrl: cancelUrl,
-      })
+    // Toss Payments flow
+    const tossParams = await createTossCheckout({
+      userId: user.id,
+      userEmail,
+      userName: user.name || undefined,
+      planId,
+      billingInterval,
+      successUrl,
+      failUrl: cancelUrl,
+    })
 
-      return NextResponse.json({
-        provider: 'toss',
-        ...tossParams,
-        clientKey: process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY,
-      })
-    } else {
-      // Stripe flow
-      const stripeSession = await createStripeCheckout({
-        userId: user.id,
-        userEmail,
-        planId,
-        billingInterval,
-        successUrl,
-        cancelUrl,
-        locale,
-        trialDays: plan.name === 'pro' ? 14 : undefined, // 14-day trial for Pro plan
-      })
-
-      return NextResponse.json({
-        provider: 'stripe',
-        sessionId: stripeSession.sessionId,
-        url: stripeSession.url,
-      })
-    }
+    return NextResponse.json({
+      provider: 'toss',
+      ...tossParams,
+      clientKey: process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY,
+    })
   } catch (error) {
     console.error('Checkout error:', error)
 
@@ -163,7 +140,6 @@ export async function GET(request: NextRequest) {
 
     // Check which payment providers are available
     const providers = {
-      stripe: !!process.env.STRIPE_SECRET_KEY,
       toss: isTossConfigured(),
     }
 

@@ -13,7 +13,6 @@ vi.mock('../../subscription-cache', () => ({
 import {
   createSubscription,
   updateSubscriptionStatus,
-  getSubscriptionByStripeId,
   getSubscriptionByTossId,
 } from '../management'
 import { createSupabaseAdminClient } from '../../supabase-server'
@@ -32,55 +31,6 @@ describe('subscription/management', () => {
   })
 
   describe('createSubscription', () => {
-    it('should create a subscription with Stripe payment provider', async () => {
-      const insertMock = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: {
-              id: 'sub-new-123',
-              user_id: 'user-123',
-              plan_id: 'plan-pro',
-              status: 'active',
-              payment_provider: 'stripe',
-            },
-            error: null,
-          }),
-        }),
-      })
-      const mockClient = {
-        from: vi.fn().mockReturnValue({
-          insert: insertMock,
-        }),
-      }
-      mockCreateSupabaseAdminClient.mockResolvedValue(mockClient as any)
-
-      const result = await createSubscription({
-        userId: 'user-123',
-        planId: 'plan-pro',
-        status: 'active',
-        paymentProvider: 'stripe',
-        stripeSubscriptionId: 'sub_stripe_123',
-        stripeCustomerId: 'cus_stripe_123',
-        billingInterval: 'monthly',
-        currency: 'USD',
-        currentPeriodStart: '2026-01-01T00:00:00Z',
-        currentPeriodEnd: '2026-02-01T00:00:00Z',
-      })
-
-      expect(insertMock).toHaveBeenCalledWith(expect.objectContaining({
-        user_id: 'user-123',
-        organization_id: null,
-        plan_id: 'plan-pro',
-        status: 'active',
-        payment_provider: 'stripe',
-        stripe_subscription_id: 'sub_stripe_123',
-        stripe_customer_id: 'cus_stripe_123',
-        billing_interval: 'monthly',
-        currency: 'USD',
-      }))
-      expect(mockInvalidateSubscriptionCache).toHaveBeenCalledWith('user-123')
-    })
-
     it('should create a subscription with Toss payment provider', async () => {
       const insertMock = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
@@ -123,6 +73,7 @@ describe('subscription/management', () => {
         toss_customer_key: 'toss_cus_123',
         toss_billing_key: 'toss_billing_123',
       }))
+      expect(mockInvalidateSubscriptionCache).toHaveBeenCalledWith('user-123')
     })
 
     it('should create organization subscription and invalidate member caches', async () => {
@@ -150,9 +101,9 @@ describe('subscription/management', () => {
         organizationId: 'org-123',
         planId: 'plan-institution',
         status: 'active',
-        paymentProvider: 'stripe',
+        paymentProvider: 'toss',
         billingInterval: 'yearly',
-        currency: 'USD',
+        currency: 'KRW',
         currentPeriodStart: '2026-01-01T00:00:00Z',
         currentPeriodEnd: '2027-01-01T00:00:00Z',
       })
@@ -191,9 +142,9 @@ describe('subscription/management', () => {
         userId: 'user-123',
         planId: 'plan-pro',
         status: 'trialing',
-        paymentProvider: 'stripe',
+        paymentProvider: 'toss',
         billingInterval: 'monthly',
-        currency: 'USD',
+        currency: 'KRW',
         currentPeriodStart: '2026-01-01T00:00:00Z',
         currentPeriodEnd: '2026-02-01T00:00:00Z',
         trialEnd,
@@ -226,9 +177,9 @@ describe('subscription/management', () => {
           userId: 'user-123',
           planId: 'plan-pro',
           status: 'active',
-          paymentProvider: 'stripe',
+          paymentProvider: 'toss',
           billingInterval: 'monthly',
-          currency: 'USD',
+          currency: 'KRW',
           currentPeriodStart: '2026-01-01T00:00:00Z',
           currentPeriodEnd: '2026-02-01T00:00:00Z',
         })
@@ -359,57 +310,6 @@ describe('subscription/management', () => {
       await expect(
         updateSubscriptionStatus('sub-123', 'canceled')
       ).rejects.toMatchObject({ message: 'Update failed' })
-    })
-  })
-
-  describe('getSubscriptionByStripeId', () => {
-    it('should return subscription when found', async () => {
-      const mockSubscription = {
-        id: 'sub-123',
-        stripe_subscription_id: 'sub_stripe_123',
-        user_id: 'user-123',
-        subscription_plans: {
-          id: 'plan-pro',
-          name: 'pro',
-        },
-      }
-      const mockClient = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({
-                data: mockSubscription,
-                error: null,
-              }),
-            }),
-          }),
-        }),
-      }
-      mockCreateSupabaseAdminClient.mockResolvedValue(mockClient as any)
-
-      const result = await getSubscriptionByStripeId('sub_stripe_123')
-
-      expect(result).toEqual(mockSubscription)
-    })
-
-    it('should return null when subscription not found', async () => {
-      const mockClient = {
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({
-                data: null,
-                error: { code: 'PGRST116' },
-              }),
-            }),
-          }),
-        }),
-      }
-      mockCreateSupabaseAdminClient.mockResolvedValue(mockClient as any)
-
-      const result = await getSubscriptionByStripeId('nonexistent')
-
-      expect(result).toBeNull()
     })
   })
 

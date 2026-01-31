@@ -40,8 +40,6 @@ export interface SubscriptionPlan {
   priceYearlyKrw: number | null
   priceMonthlyUsd: number | null
   priceYearlyUsd: number | null
-  stripePriceIdMonthly: string | null
-  stripePriceIdYearly: string | null
   tossPlanCode: string | null
   isActive: boolean
 }
@@ -59,7 +57,7 @@ export type SubscriptionStatus =
   | 'incomplete'
 
 export type BillingInterval = 'monthly' | 'yearly'
-export type PaymentProvider = 'stripe' | 'toss'
+export type PaymentProvider = 'toss'
 export type Currency = 'KRW' | 'USD' | 'EUR'
 
 export interface Subscription {
@@ -75,8 +73,6 @@ export interface Subscription {
   trialStart: string | null
   trialEnd: string | null
   paymentProvider: PaymentProvider
-  stripeSubscriptionId: string | null
-  stripeCustomerId: string | null
   tossSubscriptionId: string | null
   tossCustomerKey: string | null
   billingInterval: BillingInterval
@@ -437,8 +433,6 @@ export function transformPlanRow(row: SubscriptionPlanRow): SubscriptionPlan {
     priceYearlyKrw: row.price_yearly_krw,
     priceMonthlyUsd: row.price_monthly_usd,
     priceYearlyUsd: row.price_yearly_usd,
-    stripePriceIdMonthly: row.stripe_price_id_monthly,
-    stripePriceIdYearly: row.stripe_price_id_yearly,
     tossPlanCode: row.toss_plan_code,
     isActive: row.is_active,
   }
@@ -460,8 +454,6 @@ export function transformSubscriptionRow(
     trialStart: row.trial_start,
     trialEnd: row.trial_end,
     paymentProvider: row.payment_provider as PaymentProvider,
-    stripeSubscriptionId: row.stripe_subscription_id,
-    stripeCustomerId: row.stripe_customer_id,
     tossSubscriptionId: row.toss_subscription_id,
     tossCustomerKey: row.toss_customer_key,
     billingInterval: row.billing_interval as BillingInterval,

@@ -2,7 +2,16 @@
   "functions": {
     "app/api/upload/route.ts": {
       "maxDuration": 60
+    },
+    "app/api/cron/toss-renewals/route.ts": {
+      "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/toss-renewals",
+      "schedule": "0 0 * * *"
+    }
+  ],
   "regions": ["iad1"]
 }

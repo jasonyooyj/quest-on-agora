@@ -14,6 +14,5 @@ export { getAvailablePlans, getPlanById, getPlanByName } from './subscription/pl
 export {
   createSubscription,
   updateSubscriptionStatus,
-  getSubscriptionByStripeId,
   getSubscriptionByTossId,
 } from './subscription/management'

@@ -13,9 +13,7 @@ export async function createSubscription(params: {
   organizationId?: string
   planId: string
   status: string
-  paymentProvider: 'stripe' | 'toss'
-  stripeSubscriptionId?: string
-  stripeCustomerId?: string
+  paymentProvider: 'toss'
   tossSubscriptionId?: string
   tossCustomerKey?: string
   tossBillingKey?: string
@@ -35,8 +33,6 @@ export async function createSubscription(params: {
       plan_id: params.planId,
       status: params.status,
       payment_provider: params.paymentProvider,
-      stripe_subscription_id: params.stripeSubscriptionId || null,
-      stripe_customer_id: params.stripeCustomerId || null,
       toss_subscription_id: params.tossSubscriptionId || null,
       toss_customer_key: params.tossCustomerKey || null,
       toss_billing_key: params.tossBillingKey || null,
@@ -98,25 +94,6 @@ export async function updateSubscriptionStatus(
   } else if (subscription?.user_id) {
     invalidateSubscriptionCache(subscription.user_id)
   }
-}
-
-/**
- * Get subscription by Stripe subscription ID
- */
-export async function getSubscriptionByStripeId(stripeSubscriptionId: string) {
-  const supabase = await createSupabaseAdminClient()
-
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*, subscription_plans(*)')
-    .eq('stripe_subscription_id', stripeSubscriptionId)
-    .single()
-
-  if (error) {
-    return null
-  }
-
-  return data
 }
 
 /**

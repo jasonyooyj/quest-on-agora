@@ -1,15 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Check, X, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Loader2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+
+// 플랜 ID (데이터베이스의 subscription_plans 테이블과 매칭)
+const PLAN_IDS: Record<string, string> = {
+    free: '00000000-0000-0000-0000-000000000001',
+    pro: '00000000-0000-0000-0000-000000000002',
+    institution: '00000000-0000-0000-0000-000000000003',
+};
 
 export function PricingSection() {
     const t = useTranslations('Pricing');
     const locale = useLocale();
+    const router = useRouter();
     const [isYearly, setIsYearly] = useState(true);
+    const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
     const isKo = locale === 'ko';
 
@@ -47,6 +58,64 @@ export function PricingSection() {
         }
         return `$${price.toFixed(2)}`;
     };
+
+    // 결제 시작 핸들러
+    const handleCheckout = useCallback(async (planKey: string) => {
+        if (planKey === 'free') {
+            // 무료 플랜은 회원가입으로 이동
+            router.push(`/${locale}/auth/register`);
+            return;
+        }
+
+        if (planKey === 'institution') {
+            // 기관 플랜은 영업팀 문의
+            window.location.href = 'mailto:sales@agora.edu';
+            return;
+        }
+
+        setLoadingPlan(planKey);
+
+        try {
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    planId: PLAN_IDS[planKey],
+                    billingInterval: isYearly ? 'yearly' : 'monthly',
+                    locale,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // 로그인 필요
+                    toast.error('로그인이 필요합니다.');
+                    router.push(`/${locale}/auth/login?redirect=/pricing`);
+                    return;
+                }
+                throw new Error(data.error || '결제 처리 중 오류가 발생했습니다.');
+            }
+
+            // Toss 결제 위젯 페이지로 이동
+            const params = new URLSearchParams({
+                clientKey: data.clientKey,
+                customerKey: data.customerKey,
+                amount: data.amount.toString(),
+                orderId: data.orderId,
+                orderName: data.orderName,
+                successUrl: data.successUrl,
+                failUrl: data.failUrl,
+            });
+            router.push(`/${locale}/checkout/toss?${params.toString()}`);
+        } catch (error) {
+            console.error('Checkout error:', error);
+            toast.error(error instanceof Error ? error.message : '결제 처리 중 오류가 발생했습니다.');
+        } finally {
+            setLoadingPlan(null);
+        }
+    }, [isYearly, locale, router]);
 
     return (
         <section id="pricing" className="py-24 lg:py-32 relative overflow-hidden">
@@ -137,16 +206,27 @@ export function PricingSection() {
                             </div>
 
                             {/* CTA */}
-                            <a
-                                href={plan.key === 'institution' ? "mailto:sales@agora.com" : "/auth/register"}
+                            <button
+                                onClick={() => handleCheckout(plan.key)}
+                                disabled={loadingPlan === plan.key}
                                 className={cn(
-                                    "w-full mb-8",
-                                    plan.highlight ? "btn-primary" : "btn-brutal"
+                                    "w-full mb-8 flex items-center justify-center",
+                                    plan.highlight ? "btn-primary" : "btn-brutal",
+                                    loadingPlan === plan.key && "opacity-70 cursor-not-allowed"
                                 )}
                             >
-                                {t(`plans.${plan.key}.cta`)}
-                                {plan.highlight && <ArrowRight className="w-4 h-4 ml-2" />}
-                            </a>
+                                {loadingPlan === plan.key ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                        처리 중...
+                                    </>
+                                ) : (
+                                    <>
+                                        {t(`plans.${plan.key}.cta`)}
+                                        {plan.highlight && <ArrowRight className="w-4 h-4 ml-2" />}
+                                    </>
+                                )}
+                            </button>
 
                             {/* Features */}
                             <div className="space-y-4">
