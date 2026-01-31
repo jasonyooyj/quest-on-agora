@@ -14,7 +14,12 @@ import {
   TossPaymentError,
   getTossErrorMessage,
 } from '@/lib/toss-payments'
-import { createSubscription, getPlanById } from '@/lib/subscription'
+import {
+  createSubscription,
+  updateSubscriptionStatus,
+  getActiveSubscriptionByUserId,
+  getPlanById,
+} from '@/lib/subscription'
 import { z } from 'zod'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { getCurrentUser } from '@/lib/auth'
@@ -114,23 +119,42 @@ async function handleBillingKeyIssuance(
     periodEnd.setFullYear(periodEnd.getFullYear() + 1)
   }
 
-  // Create subscription record
-  await createSubscription({
-    userId,
-    planId,
-    status: 'active',
-    paymentProvider: 'toss',
-    tossCustomerKey: customerKey,
-    tossBillingKey: billingKeyResult.billingKey,
-    billingInterval,
-    currency: 'KRW',
-    currentPeriodStart: now.toISOString(),
-    currentPeriodEnd: periodEnd.toISOString(),
-  })
+  const periodStart = now.toISOString()
+  const periodEndStr = periodEnd.toISOString()
+
+  // 업그레이드: 기존 활성 구독이 있으면 해당 행 갱신, 없으면 신규 생성
+  const existingBilling = await getActiveSubscriptionByUserId(userId)
+  let subscriptionIdForPayment: string | null = null
+  if (existingBilling) {
+    await updateSubscriptionStatus(existingBilling.id, 'active', {
+      plan_id: planId,
+      current_period_start: periodStart,
+      current_period_end: periodEndStr,
+      toss_customer_key: customerKey,
+      toss_billing_key: billingKeyResult.billingKey ?? null,
+      billing_interval: billingInterval,
+    })
+    subscriptionIdForPayment = existingBilling.id
+  } else {
+    const newSub = await createSubscription({
+      userId,
+      planId,
+      status: 'active',
+      paymentProvider: 'toss',
+      tossCustomerKey: customerKey,
+      tossBillingKey: billingKeyResult.billingKey,
+      billingInterval,
+      currency: 'KRW',
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEndStr,
+    })
+    subscriptionIdForPayment = newSub.id
+  }
 
   // Record payment history
   const supabase = await createSupabaseAdminClient()
   await supabase.from('payment_history').insert({
+    subscription_id: subscriptionIdForPayment,
     payment_provider: 'toss',
     provider_payment_id: `billing_${billingKeyResult.billingKey}_${Date.now()}`,
     amount: billingInterval === 'monthly' ? plan.priceMonthlyKrw : plan.priceYearlyKrw,
@@ -198,23 +222,40 @@ async function handlePaymentConfirmation(
     periodEnd.setFullYear(periodEnd.getFullYear() + 1)
   }
 
-  // Create subscription record
-  const subscription = await createSubscription({
-    userId,
-    planId,
-    status: 'active',
-    paymentProvider: 'toss',
-    tossSubscriptionId: orderId,
-    billingInterval,
-    currency: 'KRW',
-    currentPeriodStart: now.toISOString(),
-    currentPeriodEnd: periodEnd.toISOString(),
-  })
+  const periodStart = now.toISOString()
+  const periodEndStr = periodEnd.toISOString()
+
+  // 업그레이드: 기존 활성 구독이 있으면 해당 행 갱신, 없으면 신규 생성
+  const existing = await getActiveSubscriptionByUserId(userId)
+  let subscriptionId: string | null = null
+  if (existing) {
+    await updateSubscriptionStatus(existing.id, 'active', {
+      plan_id: planId,
+      current_period_start: periodStart,
+      current_period_end: periodEndStr,
+      toss_subscription_id: orderId,
+      billing_interval: billingInterval,
+    })
+    subscriptionId = existing.id
+  } else {
+    const subscription = await createSubscription({
+      userId,
+      planId,
+      status: 'active',
+      paymentProvider: 'toss',
+      tossSubscriptionId: orderId,
+      billingInterval,
+      currency: 'KRW',
+      currentPeriodStart: periodStart,
+      currentPeriodEnd: periodEndStr,
+    })
+    subscriptionId = subscription.id
+  }
 
   // Record payment history
   const supabase = await createSupabaseAdminClient()
   await supabase.from('payment_history').insert({
-    subscription_id: subscription.id,
+    subscription_id: subscriptionId,
     payment_provider: 'toss',
     provider_payment_id: paymentKey,
     amount: paymentResult.totalAmount,

@@ -29,7 +29,7 @@ export default function DemoStep1Creation() {
   const maxTurns = Math.max(5, duration)
 
   return (
-    <div className="w-full h-full bg-white p-5 flex flex-col overflow-hidden">
+    <div className="w-full h-full min-h-0 bg-white p-3 sm:p-5 flex flex-col overflow-auto">
       {/* Topic Preview */}
       <div className="mb-4">
         <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">{t('step1.phase1')}</div>
@@ -41,7 +41,7 @@ export default function DemoStep1Creation() {
       {/* AI Mode Selector */}
       <div className="mb-4">
         <div className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">{t('step1.phase2')}</div>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {modeKeys.map((modeKey) => {
             const Icon = icons[modeKey]
             const isSelected = selectedMode === modeKey

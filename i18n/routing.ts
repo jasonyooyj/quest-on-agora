@@ -5,8 +5,11 @@ export const routing = defineRouting({
   // A list of all locales that are supported
   locales: ['ko', 'en'],
 
-  // Used when no locale matches
-  defaultLocale: 'ko'
+  // Used when no locale matches (접속 시 기본 랜딩은 한국어)
+  defaultLocale: 'ko',
+
+  // 브라우저 언어 감지 비활성화 → 항상 defaultLocale(ko)로 랜딩
+  localeDetection: false,
 });
 
 // Type for supported locales

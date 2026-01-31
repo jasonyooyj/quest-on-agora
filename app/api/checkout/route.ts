@@ -7,9 +7,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createCheckoutParams as createTossCheckout, isTossConfigured } from '@/lib/toss-payments'
-import { getPlanById, getSubscriptionInfo } from '@/lib/subscription'
+import { getPlanById, getSubscriptionInfo, getAvailablePlans } from '@/lib/subscription'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
 import { z } from 'zod'
 import { getCurrentUser } from '@/lib/auth'
@@ -33,6 +32,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 })
     }
 
+    // 학생 역할은 결제 불가
+    if (user.role === 'student') {
+      return NextResponse.json({
+        error: '학생 계정은 구독 결제가 불가능합니다.',
+        code: 'STUDENT_NOT_ALLOWED',
+        message: '강사 계정으로 전환 후 다시 시도해 주세요.',
+      }, { status: 403 })
+    }
+
     // Parse and validate request body
     const body = await request.json()
     const validation = checkoutSchema.safeParse(body)
@@ -51,10 +59,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '결제 시스템이 설정되지 않았습니다.' }, { status: 500 })
     }
 
-    // Get plan details
+    // Get plan details (요금제는 database/migrations/002_seed_subscription_plans.sql 시드 필요)
     const plan = await getPlanById(planId)
     if (!plan) {
-      return NextResponse.json({ error: '요금제를 찾을 수 없습니다.' }, { status: 404 })
+      return NextResponse.json({
+        error: '요금제를 찾을 수 없습니다.',
+        code: 'PLAN_NOT_FOUND',
+        hint: 'Supabase에 요금제 시드가 적용되었는지 확인하세요. database/migrations/002_seed_subscription_plans.sql 실행 필요.',
+      }, { status: 404 })
     }
 
     // Check if plan is available for subscription
@@ -69,13 +81,18 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Check if user already has an active subscription
+    // 이미 활성 구독이 있으면: 업그레이드(선택 플랜 tier > 현재 tier)만 허용
     const currentSubscription = await getSubscriptionInfo(user.id, locale)
     if (currentSubscription.planName !== 'free' && currentSubscription.isActive) {
-      return NextResponse.json({
-        error: '이미 구독 중입니다. 요금제 변경은 설정에서 해주세요.',
-        redirectTo: '/settings/billing',
-      }, { status: 400 })
+      const currentTier = typeof currentSubscription.planTier === 'number' ? currentSubscription.planTier : 0
+      const isUpgrade = plan.tier > currentTier
+      if (!isUpgrade) {
+        return NextResponse.json({
+          error: '이미 구독 중입니다. 요금제 변경은 설정에서 해주세요.',
+          redirectTo: '/settings/billing',
+        }, { status: 400 })
+      }
+      // 업그레이드(Pro→Max 등): 결제 진행 허용
     }
 
     // Get user email
@@ -117,36 +134,20 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * GET /api/checkout - Get available plans for checkout
+ * GET /api/checkout - Get available plans for checkout (비로그인도 조회 가능, RLS 우회)
  */
 export async function GET(request: NextRequest) {
-  // Apply rate limiting
   const rateLimitResponse = applyRateLimit(request, RATE_LIMITS.api, 'checkout')
   if (rateLimitResponse) return rateLimitResponse
 
   try {
-    const supabase = await createSupabaseRouteClient()
+    const { searchParams } = new URL(request.url)
+    const locale = (searchParams.get('locale') === 'en' ? 'en' : 'ko') as 'ko' | 'en'
 
-    // Get available plans
-    const { data: plans, error } = await supabase
-      .from('subscription_plans')
-      .select('*')
-      .eq('is_active', true)
-      .order('tier', { ascending: true })
+    const plans = await getAvailablePlans(locale)
+    const providers = { toss: isTossConfigured() }
 
-    if (error) {
-      throw error
-    }
-
-    // Check which payment providers are available
-    const providers = {
-      toss: isTossConfigured(),
-    }
-
-    return NextResponse.json({
-      plans,
-      providers,
-    })
+    return NextResponse.json({ plans, providers })
   } catch (error) {
     console.error('Get plans error:', error)
     return NextResponse.json(

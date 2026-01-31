@@ -45,7 +45,9 @@
     "roleMember": "Member",
     "settings": "Settings",
     "logout": "Log out",
-    "language": "Language"
+    "language": "Language",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
   "Error": {
     "title": "Something went wrong",
@@ -348,7 +350,16 @@
   "Footer": {
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
-    "contact": "Contact Us"
+    "contact": "Contact Us",
+    "business": {
+      "companyName": "Company",
+      "representative": "Representative",
+      "registrationNumber": "Business Registration No.",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "disclaimer": "Agora acts as an intermediary platform and is not a party to transactions. All obligations and responsibilities regarding reservations, services, and refunds lie with the respective sellers."
+    }
   },
   "Auth": {
     "Login": {
@@ -1634,8 +1645,20 @@
           "1": "30 discussions per month",
           "2": "5 active discussions at a time",
           "3": "Up to 100 participants per session",
-          "4": "Advanced Analytics & Exports",
+          "4": "Advanced Analytics",
           "5": "All AI Tutor Modes"
+        }
+      },
+      "max": {
+        "name": "Max",
+        "description": "For power users running large classes and multiple discussions.",
+        "cta": "Get Max",
+        "features": {
+          "1": "100 discussions per month",
+          "2": "20 active discussions at a time",
+          "3": "Up to 300 participants per session",
+          "4": "Advanced Analytics & Exports",
+          "5": "Priority Support & API Access"
         }
       },
       "institution": {
@@ -1655,47 +1678,47 @@
   "Legal": {
     "Privacy": {
       "title": "Privacy Policy",
-      "lastUpdated": "Last updated: January 1, 2024",
+      "lastUpdated": "Last updated: January 31, 2026",
       "purpose": {
         "title": "1. Purpose of Personal Information Processing",
-        "content": "Agora processes personal information for the following purposes. The processed personal information will not be used for purposes other than the following, and necessary measures such as obtaining separate consent will be taken if the purpose of use changes.",
+        "content": "Studio 001 (hereinafter \"Company\") processes personal information for the following purposes in operating the Agora service (hereinafter \"Service\"). The processed personal information will not be used for purposes other than the following, and necessary measures such as obtaining separate consent will be taken if the purpose of use changes.",
         "items": {
-          "1": "Member registration and management",
-          "2": "Service provision and improvement",
-          "3": "Discussion activity analysis and feedback provision"
+          "1": "Member registration and management: Verification of registration intent, identification and authentication for membership services, membership maintenance and management, prevention of fraudulent use",
+          "2": "Service provision and improvement: AI-based discussion service provision, content delivery, personalized service, service quality improvement",
+          "3": "Payment and settlement: Payment and settlement for paid services, invoice delivery, purchase and payment processing"
         }
       },
       "items": {
         "title": "2. Personal Information Items Processed",
         "content": "The Company collects the following personal information for membership registration, service application, etc.",
         "list": {
-          "required": "Required: Email, Password, Name, Affiliation (School/Department)",
-          "optional": "Optional: Profile Picture, Bio"
+          "required": "Required: Email, Name, Affiliation (School/Department), Role (Instructor/Student)",
+          "optional": "Optional: Profile Picture"
         }
       },
       "retention": {
-        "title": "3. Destruction of Personal Information",
-        "content": "The Company destroys personal information without delay when the personal information becomes unnecessary, such as when the personal information retention period has elapsed or the processing purpose has been achieved."
+        "title": "3. Retention and Destruction of Personal Information",
+        "content": "The Company processes and retains personal information within the personal information retention and use period pursuant to laws or the period agreed upon when collecting personal information from the data subject. Personal information is destroyed without delay upon membership withdrawal or expiration of the retention period. However, if preservation is required by relevant laws, it will be preserved for the applicable period."
       },
-      "demoNote": "* This Privacy Policy is an example written for demonstration purposes and has no actual legal effect."
+      "demoNote": "Privacy inquiries: questonkr@gmail.com"
     },
     "Terms": {
       "title": "Terms of Service",
-      "lastUpdated": "Last updated: January 1, 2024",
+      "lastUpdated": "Last updated: January 31, 2026",
       "article1": {
         "title": "Article 1 (Purpose)",
-        "content": "These Terms aim to prescribe the rights, obligations, and responsibilities between Agora (hereinafter referred to as the \"Company\") and members in relation to the use of the online discussion platform service (hereinafter referred to as the \"Service\") provided by the Company."
+        "content": "These Terms aim to prescribe the rights, obligations, responsibilities, and other necessary matters between Studio 001 (hereinafter \"Company\") and users regarding the use of Agora (hereinafter \"Service\") operated by the Company."
       },
       "article2": {
         "title": "Article 2 (Definition)",
-        "content1": "1. \"Service\" refers to Agora and related various services that members can use regardless of the terminal implemented (including various wired/wireless devices such as PCs and portable terminals).",
-        "content2": "2. \"Member\" refers to a customer who accesses the Company's service, concludes a user agreement with the Company according to these Terms, and uses the service provided by the Company."
+        "content1": "\"Service\" refers to the Agora AI discussion platform and related services that users can use regardless of the terminal implemented (including various wired/wireless devices such as PCs and portable terminals).",
+        "content2": "\"User\" refers to members and non-members who access the Company's service, conclude a user agreement with the Company according to these Terms, and use the service provided by the Company."
       },
       "article3": {
         "title": "Article 3 (Effect and Change of Terms)",
-        "content": "The Company posts the contents of these Terms on the initial screen of the service so that members can easily know. The Company may revise these Terms to the extent that it does not violate relevant laws such as the \"Act on the Regulation of Terms and Conditions\"."
+        "content": "The Company posts the contents of these Terms on the initial screen of the service so that users can easily access them. The Company may revise these Terms to the extent that it does not violate relevant laws such as the \"Act on the Regulation of Terms and Conditions\" and \"Act on Promotion of Information and Communications Network Utilization and Information Protection\". Revised terms will be announced 7 days before the effective date, or 30 days in advance for changes unfavorable to users."
       },
-      "demoNote": "* These Terms are an example written for demonstration purposes and has no actual legal effect."
+      "demoNote": "Service inquiries: questonkr@gmail.com | Contact: 010-2361-2963"
     }
   }
 }

@@ -34,22 +34,22 @@ export default function DemoStep4Dashboard() {
   const t = useTranslations('Demo')
 
   return (
-    <div className="w-full h-full bg-zinc-50 flex flex-col overflow-hidden p-4">
+    <div className="w-full h-full min-h-0 bg-zinc-50 flex flex-col overflow-auto p-3 sm:p-4">
       {/* Header Stats */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Users className="w-5 h-5 text-primary" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 sm:mb-4 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
           </div>
-          <div>
-            <div className="text-lg font-bold text-zinc-900">{t('step4.liveParticipation')}</div>
-            <div className="text-sm text-zinc-500">{t('step4.online', { count: mockStats.online })}</div>
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-bold text-zinc-900">{t('step4.liveParticipation')}</div>
+            <div className="text-xs sm:text-sm text-zinc-500">{t('step4.online', { count: mockStats.online })}</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold">{t('step4.pro')} {mockDistribution.pro}</span>
-          <span className="px-2.5 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">{t('step4.con')} {mockDistribution.con}</span>
-          <span className="px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">{t('step4.neutral')} {mockDistribution.neutral}</span>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] sm:text-xs font-bold">{t('step4.pro')} {mockDistribution.pro}</span>
+          <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-rose-100 text-rose-700 text-[10px] sm:text-xs font-bold">{t('step4.con')} {mockDistribution.con}</span>
+          <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-zinc-100 text-zinc-600 text-[10px] sm:text-xs font-bold">{t('step4.neutral')} {mockDistribution.neutral}</span>
         </div>
       </div>
 

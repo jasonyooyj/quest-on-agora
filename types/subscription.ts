@@ -4,8 +4,8 @@
 // PLAN TYPES
 // ============================================================================
 
-export type PlanName = 'free' | 'pro' | 'institution'
-export type PlanTier = 0 | 1 | 2  // 0=free, 1=pro, 2=institution
+export type PlanName = 'free' | 'pro' | 'max' | 'institution'
+export type PlanTier = 0 | 1 | 2 | 3  // 0=free, 1=pro, 2=max, 3=institution
 
 export interface SubscriptionFeatures {
   analytics: boolean

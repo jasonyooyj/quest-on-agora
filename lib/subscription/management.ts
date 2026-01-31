@@ -97,6 +97,26 @@ export async function updateSubscriptionStatus(
 }
 
 /**
+ * 사용자(개인)의 활성 구독 1건 조회 (업그레이드 시 기존 행 갱신용)
+ */
+export async function getActiveSubscriptionByUserId(userId: string) {
+  const supabase = await createSupabaseAdminClient()
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('id, user_id, plan_id, current_period_start, current_period_end')
+    .eq('user_id', userId)
+    .in('status', ['active', 'trialing', 'past_due'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) {
+    console.error('Error fetching active subscription:', error)
+    return null
+  }
+  return data
+}
+
+/**
  * Get subscription by Toss subscription ID
  */
 export async function getSubscriptionByTossId(tossSubscriptionId: string) {

@@ -19,6 +19,7 @@ vi.mock('@/lib/toss-payments', () => ({
 vi.mock('@/lib/subscription', () => ({
   getPlanById: vi.fn(),
   getSubscriptionInfo: vi.fn(),
+  getAvailablePlans: vi.fn(),
 }))
 
 vi.mock('@/lib/rate-limiter', () => ({
@@ -29,7 +30,7 @@ vi.mock('@/lib/rate-limiter', () => ({
 import { POST, GET } from '../route'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createCheckoutParams as createTossCheckout, isTossConfigured } from '@/lib/toss-payments'
-import { getPlanById, getSubscriptionInfo } from '@/lib/subscription'
+import { getPlanById, getSubscriptionInfo, getAvailablePlans } from '@/lib/subscription'
 import { getCurrentUser } from '@/lib/auth'
 
 const mockCreateSupabaseRouteClient = vi.mocked(createSupabaseRouteClient)
@@ -38,6 +39,7 @@ const mockCreateTossCheckout = vi.mocked(createTossCheckout)
 const mockIsTossConfigured = vi.mocked(isTossConfigured)
 const mockGetPlanById = vi.mocked(getPlanById)
 const mockGetSubscriptionInfo = vi.mocked(getSubscriptionInfo)
+const mockGetAvailablePlans = vi.mocked(getAvailablePlans)
 
 // Helper to create mock request
 function createMockRequest(body: unknown, method: string = 'POST'): NextRequest {
@@ -252,6 +254,7 @@ describe('checkout API route', () => {
       } as any)
       mockGetSubscriptionInfo.mockResolvedValue({
         planName: 'pro',
+        planTier: 1,
         isActive: true,
       } as any)
 
@@ -266,6 +269,51 @@ describe('checkout API route', () => {
       expect(response.status).toBe(400)
       expect(data.error).toBe('이미 구독 중입니다. 요금제 변경은 설정에서 해주세요.')
       expect(data.redirectTo).toBe('/settings/billing')
+    })
+
+    it('should allow checkout when user upgrades (Pro → Max)', async () => {
+      const maxPlanId = '00000000-0000-0000-0000-000000000004'
+      mockGetCurrentUser.mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'instructor',
+      })
+      mockIsTossConfigured.mockReturnValue(true)
+      mockGetPlanById.mockResolvedValue({
+        id: maxPlanId,
+        name: 'max',
+        tier: 2,
+      } as any)
+      mockGetSubscriptionInfo.mockResolvedValue({
+        planName: 'pro',
+        planTier: 1,
+        isActive: true,
+      } as any)
+      mockCreateTossCheckout.mockResolvedValue({
+        customerKey: 'agora_user-123',
+        orderId: 'order_upgrade_123',
+        orderName: 'Max Plan',
+        amount: 39900,
+        successUrl: 'https://agora.edu/ko/checkout/success',
+        failUrl: 'https://agora.edu/ko/pricing',
+      })
+
+      const request = createMockRequest({
+        planId: maxPlanId,
+        billingInterval: 'monthly',
+        locale: 'ko',
+      })
+
+      const response = await POST(request)
+      const data = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(data.provider).toBe('toss')
+      expect(data.orderId).toBe('order_upgrade_123')
+      expect(mockCreateTossCheckout).toHaveBeenCalledWith(
+        expect.objectContaining({ planId: maxPlanId })
+      )
     })
 
     it('should create Toss checkout params for Korean locale', async () => {
@@ -377,27 +425,11 @@ describe('checkout API route', () => {
 
   describe('GET /api/checkout', () => {
     it('should return available plans and providers', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue({
-        from: vi.fn().mockImplementation((table: string) => {
-          if (table === 'subscription_plans') {
-            return {
-              select: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  order: vi.fn().mockResolvedValue({
-                    data: [
-                      { id: 'plan-free', name: 'free', tier: 0 },
-                      { id: 'plan-pro', name: 'pro', tier: 1 },
-                      { id: 'plan-institution', name: 'institution', tier: 2 },
-                    ],
-                    error: null,
-                  }),
-                }),
-              }),
-            }
-          }
-          return {}
-        }),
-      } as any)
+      mockGetAvailablePlans.mockResolvedValue([
+        { id: 'plan-free', name: 'free', tier: 0 } as any,
+        { id: 'plan-pro', name: 'pro', tier: 1 } as any,
+        { id: 'plan-institution', name: 'institution', tier: 2 } as any,
+      ])
       mockIsTossConfigured.mockReturnValue(true)
 
       const request = new NextRequest('https://agora.edu/api/checkout', { method: 'GET' })
@@ -412,18 +444,7 @@ describe('checkout API route', () => {
     })
 
     it('should handle database errors gracefully', async () => {
-      mockCreateSupabaseRouteClient.mockResolvedValue({
-        from: vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              order: vi.fn().mockResolvedValue({
-                data: null,
-                error: { message: 'Database error' },
-              }),
-            }),
-          }),
-        }),
-      } as any)
+      mockGetAvailablePlans.mockRejectedValue(new Error('Database error'))
 
       const request = new NextRequest('https://agora.edu/api/checkout', { method: 'GET' })
       const response = await GET(request)

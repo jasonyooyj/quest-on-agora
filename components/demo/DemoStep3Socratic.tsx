@@ -51,21 +51,21 @@ export default function DemoStep3Socratic() {
   }, [isTyping, aiResponse])
 
   return (
-    <div className="w-full h-full bg-white flex flex-col overflow-hidden">
+    <div className="w-full h-full min-h-0 bg-white flex flex-col overflow-auto">
       {/* Header */}
-      <div className="p-4 border-b border-zinc-200 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-50 border border-rose-200">
-            <ThumbsDown className="w-5 h-5 text-rose-500" />
-            <span className="text-sm font-bold text-rose-600">{t('step3.stance')}</span>
+      <div className="p-3 sm:p-4 border-b border-zinc-200 flex items-center justify-between flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl bg-rose-50 border border-rose-200 flex-shrink-0">
+            <ThumbsDown className="w-4 h-4 sm:w-5 sm:h-5 text-rose-500" />
+            <span className="text-xs sm:text-sm font-bold text-rose-600">{t('step3.stance')}</span>
           </div>
-          <span className="text-sm text-zinc-500">{t('step3.debating')}</span>
+          <span className="text-xs sm:text-sm text-zinc-500 truncate">{t('step3.debating')}</span>
         </div>
-        <div className="text-xs font-bold text-zinc-400 uppercase tracking-wide">Turn 2/10</div>
+        <div className="text-[10px] sm:text-xs font-bold text-zinc-400 uppercase tracking-wide flex-shrink-0">Turn 2/10</div>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-5 space-y-3 sm:space-y-5">
         {/* User message */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -121,21 +121,21 @@ export default function DemoStep3Socratic() {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-zinc-200 bg-zinc-50/50">
-        <div className="flex gap-3">
-          <div className="flex-1 relative">
+      <div className="p-3 sm:p-4 border-t border-zinc-200 bg-zinc-50/50 flex-shrink-0">
+        <div className="flex gap-2 sm:gap-3">
+          <div className="flex-1 min-w-0 relative">
             <input
               type="text"
               placeholder={t('step3.inputPlaceholder')}
               disabled
-              className="w-full h-14 px-5 rounded-xl bg-white border border-zinc-200 text-base placeholder:text-zinc-400 disabled:opacity-50"
+              className="w-full h-12 sm:h-14 px-3 sm:px-5 rounded-lg sm:rounded-xl bg-white border border-zinc-200 text-sm sm:text-base placeholder:text-zinc-400 disabled:opacity-50"
             />
           </div>
           <button
             disabled
-            className="w-14 h-14 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-center opacity-50"
+            className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white flex items-center justify-center opacity-50 flex-shrink-0"
           >
-            <Send className="w-6 h-6" />
+            <Send className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
       </div>

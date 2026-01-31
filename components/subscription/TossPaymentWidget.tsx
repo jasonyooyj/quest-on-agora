@@ -79,6 +79,17 @@ export function TossPaymentWidget({
   useEffect(() => {
     const loadTossSDK = async () => {
       try {
+        // 결제 위젯 SDK는 '결제위젯 연동 키'(클라이언트 키에 gck 포함)만 지원함. API 개별 연동 키(ck)는 사용 불가.
+        const isWidgetKey = /gck/i.test(clientKey)
+        if (!isWidgetKey) {
+          const msg =
+            '결제 위젯은 "결제위젯 연동 키"의 클라이언트 키로 연동해주세요. 개발자센터 → 결제위젯 연동 키(클라이언트 키에 gck 포함)를 발급받아 NEXT_PUBLIC_TOSS_CLIENT_KEY에 설정하고, 같은 세트의 시크릿 키를 TOSS_PAYMENTS_SECRET_KEY에 설정하세요. API 개별 연동 키(ck)는 위젯에서 지원하지 않습니다.'
+          setError(msg)
+          setIsLoading(false)
+          onError?.(new Error(msg))
+          return
+        }
+
         // SDK가 이미 로드되어 있는지 확인
         if (!window.TossPayments) {
           const script = document.createElement('script')
@@ -92,7 +103,7 @@ export function TossPaymentWidget({
           })
         }
 
-        // TossPayments 인스턴스 생성
+        // TossPayments 인스턴스 생성 (결제위젯 연동 키 사용)
         const tossPayments = new window.TossPayments(clientKey)
         const widgets = tossPayments.widgets({ customerKey })
 

@@ -2,7 +2,7 @@
 -- Description: Inserts the default subscription plans (Free, Pro, Institution)
 
 -- Clear existing plans (for idempotent migrations)
-DELETE FROM subscription_plans WHERE name IN ('free', 'pro', 'institution');
+DELETE FROM subscription_plans WHERE name IN ('free', 'pro', 'max', 'institution');
 
 -- ============================================================================
 -- FREE TIER
@@ -11,6 +11,7 @@ DELETE FROM subscription_plans WHERE name IN ('free', 'pro', 'institution');
 -- Target: Individual instructors trying the platform
 
 INSERT INTO subscription_plans (
+    id,
     name,
     display_name_ko,
     display_name_en,
@@ -25,6 +26,7 @@ INSERT INTO subscription_plans (
     price_yearly_usd,
     is_active
 ) VALUES (
+    '00000000-0000-0000-0000-000000000001',
     'free',
     '무료',
     'Free',
@@ -58,6 +60,7 @@ INSERT INTO subscription_plans (
 -- Target: Professors/teachers who use the platform regularly
 
 INSERT INTO subscription_plans (
+    id,
     name,
     display_name_ko,
     display_name_en,
@@ -75,6 +78,7 @@ INSERT INTO subscription_plans (
     toss_plan_code,
     is_active
 ) VALUES (
+    '00000000-0000-0000-0000-000000000002',
     'pro',
     'Pro',
     'Pro',
@@ -105,12 +109,65 @@ INSERT INTO subscription_plans (
 );
 
 -- ============================================================================
+-- MAX TIER
+-- ============================================================================
+-- For power users with large-scale needs
+-- Target: Instructors running multiple large classes simultaneously
+
+INSERT INTO subscription_plans (
+    id,
+    name,
+    display_name_ko,
+    display_name_en,
+    tier,
+    max_discussions_per_month,
+    max_active_discussions,
+    max_participants_per_discussion,
+    features,
+    price_monthly_krw,
+    price_yearly_krw,
+    price_monthly_usd,
+    price_yearly_usd,
+    toss_plan_code,
+    is_active
+) VALUES (
+    '00000000-0000-0000-0000-000000000004',
+    'max',
+    'Max',
+    'Max',
+    2,
+    100,            -- 100 discussions per month
+    20,             -- 20 active discussions at a time
+    300,            -- 300 participants per discussion
+    '{
+        "analytics": true,
+        "export": true,
+        "reports": true,
+        "customAiModes": true,
+        "prioritySupport": true,
+        "sso": false,
+        "dedicatedSupport": false,
+        "organizationManagement": false,
+        "advancedAnalytics": true,
+        "customBranding": true,
+        "apiAccess": true
+    }'::jsonb,
+    39900,          -- ₩39,900/month
+    399000,         -- ₩399,000/year (~2 months free)
+    3999,           -- $39.99/month (USD cents)
+    39990,          -- $399.90/year (USD cents)
+    NULL,           -- To be set after Toss product creation
+    true
+);
+
+-- ============================================================================
 -- INSTITUTION TIER
 -- ============================================================================
 -- For universities and educational institutions
 -- Target: Schools with multiple instructors
 
 INSERT INTO subscription_plans (
+    id,
     name,
     display_name_ko,
     display_name_en,
@@ -125,10 +182,11 @@ INSERT INTO subscription_plans (
     price_yearly_usd,
     is_active
 ) VALUES (
+    '00000000-0000-0000-0000-000000000003',
     'institution',
     '기관',
     'Institution',
-    2,
+    3,
     NULL,           -- Unlimited discussions
     NULL,           -- Unlimited active discussions
     NULL,           -- Unlimited participants

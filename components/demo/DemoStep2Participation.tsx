@@ -25,27 +25,27 @@ export default function DemoStep2Participation() {
   const t = useTranslations('Demo')
 
   return (
-    <div className="w-full h-full bg-white relative overflow-hidden">
+    <div className="w-full h-full min-h-0 bg-white relative overflow-auto">
       {/* Background: Chat Interface Preview */}
-      <div className={`absolute inset-0 p-6 flex flex-col transition-all duration-300 ${showModal ? 'blur-sm scale-[0.98] opacity-50' : ''}`}>
+      <div className={`absolute inset-0 p-3 sm:p-6 flex flex-col transition-all duration-300 ${showModal ? 'blur-sm scale-[0.98] opacity-50' : ''}`}>
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6 pb-4 border-b border-zinc-200">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <MessageSquare className="w-6 h-6 text-primary" />
+        <div className="flex items-center gap-2 sm:gap-4 mb-3 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-200">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <MessageSquare className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           </div>
-          <div>
-            <div className="text-base font-bold text-zinc-900 line-clamp-1">{t('mockData.topic.title')}</div>
-            <div className="text-sm text-zinc-500">{t('step2.joinDiscussion')}</div>
+          <div className="min-w-0 flex-1">
+            <div className="text-sm sm:text-base font-bold text-zinc-900 line-clamp-1">{t('mockData.topic.title')}</div>
+            <div className="text-xs sm:text-sm text-zinc-500">{t('step2.joinDiscussion')}</div>
           </div>
         </div>
 
         {/* Welcome message */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <div className="w-20 h-20 bg-zinc-100 border border-zinc-200 rounded-2xl flex items-center justify-center mb-6">
-            <MessageSquare className="w-10 h-10 text-primary" />
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-3 sm:px-6">
+          <div className="w-14 h-14 sm:w-20 sm:h-20 bg-zinc-100 border border-zinc-200 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 flex-shrink-0">
+            <MessageSquare className="w-7 h-7 sm:w-10 sm:h-10 text-primary" />
           </div>
-          <p className="text-xl font-bold text-zinc-900 mb-3">{t('step2.startAiDiscussion')}</p>
-          <p className="text-base text-zinc-500 leading-relaxed max-w-[280px]">
+          <p className="text-base sm:text-xl font-bold text-zinc-900 mb-2 sm:mb-3">{t('step2.startAiDiscussion')}</p>
+          <p className="text-sm sm:text-base text-zinc-500 leading-relaxed max-w-[280px]">
             {t('step2.aiTutorIntro')}
           </p>
         </div>
@@ -67,7 +67,7 @@ export default function DemoStep2Participation() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 10 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute inset-6 bg-white/98 border border-zinc-200 rounded-2xl p-5 shadow-2xl z-20 flex flex-col overflow-hidden"
+              className="absolute inset-3 sm:inset-6 bg-white/98 border border-zinc-200 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-2xl z-20 flex flex-col overflow-auto"
             >
               <div className="text-center mb-3 flex-shrink-0">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2 border border-primary/20">

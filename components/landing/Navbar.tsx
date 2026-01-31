@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useScroll, useMotionValueEvent, motion, AnimatePresence } from "framer-motion";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Menu, X, MessageCircle, ArrowUpRight, ChevronDown, LogOut, LayoutDashboard, Check } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
@@ -23,6 +23,7 @@ export function Navbar() {
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+    const mobileMenuCloseLockRef = useRef(false);
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<{ name?: string | null; role?: string | null } | null>(null);
 
@@ -33,6 +34,25 @@ export function Navbar() {
     const closeMobileMenu = useCallback(() => {
         setMobileMenuOpen(false);
         setMobileProfileOpen(false);
+        mobileMenuCloseLockRef.current = true;
+        setTimeout(() => {
+            mobileMenuCloseLockRef.current = false;
+        }, 350);
+    }, []);
+
+    const handleMobileMenuToggle = useCallback(() => {
+        if (mobileMenuCloseLockRef.current) return;
+        setMobileMenuOpen((prev) => {
+            const next = !prev;
+            if (!next) {
+                setMobileProfileOpen(false);
+                mobileMenuCloseLockRef.current = true;
+                setTimeout(() => {
+                    mobileMenuCloseLockRef.current = false;
+                }, 350);
+            }
+            return next;
+        });
     }, []);
 
     const navItems = [
@@ -130,7 +150,7 @@ export function Navbar() {
     return (
         <motion.header
             className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-spring ${isScrolled
-                ? `top-4 mx-auto ${scrolledFrameClass} glass-panel rounded-full py-2 px-6 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-zinc-200 bg-white/80 backdrop-blur-2xl`
+                ? `glass-panel py-2 px-6 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-zinc-200 bg-white/80 backdrop-blur-2xl rounded-t-2xl lg:top-4 lg:mx-auto lg:${scrolledFrameClass} lg:rounded-full`
                 : "bg-transparent py-6"
                 }`}
             initial={{ y: -100 }}
@@ -250,16 +270,11 @@ export function Navbar() {
                 {/* Mobile Menu Toggle */}
                 <div className="flex justify-end md:hidden justify-self-end col-start-3">
                     <button
+                        type="button"
                         className="text-zinc-600 hover:text-zinc-900"
-                        onClick={() => {
-                            setMobileMenuOpen((prev) => {
-                                const next = !prev;
-                                if (!next) {
-                                    setMobileProfileOpen(false);
-                                }
-                                return next;
-                            });
-                        }}
+                        onClick={handleMobileMenuToggle}
+                        aria-expanded={mobileMenuOpen}
+                        aria-label={mobileMenuOpen ? t('closeMenu') : t('openMenu')}
                     >
                         {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                     </button>
@@ -273,7 +288,7 @@ export function Navbar() {
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
-                        className="md:hidden glass-panel border-b border-zinc-200 overflow-hidden"
+                        className="md:hidden glass-panel border-b border-zinc-200 rounded-b-2xl overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.06)] mt-3"
                     >
                         <div className="flex flex-col p-6 gap-4">
                             {navItems.map((item) => (

@@ -34,6 +34,9 @@ export async function getPlanById(planId: string) {
     .single()
 
   if (error || !plan) {
+    if (error) {
+      console.error('[getPlanById] planId=', planId, 'error=', error.message, error.code)
+    }
     return null
   }
 
