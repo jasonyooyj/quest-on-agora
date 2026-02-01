@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { createSupabaseRouteClient } from '@/lib/supabase-server'
 
 // Create a Supabase admin client with service role key (bypasses RLS)
 function getSupabaseAdmin() {
@@ -25,6 +26,17 @@ export async function POST(request: NextRequest) {
     if (rateLimitResponse) return rateLimitResponse
 
     try {
+        // Verify authentication first
+        const supabase = await createSupabaseRouteClient()
+        const { data: { user } } = await supabase.auth.getUser()
+
+        if (!user) {
+            return NextResponse.json(
+                { error: 'Unauthorized' },
+                { status: 401 }
+            )
+        }
+
         const body = await request.json()
         const { id, email, name, role, student_number, school, department } = body
 
@@ -32,6 +44,14 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
+            )
+        }
+
+        // SECURITY: Verify the profile ID matches the authenticated user
+        if (id !== user.id) {
+            return NextResponse.json(
+                { error: 'Forbidden: Cannot modify another user\'s profile' },
+                { status: 403 }
             )
         }
 
