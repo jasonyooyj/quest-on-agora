@@ -25,7 +25,7 @@ function RegisterContent() {
     const redirect = searchParams.get('redirect')
     const [isLoading, setIsLoading] = useState(false)
     const [oauthLoading, setOauthLoading] = useState<string | null>(null)
-    const [selectedRole, setSelectedRole] = useState<'instructor' | 'student'>('student')
+    const [selectedRole, setSelectedRole] = useState<'instructor' | 'student'>('instructor')
 
     const registerSchema = z.object({
         name: z.string().min(2, tVal('nameRequired')),
@@ -77,7 +77,7 @@ function RegisterContent() {
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<RegisterForm>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
-            role: 'student',
+            role: 'instructor',
         },
     })
 
@@ -176,14 +176,63 @@ function RegisterContent() {
                 transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
                 className="relative z-10 w-full max-w-2xl glass-panel p-10 md:p-12 shadow-xl bg-white/90 border-zinc-200"
             >
-                {/* Header */}
-                <div className="mb-10 text-center">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6">
-                        <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                        <span className="text-[10px] font-bold text-primary tracking-widest uppercase">{t('title')}</span>
+                {/* 역할 선택 - 최상단, 가장 눈에 띄게 */}
+                <div className="mb-10 -mt-1">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold tracking-widest uppercase mb-4">
+                        {t('roleStep')}
                     </div>
-                    <h2 className="text-4xl font-bold tracking-tight text-zinc-900 mb-3">{t('welcome')}</h2>
-                    <p className="text-zinc-600">
+                    <h3 className="text-xl md:text-2xl font-bold text-zinc-900 mb-1">{t('roleLabel')}</h3>
+                    <p className="text-sm text-zinc-500 mb-5">{t('roleDescription')}</p>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedRole('instructor')
+                                setValue('role', 'instructor')
+                            }}
+                            className={`group relative p-6 md:p-8 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-4 overflow-hidden ${selectedRole === 'instructor'
+                                ? 'bg-gradient-to-b from-primary/20 to-primary/5 border-primary shadow-[0_0_0_3px_rgba(139,92,246,0.2),0_8px_24px_rgba(139,92,246,0.12)] ring-2 ring-primary/30'
+                                : 'bg-zinc-50/80 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100 hover:shadow-md'
+                                }`}
+                        >
+                            <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${selectedRole === 'instructor' ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-zinc-200 text-zinc-500 group-hover:bg-zinc-300 group-hover:text-zinc-700'}`}>
+                                <GraduationCap className="w-7 h-7 md:w-8 md:h-8" />
+                            </div>
+                            <span className={`text-base md:text-lg font-bold tracking-tight ${selectedRole === 'instructor' ? 'text-zinc-900' : 'text-zinc-600 group-hover:text-zinc-900'}`}>{t('instructor')}</span>
+                            {selectedRole === 'instructor' && (
+                                <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-primary animate-pulse" aria-hidden />
+                            )}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedRole('student')
+                                setValue('role', 'student')
+                            }}
+                            className={`group relative p-6 md:p-8 rounded-3xl border-2 transition-all duration-300 flex flex-col items-center gap-4 overflow-hidden ${selectedRole === 'student'
+                                ? 'bg-gradient-to-b from-primary/20 to-primary/5 border-primary shadow-[0_0_0_3px_rgba(139,92,246,0.2),0_8px_24px_rgba(139,92,246,0.12)] ring-2 ring-primary/30'
+                                : 'bg-zinc-50/80 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100 hover:shadow-md'
+                                }`}
+                        >
+                            <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${selectedRole === 'student' ? 'bg-primary text-primary-foreground shadow-lg' : 'bg-zinc-200 text-zinc-500 group-hover:bg-zinc-300 group-hover:text-zinc-700'}`}>
+                                <User className="w-7 h-7 md:w-8 md:h-8" />
+                            </div>
+                            <span className={`text-base md:text-lg font-bold tracking-tight ${selectedRole === 'student' ? 'text-zinc-900' : 'text-zinc-600 group-hover:text-zinc-900'}`}>{t('student')}</span>
+                            {selectedRole === 'student' && (
+                                <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-primary animate-pulse" aria-hidden />
+                            )}
+                        </button>
+                    </div>
+                </div>
+
+                {/* 2단계: 가입 방법 및 정보 입력 */}
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold tracking-widest uppercase mb-4">
+                    {t('step2')}
+                </div>
+                {/* Header */}
+                <div className="mb-8 text-center">
+                    <h2 className="text-3xl font-bold tracking-tight text-zinc-900 mb-2">{t('welcome')}</h2>
+                    <p className="text-sm text-zinc-600">
                         {t('description')}
                     </p>
                 </div>
@@ -230,53 +279,6 @@ function RegisterContent() {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                    {/* Role Selection */}
-                    <div className="space-y-4">
-                        <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1 text-center block">
-                            {t('roleLabel')}
-                        </label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setSelectedRole('instructor')
-                                    setValue('role', 'instructor')
-                                }}
-                                className={`group relative p-6 rounded-3xl border transition-all duration-500 flex flex-col items-center gap-3 overflow-hidden ${selectedRole === 'instructor'
-                                    ? 'bg-primary/10 border-primary shadow-[0_0_20px_rgba(139,92,246,0.15)]'
-                                    : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100'
-                                    }`}
-                            >
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${selectedRole === 'instructor' ? 'bg-primary text-primary-foreground' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'}`}>
-                                    <GraduationCap className="w-6 h-6" />
-                                </div>
-                                <span className={`font-bold tracking-tight transition-colors ${selectedRole === 'instructor' ? 'text-zinc-900' : 'text-zinc-500 group-hover:text-zinc-900'}`}>{t('instructor')}</span>
-                                {selectedRole === 'instructor' && (
-                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-primary" />
-                                )}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setSelectedRole('student')
-                                    setValue('role', 'student')
-                                }}
-                                className={`group relative p-6 rounded-3xl border transition-all duration-500 flex flex-col items-center gap-3 overflow-hidden ${selectedRole === 'student'
-                                    ? 'bg-primary/10 border-primary shadow-[0_0_20px_rgba(139,92,246,0.15)]'
-                                    : 'bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100'
-                                    }`}
-                            >
-                                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 ${selectedRole === 'student' ? 'bg-primary text-primary-foreground' : 'bg-zinc-100 text-zinc-500 group-hover:text-zinc-900'}`}>
-                                    <User className="w-6 h-6" />
-                                </div>
-                                <span className={`font-bold tracking-tight transition-colors ${selectedRole === 'student' ? 'text-zinc-900' : 'text-zinc-500 group-hover:text-zinc-900'}`}>{t('student')}</span>
-                                {selectedRole === 'student' && (
-                                    <div className="absolute bottom-0 left-0 w-full h-1 bg-primary" />
-                                )}
-                            </button>
-                        </div>
-                    </div>
-
                     <div className="grid md:grid-cols-2 gap-6">
                         {/* Name */}
                         <div className="space-y-2">

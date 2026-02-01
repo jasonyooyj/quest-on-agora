@@ -49,6 +49,9 @@
     "openMenu": "메뉴 열기",
     "closeMenu": "메뉴 닫기"
   },
+  "Dashboard": {
+    "loading": "로딩 중..."
+  },
   "Error": {
     "title": "문제가 발생했습니다",
     "description": "요청을 처리하는 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
@@ -385,7 +388,10 @@
       "googleBtn": "Google로 시작하기",
       "kakaoBtn": "카카오로 시작하기",
       "orEmail": "또는 이메일로 가입",
+      "roleStep": "1단계",
+      "step2": "2단계",
       "roleLabel": "본인의 역할은 무엇인가요?",
+      "roleDescription": "가입 전에 먼저 선택해주세요.",
       "instructor": "강사",
       "student": "학생",
       "nameLabel": "성함",

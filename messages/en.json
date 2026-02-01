@@ -49,6 +49,9 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu"
   },
+  "Dashboard": {
+    "loading": "Loading..."
+  },
   "Error": {
     "title": "Something went wrong",
     "description": "An error occurred while processing your request. Please try again later.",
@@ -385,7 +388,10 @@
       "googleBtn": "Start with Google",
       "kakaoBtn": "Start with Kakao",
       "orEmail": "Or sign up with email",
+      "roleStep": "Step 1",
+      "step2": "Step 2",
       "roleLabel": "What is your role?",
+      "roleDescription": "Choose before signing up.",
       "instructor": "Instructor",
       "student": "Student",
       "nameLabel": "Name",
