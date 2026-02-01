@@ -43,13 +43,13 @@ export function DiscussionOnboardingOverlay({
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 20 }}
-                className="relative z-10 w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20"
+                className="relative z-10 w-full max-w-4xl mx-4 bg-white rounded-[2rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20 max-h-[90vh] overflow-y-auto"
             >
                 {/* Decorative background blobs inside card */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 rounded-full filter blur-[100px] pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full filter blur-[100px] pointer-events-none" />
 
-                <div className="p-12 relative">
+                <div className="p-6 sm:p-12 relative">
                     <button
                         onClick={onClose}
                         className="absolute top-8 right-8 w-10 h-10 rounded-full bg-zinc-100 hover:bg-zinc-200 flex items-center justify-center text-zinc-500 transition-colors"
@@ -76,7 +76,7 @@ export function DiscussionOnboardingOverlay({
                         </motion.p>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-12 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
                         {/* Left Column: QR Code */}
                         <motion.div
                             initial={{ x: -20, opacity: 0 }}
@@ -84,8 +84,8 @@ export function DiscussionOnboardingOverlay({
                             transition={{ delay: 0.3 }}
                             className="flex flex-col items-center"
                         >
-                            <div className="bg-white p-4 rounded-3xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-zinc-100 mb-6">
-                                <div className="w-64 h-64 bg-white flex items-center justify-center">
+                            <div className="bg-white p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] border border-zinc-100 mb-4 sm:mb-6">
+                                <div className="w-48 h-48 sm:w-64 sm:h-64 bg-white flex items-center justify-center">
                                     {joinUrl && (
                                         <QRCode
                                             value={joinUrl}
@@ -113,9 +113,9 @@ export function DiscussionOnboardingOverlay({
                                     <span className="w-6 h-6 rounded-full bg-zinc-900 text-white flex items-center justify-center text-xs font-bold">2</span>
                                     {t('inputCode')}
                                 </p>
-                                <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-6 text-center">
-                                    <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">JOIN CODE</p>
-                                    <p className="text-5xl font-black text-zinc-900 tracking-wider mb-4 font-mono">{joinCode}</p>
+                                <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 sm:p-6 text-center">
+                                    <p className="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-widest mb-2">JOIN CODE</p>
+                                    <p className="text-3xl sm:text-5xl font-black text-zinc-900 tracking-wider mb-4 font-mono">{joinCode}</p>
                                     <div className="flex gap-2 justify-center">
                                         <button
                                             onClick={copyUrl}

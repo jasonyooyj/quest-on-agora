@@ -202,11 +202,11 @@ export function InterventionDialog({
                 <Button
                   key={type}
                   variant={interventionType === type ? "default" : "outline"}
-                  className="justify-start gap-2"
+                  className="justify-start gap-2 text-sm"
                   onClick={() => handleTypeChange(type)}
                 >
-                  {getTypeIcon(type)}
-                  {label}
+                  <span className="shrink-0">{getTypeIcon(type)}</span>
+                  <span className="truncate">{label}</span>
                 </Button>
               ))}
             </div>

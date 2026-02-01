@@ -27,7 +27,7 @@ export function StudentInterventionActions({
                     메모 남기기
                 </Button>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {(
                     [
                         { type: "nudge" as const, label: "격려/힌트", icon: Lightbulb },
@@ -42,8 +42,8 @@ export function StudentInterventionActions({
                         className="text-xs h-9 justify-start gap-2"
                         onClick={() => onTemplateClick(type)}
                     >
-                        <Icon className="w-3.5 h-3.5" />
-                        {label}
+                        <Icon className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate">{label}</span>
                     </Button>
                 ))}
             </div>

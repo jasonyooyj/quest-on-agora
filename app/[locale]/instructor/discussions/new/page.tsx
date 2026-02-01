@@ -710,21 +710,14 @@ export default function NewDiscussionPage() {
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         onClick={() => handleSelectTopic(index)}
-                                        className={`w-full p-5 rounded-xl text-left transition-all group/topic relative ${isSelected
+                                        className={`w-full p-4 sm:p-5 rounded-xl text-left transition-all group/topic ${isSelected
                                           ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
                                           : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
                                           }`}
                                       >
-                                        <span
-                                          className={`absolute right-4 top-4 px-2 py-1 rounded-full text-[10px] font-bold tracking-wide pointer-events-none ${isSelected
-                                            ? difficulty.selectedClassName
-                                            : difficulty.className
-                                            }`}
-                                        >
-                                          {difficulty.label}
-                                        </span>
-                                        <div className="flex items-start gap-4">
-                                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${isSelected
+                                        {/* Header: 번호 + 난이도 뱃지 */}
+                                        <div className="flex items-center justify-between gap-2 mb-3">
+                                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${isSelected
                                             ? 'bg-white/20 text-white'
                                             : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
                                             }`}>
@@ -734,35 +727,44 @@ export default function NewDiscussionPage() {
                                               <span className="text-sm font-bold">{index + 1}</span>
                                             )}
                                           </div>
-                                          <div className="flex-1 min-w-0 pr-16">
-                                            <p className={`font-bold text-sm leading-snug mb-2 ${isSelected ? 'text-white' : 'text-zinc-800'
-                                              }`}>
-                                              {topic.title}
-                                            </p>
-                                            <p className={`text-xs leading-relaxed line-clamp-2 ${isSelected ? 'text-white/80' : 'text-zinc-500'
-                                              }`}>
-                                              {topic.description}
-                                            </p>
-                                            {topic.stances && (
-                                              <div className="flex items-center gap-2 mt-3">
-                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
-                                                  ? 'bg-emerald-400/30 text-emerald-100'
-                                                  : 'bg-emerald-100 text-emerald-700'
-                                                  }`}>
-                                                  {topic.stances.pro}
-                                                </span>
-                                                <span className={`text-[10px] ${isSelected ? 'text-white/50' : 'text-zinc-400'
-                                                  }`}>vs</span>
-                                                <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
-                                                  ? 'bg-rose-400/30 text-rose-100'
-                                                  : 'bg-rose-100 text-rose-700'
-                                                  }`}>
-                                                  {topic.stances.con}
-                                                </span>
-                                              </div>
-                                            )}
-                                          </div>
+                                          <span
+                                            className={`px-2 py-1 rounded-full text-[10px] font-bold tracking-wide ${isSelected
+                                              ? difficulty.selectedClassName
+                                              : difficulty.className
+                                              }`}
+                                          >
+                                            {difficulty.label}
+                                          </span>
                                         </div>
+                                        {/* 제목 */}
+                                        <p className={`font-bold text-sm leading-snug mb-2 ${isSelected ? 'text-white' : 'text-zinc-800'
+                                          }`}>
+                                          {topic.title}
+                                        </p>
+                                        {/* 설명 */}
+                                        <p className={`text-xs leading-relaxed line-clamp-2 ${isSelected ? 'text-white/80' : 'text-zinc-500'
+                                          }`}>
+                                          {topic.description}
+                                        </p>
+                                        {/* 입장 뱃지 */}
+                                        {topic.stances && (
+                                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-3">
+                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
+                                              ? 'bg-emerald-400/30 text-emerald-100'
+                                              : 'bg-emerald-100 text-emerald-700'
+                                              }`}>
+                                              {topic.stances.pro}
+                                            </span>
+                                            <span className={`text-[10px] ${isSelected ? 'text-white/50' : 'text-zinc-400'
+                                              }`}>vs</span>
+                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
+                                              ? 'bg-rose-400/30 text-rose-100'
+                                              : 'bg-rose-100 text-rose-700'
+                                              }`}>
+                                              {topic.stances.con}
+                                            </span>
+                                          </div>
+                                        )}
                                       </motion.button>
                                     )
                                   })}
