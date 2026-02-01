@@ -1,0 +1,7 @@
+export { DemoProvider, useDemo } from './DemoContext'
+export type { DemoMessage, MockStudent, DemoPhase } from './DemoContext'
+export { useDemoChat } from './useDemoChat'
+export { LiveStudentDemo } from './LiveStudentDemo'
+export { LiveInstructorDemo } from './LiveInstructorDemo'
+export { DemoTransitionModal } from './DemoTransitionModal'
+export { DemoCompletionCTA } from './DemoCompletionCTA'

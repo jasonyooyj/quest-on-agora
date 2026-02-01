@@ -6,6 +6,7 @@
     "description": "AI와의 깊이 있는 대화로 학생의 비판적 사고를 이끌어내고, 실시간으로 토론을 모니터링하세요.",
     "ctaPrimary": "무료로 시작",
     "ctaSecondary": "데모 보기",
+    "ctaLiveDemo": "직접 체험하기",
     "dashboard": {
       "badge": "아고라 스페셜",
       "participationRate": "실시간 참여율",
@@ -1727,6 +1728,36 @@
         "content": "회사는 이 약관의 내용을 이용자가 쉽게 알 수 있도록 서비스 초기 화면에 게시합니다. 회사는 「약관의 규제에 관한 법률」, 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 등 관련법을 위배하지 않는 범위에서 이 약관을 개정할 수 있습니다. 개정 약관은 적용일 7일 전부터 공지하며, 이용자에게 불리한 변경의 경우 30일 전에 공지합니다."
       },
       "demoNote": "서비스 이용 관련 문의: questonkr@gmail.com | 대표번호: 010-2361-2963"
+    }
+  },
+  "LiveDemo": {
+    "title": "실제 토론 체험하기",
+    "topic": {
+      "title": "인공지능이 인간의 창의성을 대체할 수 있는가?",
+      "description": "AI 예술, 음악, 글쓰기의 발전과 한계에 대해 토론합니다."
+    },
+    "studentPhase": {
+      "title": "학생으로 체험하기",
+      "description": "AI 튜터와 실제로 토론해보세요",
+      "turnCounter": "{current}/{max} 턴",
+      "skipToInstructor": "강사 뷰로 건너뛰기"
+    },
+    "instructorPhase": {
+      "title": "강사로 체험하기",
+      "description": "학생들의 토론을 모니터링해보세요"
+    },
+    "transition": {
+      "title": "학생 체험을 완료했습니다!",
+      "description": "이제 강사 입장에서 토론을 관리해보세요",
+      "continue": "강사 뷰 체험하기",
+      "skip": "가입하러 가기"
+    },
+    "completion": {
+      "title": "체험을 완료했습니다!",
+      "description": "Quest on Agora로 나만의 토론을 시작하세요",
+      "signUp": "무료로 시작하기",
+      "pricing": "요금제 보기",
+      "tryAgain": "다시 체험하기"
     }
   }
 }

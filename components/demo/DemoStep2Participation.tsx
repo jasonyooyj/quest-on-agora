@@ -27,7 +27,7 @@ export default function DemoStep2Participation() {
   return (
     <div className="w-full h-full min-h-0 bg-white relative overflow-auto">
       {/* Background: Chat Interface Preview */}
-      <div className={`absolute inset-0 p-3 sm:p-6 flex flex-col transition-all duration-300 ${showModal ? 'blur-sm scale-[0.98] opacity-50' : ''}`}>
+      <div className={`absolute inset-0 p-3 sm:p-6 flex flex-col transition-all duration-300 ${showModal ? 'opacity-50' : ''}`}>
         {/* Header */}
         <div className="flex items-center gap-2 sm:gap-4 mb-3 sm:mb-6 pb-3 sm:pb-4 border-b border-zinc-200">
           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -59,7 +59,7 @@ export default function DemoStep2Participation() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/20 backdrop-blur-sm z-10"
+              className="absolute inset-0 bg-black/20 z-10"
               onClick={() => setShowModal(false)}
             />
             <motion.div

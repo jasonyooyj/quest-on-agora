@@ -6,6 +6,7 @@
     "description": "Engage students in deep critical thinking conversations with AI, and monitor discussions in real-time.",
     "ctaPrimary": "Get Started for Free",
     "ctaSecondary": "View Demo",
+    "ctaLiveDemo": "Try Live Demo",
     "dashboard": {
       "badge": "Agora Spatial",
       "participationRate": "Real-time Participation",
@@ -1727,6 +1728,36 @@
         "content": "The Company posts the contents of these Terms on the initial screen of the service so that users can easily access them. The Company may revise these Terms to the extent that it does not violate relevant laws such as the \"Act on the Regulation of Terms and Conditions\" and \"Act on Promotion of Information and Communications Network Utilization and Information Protection\". Revised terms will be announced 7 days before the effective date, or 30 days in advance for changes unfavorable to users."
       },
       "demoNote": "Service inquiries: questonkr@gmail.com | Contact: 010-2361-2963"
+    }
+  },
+  "LiveDemo": {
+    "title": "Experience a Real Discussion",
+    "topic": {
+      "title": "Can AI Replace Human Creativity?",
+      "description": "Discuss the advancement and limitations of AI in art, music, and writing."
+    },
+    "studentPhase": {
+      "title": "Experience as Student",
+      "description": "Have a real discussion with an AI tutor",
+      "turnCounter": "Turn {current}/{max}",
+      "skipToInstructor": "Skip to Instructor View"
+    },
+    "instructorPhase": {
+      "title": "Experience as Instructor",
+      "description": "Monitor students' discussions in real-time"
+    },
+    "transition": {
+      "title": "Student Experience Complete!",
+      "description": "Now manage the discussion as an instructor",
+      "continue": "Try Instructor View",
+      "skip": "Sign Up Instead"
+    },
+    "completion": {
+      "title": "Demo Complete!",
+      "description": "Start your own discussions with Quest on Agora",
+      "signUp": "Get Started Free",
+      "pricing": "View Pricing",
+      "tryAgain": "Try Again"
     }
   }
 }

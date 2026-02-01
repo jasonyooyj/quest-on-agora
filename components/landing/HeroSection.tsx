@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CheckCircle2, Play } from "lucide-react";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import { HERO_CONTENT } from "@/lib/constants/landing-content";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -110,6 +110,14 @@ export function HeroSection() {
                             <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                         </span>
                     </button>
+                    <Link href="/demo">
+                        <button className="group px-8 py-4 bg-zinc-900 text-white font-semibold rounded-full transition-all hover:bg-zinc-800 hover:-translate-y-1 hover:shadow-lg">
+                            <span className="flex items-center gap-2">
+                                {t('ctaLiveDemo')}
+                                <Play className="w-4 h-4 transition-transform group-hover:scale-110" />
+                            </span>
+                        </button>
+                    </Link>
                 </motion.div>
 
                 <InteractiveDemo
