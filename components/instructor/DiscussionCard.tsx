@@ -1,7 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { Copy, Calendar, Eye, Users, MessageSquare, Trash2, ArrowRight } from "lucide-react";
+import { Copy, Calendar, Users, Trash2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { LiveStatusBadge } from "@/components/ui/status-badge";
 import { useTranslations, useFormatter } from 'next-intl';
 
 interface DiscussionCardProps {
@@ -40,28 +39,10 @@ export function DiscussionCard({
   const t = useTranslations('Instructor.DiscussionCard');
   const format = useFormatter();
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black uppercase tracking-widest text-emerald-500">
-            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-            {t('status.live')}
-          </div>
-        );
-      case 'closed':
-        return (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-100 border border-zinc-200 text-[10px] font-black uppercase tracking-widest text-zinc-500">
-            {t('status.closed')}
-          </div>
-        );
-      default:
-        return (
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] font-black uppercase tracking-widest text-amber-600">
-            {t('status.draft')}
-          </div>
-        );
-    }
+  const statusLabels = {
+    draft: t('status.draft'),
+    active: t('status.live'),
+    closed: t('status.closed'),
   };
 
   const handleCopyCode = (e: React.MouseEvent) => {
@@ -89,7 +70,7 @@ export function DiscussionCard({
               <h4 className="text-xl font-bold text-zinc-900 truncate group-hover:text-primary transition-colors flex-1 min-w-0">
                 {discussion.title}
               </h4>
-              {getStatusBadge(discussion.status)}
+              <LiveStatusBadge status={discussion.status} labels={statusLabels} />
             </div>
 
             {discussion.description && (
