@@ -148,16 +148,19 @@ export function Navbar() {
     const scrolledFrameClass = user ? "max-w-6xl" : "max-w-4xl";
 
     return (
-        <motion.header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-spring ${isScrolled
-                ? `glass-panel py-2 px-6 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-zinc-200 bg-white/80 backdrop-blur-2xl rounded-t-2xl lg:top-4 lg:mx-auto lg:${scrolledFrameClass} lg:rounded-full`
-                : "bg-transparent py-6"
-                }`}
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        <div
+            className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-spring ${isScrolled ? "top-4 pt-0 px-4 sm:px-6 lg:px-8" : "top-0"}`}
         >
-            <div className={`grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 ${isScrolled ? "w-full" : "container mx-auto px-4 md:px-6"}`}>
+            <motion.header
+                className={`w-full transition-all duration-500 ease-spring ${isScrolled
+                    ? `glass-panel py-2 px-6 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-zinc-200 bg-white/80 backdrop-blur-2xl rounded-t-2xl lg:top-4 lg:mx-auto lg:${scrolledFrameClass} lg:rounded-full`
+                    : "bg-transparent py-6"
+                    }`}
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            >
+                <div className={`grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-6 ${isScrolled ? "w-full" : "container mx-auto px-4 md:px-6"}`}>
                 {/* Logo */}
                 <div className="flex items-center justify-self-start">
                     <Link href={localePrefix} className="flex items-center gap-2 group">
@@ -401,6 +404,7 @@ export function Navbar() {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </motion.header>
+            </motion.header>
+        </div>
     );
 }
