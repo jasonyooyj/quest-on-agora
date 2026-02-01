@@ -61,8 +61,8 @@ export async function updateSession(request: NextRequest, response?: NextRespons
         }
     }
 
-    // Protected routes
-    const protectedPaths = ['/instructor', '/student']
+    // Protected routes (dashboard = 로딩 후 역할별 리다이렉트)
+    const protectedPaths = ['/instructor', '/student', '/dashboard']
     const adminPaths = ['/admin']
     const authPaths = ['/login', '/register', '/forgot-password', '/update-password', '/confirm-email']
     const onboardingPath = '/onboarding'
@@ -141,14 +141,13 @@ export async function updateSession(request: NextRequest, response?: NextRespons
         }
     }
 
-    // Redirect to dashboard if authenticated and trying to access auth pages
+    // Redirect to dashboard loading page if authenticated and trying to access auth pages
     if (user && isAuthPath) {
         const url = request.nextUrl.clone()
-        // Redirect based on user role (we'll check profile in the page)
         const currentLocale = request.nextUrl.pathname.split('/')[1]
         const localePrefix = locales.includes(currentLocale) ? `/${currentLocale}` : ''
         
-        url.pathname = `${localePrefix}/instructor`
+        url.pathname = `${localePrefix}/dashboard`
         return withCookies(NextResponse.redirect(url))
     }
 

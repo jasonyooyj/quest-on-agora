@@ -16,7 +16,7 @@ function OnboardingContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [isLoading, setIsLoading] = useState(false)
-    const [selectedRole, setSelectedRole] = useState<'instructor' | 'student'>('student')
+    const [selectedRole, setSelectedRole] = useState<'instructor' | 'student'>('instructor')
 
     const onboardingSchema = z.object({
         role: z.enum(['instructor', 'student']),
@@ -31,7 +31,7 @@ function OnboardingContent() {
     const { register, handleSubmit, setValue, formState: { errors } } = useForm<OnboardingForm>({
         resolver: zodResolver(onboardingSchema),
         defaultValues: {
-            role: 'student',
+            role: 'instructor',
         },
     })
 
