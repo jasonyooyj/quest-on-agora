@@ -7,8 +7,6 @@ import type {
   PinnedQuote,
 } from "@/types/discussion";
 
-// RawRecord is intentionally `any` for external API/DB data transformation
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type RawRecord = Record<string, any>;
 
 // Database row type for discussion_messages table (snake_case)

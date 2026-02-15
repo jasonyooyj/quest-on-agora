@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import {
@@ -56,9 +56,19 @@ export function SubscriptionCard({
   const showTrialBadge = subscription.isTrial && subscription.trialEndsAt
   const showPastDueBadge = subscription.isPastDue
 
-  const trialDaysRemaining = showTrialBadge
-    ? Math.max(0, Math.ceil((new Date(subscription.trialEndsAt!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0
+  // eslint-disable-next-line react-hooks/purity
+  const nowTimestamp = useMemo(() => Date.now(), [])
+
+  const trialDaysRemaining = useMemo(() => {
+    if (!showTrialBadge || !subscription.trialEndsAt) return 0
+
+    return Math.max(
+      0,
+      Math.ceil(
+        (new Date(subscription.trialEndsAt).getTime() - nowTimestamp) / (1000 * 60 * 60 * 24)
+      )
+    )
+  }, [showTrialBadge, subscription.trialEndsAt, nowTimestamp])
 
   if (compact) {
     return (

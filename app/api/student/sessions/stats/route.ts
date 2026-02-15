@@ -3,11 +3,16 @@ import { createClient } from "@supabase/supabase-js";
 import { getCurrentUser } from "@/lib/auth";
 import { applyRateLimit, RATE_LIMITS } from "@/lib/rate-limiter";
 
-// Initialize Supabase client
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    return null;
+  }
+
+  return createClient(supabaseUrl, supabaseServiceRoleKey);
+}
 
 export async function GET(request: NextRequest) {
   // Apply rate limiting
@@ -15,6 +20,15 @@ export async function GET(request: NextRequest) {
   if (rateLimitResponse) return rateLimitResponse
 
   try {
+    const supabase = getSupabaseClient();
+
+    if (!supabase) {
+      return NextResponse.json(
+        { error: "Supabase client configuration is missing" },
+        { status: 500 }
+      );
+    }
+
     const user = await getCurrentUser();
 
     if (!user) {

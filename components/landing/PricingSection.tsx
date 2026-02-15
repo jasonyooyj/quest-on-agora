@@ -236,7 +236,7 @@ export function PricingSection() {
         } finally {
             setLoadingPlan(null);
         }
-    }, [isYearly, locale, router, planIdsByKey]);
+    }, [isYearly, isKo, locale, router, planIdsByKey]);
 
     // 그리드 컬럼 수 동적 계산
     const gridCols = plans.length <= 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-4';
