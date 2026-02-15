@@ -335,3 +335,44 @@ NEXT_PUBLIC_SITE_URL=https://your-domain.com
 
 Copyright (c) 2026 Quest-On Agora. All rights reserved.
 이 프로젝트는 **비공개(Private/Proprietary)** 소프트웨어입니다.
+
+---
+
+## 빠른 시작 가이드
+
+### 환경 변수
+
+`/.env.example` 기준으로 아래 항목을 `.env.local`에 설정하세요.
+
+- Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- AI API: `OPENAI_API_KEY` 또는 `GOOGLE_API_KEY`
+- 결제: `TOSS_PAYMENTS_SECRET_KEY`, `NEXT_PUBLIC_TOSS_CLIENT_KEY`
+- 앱 URL: `NEXT_PUBLIC_APP_URL`
+- 배포/보안: `CRON_SECRET`
+
+### 실행
+
+```bash
+npm install
+cp .env.example .env.local   # 환경 변수 채우기
+npm run dev
+```
+
+### 점검 항목
+
+- `npm run lint`
+- `npm run test`
+- `npm run build`
+
+### 배포 플로우
+
+`main` 또는 `develop` 브랜치 기준으로:
+- PR 생성 시 테스트/검증 + PR 미리보기 배포 실행
+- `main` 병합 시 Vercel Production 배포 및 헬스 체크 수행
+
+## 저장소 운영 노트
+
+- CI: `.github/workflows/ci.yml`
+- 버그/기능 제안 템플릿: `.github/ISSUE_TEMPLATE`
+- PR 템플릿: `.github/pull_request_template.md`
+- 라이선스: `LICENSE`(Private/Proprietary)
