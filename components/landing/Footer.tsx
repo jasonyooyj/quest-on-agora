@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageCircle } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 export function Footer() {
@@ -11,9 +11,12 @@ export function Footer() {
                 {/* 상단: 로고 및 링크 */}
                 <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-8 border-b border-zinc-200">
                     <div className="flex items-center gap-3 group">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 transition-all">
-                            <MessageCircle className="w-5 h-5 text-primary" />
-                        </div>
+                        <Image
+                            src="/logo-navbar.png"
+                            alt="Agora"
+                            width={40}
+                            height={40}
+                        />
                         <span className="font-bold text-xl text-zinc-900 tracking-tight">
                             Agora
                         </span>

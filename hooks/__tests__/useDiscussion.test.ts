@@ -1,5 +1,7 @@
+// @vitest-environment jsdom
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { cleanup, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 
@@ -16,7 +18,7 @@ vi.mock('@/lib/supabase-client', () => ({
 
 // Mock fetch globally
 const mockFetch = vi.fn()
-global.fetch = mockFetch
+global.fetch = mockFetch as typeof fetch
 
 import {
   useDiscussionSession,
@@ -56,6 +58,7 @@ describe('useDiscussion hooks', () => {
   })
 
   afterEach(() => {
+    cleanup()
     vi.restoreAllMocks()
   })
 

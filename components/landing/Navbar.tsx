@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useScroll, useMotionValueEvent, motion, AnimatePresence } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Menu, X, MessageCircle, ArrowUpRight, ChevronDown, LogOut, LayoutDashboard, Check } from "lucide-react";
+import { Menu, X, ArrowUpRight, ChevronDown, LogOut, LayoutDashboard, Check } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { getSupabaseClient } from "@/lib/supabase-client";
@@ -164,9 +165,13 @@ export function Navbar() {
                 {/* Logo */}
                 <div className="flex items-center justify-self-start">
                     <Link href={localePrefix} className="flex items-center gap-2 group">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shadow-[0_4px_12px_rgba(99,102,241,0.3)] group-hover:shadow-[0_4px_20px_rgba(168,85,247,0.4)] transition-all duration-300">
-                            <MessageCircle className="w-4 h-4 text-white" />
-                        </div>
+                        <Image
+                            src="/logo-navbar.png"
+                            alt="Agora"
+                            width={32}
+                            height={32}
+                            className="transition-transform duration-300 group-hover:scale-110"
+                        />
                         <span className="text-lg font-semibold tracking-tight text-zinc-900 group-hover:text-zinc-700 transition-colors">
                             Agora
                         </span>

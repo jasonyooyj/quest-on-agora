@@ -1,5 +1,6 @@
 import { createSupabaseAdminClient } from '../supabase-server'
-import {
+import { transformPlanRow } from '../../types/subscription'
+import type {
   SubscriptionInfo,
   SubscriptionFeatures,
   SubscriptionLimits,
@@ -9,8 +10,7 @@ import {
   SubscriptionRow,
   UsageRecordRow,
   OrganizationMemberRow,
-  transformPlanRow,
-} from '@/types/subscription'
+} from '../../types/subscription'
 import {
   getCachedSubscriptionInfo,
   setCachedSubscriptionInfo,

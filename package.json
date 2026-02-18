@@ -3,21 +3,30 @@
   "version": "0.13.5",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.9.0 <25"
+  },
   "scripts": {
+    "predev": "node scripts/check-node-version.js",
+    "prebuild": "node scripts/check-node-version.js",
+    "prelint": "node scripts/check-node-version.js",
+    "pretest": "node scripts/check-node-version.js",
+    "pretest:e2e": "node scripts/check-node-version.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint \"app/**/*.{ts,tsx}\" \"components/**/*.{ts,tsx}\" \"hooks/**/*.{ts,tsx}\" \"lib/**/*.{ts,tsx}\" \"i18n/**/*.ts\" \"types/**/*.ts\" \"scripts/**/*.{js,ts,mjs}\"",
     "perf": "./scripts/check-performance.sh",
     "perf:prod": "./scripts/check-performance.sh https://your-production-url.com",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e": "env -u NO_COLOR playwright test",
+    "test:e2e:ui": "env -u NO_COLOR playwright test --ui",
+    "test:e2e:report": "playwright show-report",
+    "audit:prod": "npm audit --omit=dev --omit=optional"
   },
   "dependencies": {
-    "@google/genai": "^1.37.0",
+    "@google/genai": "^1.41.0",
     "@hookform/resolvers": "^5.2.2",
     "@langchain/core": "^1.1.15",
     "@langchain/google-genai": "^2.1.10",
@@ -62,14 +71,13 @@
     "katex": "^0.16.22",
     "langchain": "^1.2.10",
     "lucide-react": "^0.541.0",
-    "next": "^16.0.7",
+    "next": "^16.1.6",
     "next-intl": "^4.7.0",
     "next-themes": "^0.4.6",
     "openai": "^6.16.0",
     "pako": "^2.1.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-grab": "^0.0.98",
     "react-hook-form": "^7.68.0",
     "react-intersection-observer": "^10.0.0",
     "react-markdown": "^10.1.0",
@@ -88,7 +96,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.57.0",
-    "@supabase/mcp-server-supabase": "^0.5.10",
+    "@supabase/mcp-server-supabase": "^0.6.3",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.1",
@@ -98,11 +106,14 @@
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
     "eslint": "^9",
-    "eslint-config-next": "^16.0.7",
-    "jsdom": "^27.4.0",
+    "eslint-config-next": "^16.1.6",
+    "jsdom": "^24.1.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.7",
     "typescript": "5.9.3",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "@modelcontextprotocol/sdk": "^1.26.0"
   }
 }

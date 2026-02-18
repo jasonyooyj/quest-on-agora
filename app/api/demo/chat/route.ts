@@ -23,7 +23,7 @@ interface DemoChatRequest {
   userMessage: string
   history: DemoMessage[]
   stance: string
-  locale?: string
+  locale: 'ko' | 'en'
 }
 
 export async function POST(request: NextRequest) {
@@ -53,8 +53,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body: DemoChatRequest = await request.json()
-    const { userMessage, history = [], stance, locale = 'ko' } = body
+    const parsedBody = await parseRequestBody(request)
+    if (!parsedBody.success) {
+      return NextResponse.json({ error: parsedBody.error }, { status: parsedBody.status })
+    }
+
+    const { userMessage, history, stance, locale } = parsedBody.data
     const language = locale === 'en' ? 'English' : '한국어'
 
     // Validate input
@@ -112,8 +116,33 @@ export async function POST(request: NextRequest) {
     const encoder = new TextEncoder()
     let fullResponse = ''
 
+    let cancelled = false
     const readableStream = new ReadableStream({
       async start(controller) {
+        let closed = false
+
+        const safeEnqueue = (value: string) => {
+          if (closed || cancelled) return false
+          try {
+            controller.enqueue(encoder.encode(value))
+            return true
+          } catch {
+            closed = true
+            return false
+          }
+        }
+
+        const safeClose = () => {
+          if (closed) return
+          try {
+            controller.close()
+          } catch {
+            // no-op
+          } finally {
+            closed = true
+          }
+        }
+
         try {
           const aiStream = await chain.stream({
             discussionTitle,
@@ -125,19 +154,29 @@ export async function POST(request: NextRequest) {
           })
 
           for await (const chunk of aiStream) {
+            if (cancelled || closed) break
             fullResponse += chunk
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk })}\n\n`))
+            if (!safeEnqueue(`data: ${JSON.stringify({ chunk })}\n\n`)) {
+              break
+            }
           }
 
-          // No DB save for demo - just complete the stream
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: true })}\n\n`))
-          controller.close()
+          if (!cancelled && !closed) {
+            // No DB save for demo - just complete the stream
+            safeEnqueue(`data: ${JSON.stringify({ done: true })}\n\n`)
+            safeClose()
+          }
         } catch (error) {
-          console.error('Demo streaming error:', error)
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ error: 'Streaming failed' })}\n\n`))
-          controller.close()
+          if (!cancelled && !closed) {
+            console.error('Demo streaming error:', error)
+            safeEnqueue(`data: ${JSON.stringify({ error: 'Streaming failed' })}\n\n`)
+            safeClose()
+          }
         }
-      }
+      },
+      cancel() {
+        cancelled = true
+      },
     })
 
     return new Response(readableStream, {
@@ -170,4 +209,86 @@ function handleMockResponse() {
     response: randomResponse,
     mock: true
   })
+}
+
+function isDemoMessage(value: unknown): value is DemoMessage {
+  if (typeof value !== 'object' || value === null) return false
+  const message = value as Record<string, unknown>
+  return (
+    (message.role === 'user' || message.role === 'ai') &&
+    typeof message.content === 'string'
+  )
+}
+
+async function parseRequestBody(
+  request: NextRequest
+): Promise<
+  | { success: true; data: DemoChatRequest }
+  | { success: false; status: 400 | 415; error: string }
+> {
+  const contentType = request.headers.get('content-type') || ''
+  if (!contentType.includes('application/json')) {
+    return {
+      success: false,
+      status: 415,
+      error: 'Content-Type must be application/json',
+    }
+  }
+
+  let rawBody: unknown
+  try {
+    rawBody = await request.json()
+  } catch {
+    return {
+      success: false,
+      status: 400,
+      error: 'Invalid JSON body',
+    }
+  }
+
+  if (typeof rawBody !== 'object' || rawBody === null) {
+    return {
+      success: false,
+      status: 400,
+      error: 'Invalid request body',
+    }
+  }
+
+  const body = rawBody as Record<string, unknown>
+  const userMessage = typeof body.userMessage === 'string' ? body.userMessage : ''
+  const stance = typeof body.stance === 'string' ? body.stance : 'neutral'
+  const locale = body.locale === 'en' ? 'en' : 'ko'
+
+  if (body.userMessage !== undefined && typeof body.userMessage !== 'string') {
+    return {
+      success: false,
+      status: 400,
+      error: 'userMessage must be a string',
+    }
+  }
+
+  if (body.stance !== undefined && typeof body.stance !== 'string') {
+    return {
+      success: false,
+      status: 400,
+      error: 'stance must be a string',
+    }
+  }
+
+  if (body.history !== undefined && !Array.isArray(body.history)) {
+    return {
+      success: false,
+      status: 400,
+      error: 'history must be an array',
+    }
+  }
+
+  const history = Array.isArray(body.history)
+    ? body.history.filter(isDemoMessage)
+    : []
+
+  return {
+    success: true,
+    data: { userMessage, history, stance, locale },
+  }
 }

@@ -9,11 +9,36 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { isValidLocale } from '@/i18n/routing';
 
+function getMetadataBase() {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+  try {
+    return new URL(baseUrl);
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+}
+
 export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
   title: "Agora - 대학 토론 플랫폼",
   description: "AI 기반 대학 토론 플랫폼. 강사와 학생이 함께하는 깊이 있는 토론 경험.",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title: "Agora - 대학 토론 플랫폼",
+    description: "AI 기반 대학 토론 플랫폼. 강사와 학생이 함께하는 깊이 있는 토론 경험.",
+    images: ["/og-image.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Agora - 대학 토론 플랫폼",
+    description: "AI 기반 대학 토론 플랫폼. 강사와 학생이 함께하는 깊이 있는 토론 경험.",
+    images: ["/og-image.png"],
   },
 };
 

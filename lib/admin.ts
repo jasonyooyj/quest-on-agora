@@ -1,5 +1,3 @@
-import { createSupabaseServerClient } from './supabase-server'
-
 // Admin emails are stored in environment variable for security
 // Format: ADMIN_EMAILS=admin@school.edu,professor@school.edu
 export const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
@@ -11,6 +9,11 @@ export interface AdminUser {
   id: string
   email: string
   name: string
+}
+
+async function getSupabaseServerClient() {
+  const { createSupabaseServerClient } = await import('./supabase-server')
+  return createSupabaseServerClient()
 }
 
 /**
@@ -25,7 +28,7 @@ export function isAdmin(email: string | null | undefined): boolean {
  * Get current user if they are an admin (server-side)
  */
 export async function getAdminUser(): Promise<AdminUser | null> {
-  const supabase = await createSupabaseServerClient()
+  const supabase = await getSupabaseServerClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user || !isAdmin(user.email)) {

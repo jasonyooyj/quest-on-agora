@@ -115,6 +115,21 @@ export async function GET(request: NextRequest) {
     // Apply pagination after filtering
     const sessions = filteredSessions.slice(offset, offset + limit);
     const filteredTotalCount = filteredSessions.length;
+    const hasMore = filteredTotalCount
+      ? offset + limit < filteredTotalCount
+      : false;
+
+    if (sessions.length === 0) {
+      return NextResponse.json({
+        sessions: [],
+        pagination: {
+          page,
+          limit,
+          total: filteredTotalCount,
+          hasMore,
+        },
+      });
+    }
 
     // Collect all unique exam_ids
     const examIds = [...new Set(sessions.map((s) => s.exam_id))];
@@ -133,69 +148,80 @@ export async function GET(request: NextRequest) {
     // Create a map of exam_id -> exam for quick lookup
     const examMap = new Map((exams || []).map((exam) => [exam.id, exam]));
 
-    // Get submission counts and scores for each session
-    const sessionsWithDetails = await Promise.all(
-      sessions.map(async (session) => {
-        const exam = examMap.get(session.exam_id);
-        // Get submissions count
-        const { data: submissions, error: submissionsError } = await supabase
+    const sessionIds = sessions.map((session) => session.id);
+
+    // Fetch session-linked records in bulk to avoid N+1 queries.
+    const [{ data: submissions, error: submissionsError }, { data: grades, error: gradesError }] =
+      await Promise.all([
+        supabase
           .from("submissions")
-          .select("id, q_idx")
-          .eq("session_id", session.id);
-
-        if (submissionsError) {
-          console.error("Error fetching submissions:", submissionsError);
-        }
-
-        // Get grades if available (from instructor)
-        const { data: grades, error: gradesError } = await supabase
+          .select("session_id")
+          .in("session_id", sessionIds),
+        supabase
           .from("grades")
-          .select("score")
-          .eq("session_id", session.id);
+          .select("session_id, score")
+          .in("session_id", sessionIds),
+      ]);
 
-        if (gradesError) {
-          console.error("Error fetching grades:", gradesError);
-        }
+    if (submissionsError) {
+      console.error("Error fetching submissions:", submissionsError);
+    }
 
-        // Calculate score - each grade is 0-100, calculate average
-        // For display: show total points out of (num_grades * 100)
-        let totalScore = null;
-        let maxScore = null;
-        let averageScore = null;
-        const isGraded = grades && grades.length > 0;
+    if (gradesError) {
+      console.error("Error fetching grades:", gradesError);
+    }
 
-        if (isGraded) {
-          const totalPoints = grades.reduce(
-            (sum, grade) => sum + (grade.score || 0),
-            0
-          );
-          averageScore = Math.round(totalPoints / grades.length);
-          // For consistent display, show total points / max points
-          totalScore = totalPoints;
-          maxScore = grades.length * 100; // Each question is scored 0-100
-        }
+    const submissionCountBySession = new Map<string, number>();
+    for (const submission of submissions || []) {
+      const sessionId = submission.session_id as string;
+      submissionCountBySession.set(
+        sessionId,
+        (submissionCountBySession.get(sessionId) || 0) + 1
+      );
+    }
 
-        return {
-          id: session.id,
-          examId: session.exam_id,
-          examTitle: exam?.title || "알 수 없는 시험",
-          examCode: exam?.code || "",
-          duration: exam?.duration || 0,
-          status: session.submitted_at ? "completed" : "in-progress",
-          submittedAt: session.submitted_at || null,
-          createdAt: session.created_at,
-          submissionCount: submissions?.length || 0,
-          score: totalScore,
-          maxScore: maxScore,
-          averageScore: averageScore, // Average percentage across all graded questions
-          isGraded: isGraded, // Whether instructor has graded this session
-        };
-      })
-    );
+    const gradesBySession = new Map<string, number[]>();
+    for (const grade of grades || []) {
+      const sessionId = grade.session_id as string;
+      const score = Number(grade.score) || 0;
+      const sessionGrades = gradesBySession.get(sessionId) || [];
+      sessionGrades.push(score);
+      gradesBySession.set(sessionId, sessionGrades);
+    }
 
-    const hasMore = filteredTotalCount
-      ? offset + limit < filteredTotalCount
-      : false;
+    const sessionsWithDetails = sessions.map((session) => {
+      const exam = examMap.get(session.exam_id);
+      const sessionGrades = gradesBySession.get(session.id) || [];
+
+      // Calculate score - each grade is 0-100, calculate average.
+      let totalScore = null;
+      let maxScore = null;
+      let averageScore = null;
+      const isGraded = sessionGrades.length > 0;
+
+      if (isGraded) {
+        const totalPoints = sessionGrades.reduce((sum, score) => sum + score, 0);
+        averageScore = Math.round(totalPoints / sessionGrades.length);
+        totalScore = totalPoints;
+        maxScore = sessionGrades.length * 100;
+      }
+
+      return {
+        id: session.id,
+        examId: session.exam_id,
+        examTitle: exam?.title || "알 수 없는 시험",
+        examCode: exam?.code || "",
+        duration: exam?.duration || 0,
+        status: session.submitted_at ? "completed" : "in-progress",
+        submittedAt: session.submitted_at || null,
+        createdAt: session.created_at,
+        submissionCount: submissionCountBySession.get(session.id) || 0,
+        score: totalScore,
+        maxScore: maxScore,
+        averageScore: averageScore, // Average percentage across all graded questions
+        isGraded: isGraded, // Whether instructor has graded this session
+      };
+    });
 
     return NextResponse.json({
       sessions: sessionsWithDetails,

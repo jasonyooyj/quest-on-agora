@@ -3,19 +3,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
+  MessageCircle,
   ArrowLeft,
   ArrowRight,
   Loader2,
   Settings2,
   Users,
   EyeOff,
-  Eye,
   Clock,
   Plus,
   AlertCircle,
@@ -32,8 +31,7 @@ import {
   ChevronUp,
   Save,
   RotateCcw,
-  Lock,
-  MinusCircle
+  Lock
 } from 'lucide-react'
 import { getSupabaseClient } from '@/lib/supabase-client'
 import { toast } from 'sonner'
@@ -105,50 +103,21 @@ export default function NewDiscussionPage() {
     label: t(`phases.aiTutor.modes.${option.value}.label`),
     desc: t(`phases.aiTutor.modes.${option.value}.desc`)
   }))
-  const difficultyLabels = {
-    easy: t('phases.topic.aiGenerator.difficulty.easy'),
-    medium: t('phases.topic.aiGenerator.difficulty.medium'),
-    hard: t('phases.topic.aiGenerator.difficulty.hard'),
-  }
 
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false)
 
   // Subscription check
   const { subscription, isLoading: isLoadingSubscription } = useSubscription()
   const createCheck = canCreateDiscussion(subscription)
   const [anonymous, setAnonymous] = useState(true)
   const [useCustomStances, setUseCustomStances] = useState(false)
-  const [includeNeutral, setIncludeNeutral] = useState(true)
   const [stanceLabels, setStanceLabels] = useState({ pro: t('phases.environment.stances.pro'), con: t('phases.environment.stances.con') })
   const [additionalStances, setAdditionalStances] = useState<string[]>([])
   const [duration, setDuration] = useState<number | null>(15)
   const [previews, setPreviews] = useState<Record<string, string>>({})
   const [isFetchingPreviews, setIsFetchingPreviews] = useState(false)
   const previewTimeoutRef = useRef<NodeJS.Timeout>(null)
-
-  const getDifficultyTag = (index: number) => {
-    if (index <= 1) {
-      return {
-        label: difficultyLabels.easy,
-        className: 'bg-emerald-100 text-emerald-700',
-        selectedClassName: 'bg-emerald-400/30 text-emerald-100',
-      }
-    }
-    if (index === 2) {
-      return {
-        label: difficultyLabels.medium,
-        className: 'bg-amber-100 text-amber-700',
-        selectedClassName: 'bg-amber-400/30 text-amber-100',
-      }
-    }
-    return {
-      label: difficultyLabels.hard,
-      className: 'bg-rose-100 text-rose-700',
-      selectedClassName: 'bg-rose-400/30 text-rose-100',
-    }
-  }
 
   // AI Topic Generation states
   const [showTopicGenerator, setShowTopicGenerator] = useState(false)
@@ -315,7 +284,7 @@ export default function NewDiscussionPage() {
       const response = await fetch('/api/discussions/generate-topics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ context: learningMaterial, locale })
+        body: JSON.stringify({ context: learningMaterial })
       })
 
       const data = await response.json()
@@ -358,71 +327,61 @@ export default function NewDiscussionPage() {
     toast.success(t('phases.topic.aiGenerator.selectHint'))
   }
 
-  // Shared discussion creation logic
-  const createDiscussion = async (data: DiscussionFormInput) => {
-    const supabase = getSupabaseClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      router.push('/login')
-      return null
-    }
-
-    const joinCode = generateJoinCode()
-    const maxTurns = duration === null ? null : Math.max(5, duration)
-
-    const labels: Record<string, string> = {
-      pro: stanceLabels.pro,
-      con: stanceLabels.con,
-      neutral: t('phases.environment.stances.neutral', { default: 'Neutral' })
-    }
-
-    const stanceOptions = ['pro', 'con']
-    if (includeNeutral) {
-      stanceOptions.push('neutral')
-    }
-
-    additionalStances.forEach((label, index) => {
-      const id = `stance_${String.fromCharCode(99 + index)}`
-      labels[id] = label
-      stanceOptions.push(id)
-    })
-
-    const { data: discussion, error } = await supabase
-      .from('discussion_sessions')
-      .insert({
-        instructor_id: user.id,
-        title: data.title,
-        description: data.description || null,
-        status: 'draft',
-        join_code: joinCode,
-        settings: {
-          anonymous: anonymous,
-          stanceOptions,
-          stanceLabels: labels,
-          aiMode: data.aiMode,
-          maxTurns,
-          duration,
-        },
-      })
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error creating discussion:', error)
-      toast.error(t('toasts.createError'))
-      return null
-    }
-
-    // Clear draft on successful creation
-    clearDraft()
-    return discussion
-  }
-
   const onSubmit = async (data: DiscussionFormInput) => {
     setIsLoading(true)
     try {
-      const discussion = await createDiscussion(data)
-      if (!discussion) return
+      const supabase = getSupabaseClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
+        return
+      }
+
+      const joinCode = generateJoinCode()
+      const maxTurns = duration === null ? null : Math.max(5, duration)
+
+      const labels: Record<string, string> = {
+        pro: stanceLabels.pro,
+        con: stanceLabels.con,
+        neutral: t('phases.environment.stances.neutral', { default: 'Neutral' })
+      }
+
+      const stanceOptions = ['pro', 'con', 'neutral']
+
+      additionalStances.forEach((label, index) => {
+        const id = `stance_${String.fromCharCode(99 + index)}`
+        labels[id] = label
+        stanceOptions.push(id)
+      })
+
+      const { data: discussion, error } = await supabase
+        .from('discussion_sessions')
+        .insert({
+          instructor_id: user.id,
+          title: data.title,
+          description: data.description || null,
+          status: 'draft',
+          join_code: joinCode,
+          settings: {
+            anonymous: anonymous,
+            stanceOptions,
+            stanceLabels: labels,
+            aiMode: data.aiMode,
+            maxTurns,
+            duration,
+          },
+        })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error creating discussion:', error)
+        toast.error(t('toasts.createError'))
+        return
+      }
+
+      // Clear draft on successful creation
+      clearDraft()
 
       toast.success(t('toasts.success'))
       router.push(`/instructor/discussions/${discussion.id}`)
@@ -431,32 +390,6 @@ export default function NewDiscussionPage() {
       toast.error(t('toasts.createError'))
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const onPreview = async (data: DiscussionFormInput) => {
-    setIsPreviewLoading(true)
-    try {
-      const discussion = await createDiscussion(data)
-      if (!discussion) return
-
-      // Create preview participant and redirect to preview page
-      const previewResponse = await fetch(`/api/discussions/${discussion.id}/preview`, {
-        method: 'POST',
-      })
-
-      if (!previewResponse.ok) {
-        toast.error(t('toasts.createError'))
-        return
-      }
-
-      toast.success(t('toasts.success'))
-      router.push(`/instructor/discussions/${discussion.id}/preview`)
-    } catch (error) {
-      console.error('Error:', error)
-      toast.error(t('toasts.createError'))
-    } finally {
-      setIsPreviewLoading(false)
     }
   }
 
@@ -471,13 +404,10 @@ export default function NewDiscussionPage() {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-zinc-200 h-20 flex items-center">
         <div className="max-w-[1400px] mx-auto w-full px-8 flex items-center justify-between">
           <Link href="/instructor" className="flex items-center gap-3 group">
-            <Image
-              src="/logo-navbar.png"
-              alt="Agora"
-              width={32}
-              height={32}
-              className="group-hover:scale-110 transition-transform duration-500"
-            />
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full animate-pulse" />
+              <MessageCircle className="relative w-8 h-8 text-primary group-hover:scale-110 transition-transform duration-500" />
+            </div>
             <span className="text-2xl font-bold tracking-tighter bg-gradient-to-br from-zinc-900 to-zinc-600 bg-clip-text text-transparent">
               Agora
             </span>
@@ -701,76 +631,61 @@ export default function NewDiscussionPage() {
                                 </div>
 
                                 <div className="space-y-3">
-                                  {generatedTopics.map((topic, index) => {
-                                    const difficulty = getDifficultyTag(index)
-                                    const isSelected = selectedTopicIndex === index
-
-                                    return (
-                                      <motion.button
-                                        key={index}
-                                        type="button"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        onClick={() => handleSelectTopic(index)}
-                                        className={`w-full p-4 sm:p-5 rounded-xl text-left transition-all group/topic ${isSelected
-                                          ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
-                                          : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
-                                          }`}
-                                      >
-                                        {/* Header: 번호 + 난이도 뱃지 */}
-                                        <div className="flex items-center justify-between gap-2 mb-3">
-                                          <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${isSelected
-                                            ? 'bg-white/20 text-white'
-                                            : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
-                                            }`}>
-                                            {isSelected ? (
-                                              <Check className="w-4 h-4" />
-                                            ) : (
-                                              <span className="text-sm font-bold">{index + 1}</span>
-                                            )}
-                                          </div>
-                                          <span
-                                            className={`px-2 py-1 rounded-full text-[10px] font-bold tracking-wide ${isSelected
-                                              ? difficulty.selectedClassName
-                                              : difficulty.className
-                                              }`}
-                                          >
-                                            {difficulty.label}
-                                          </span>
+                                  {generatedTopics.map((topic, index) => (
+                                    <motion.button
+                                      key={index}
+                                      type="button"
+                                      initial={{ opacity: 0, x: -20 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: index * 0.1 }}
+                                      onClick={() => handleSelectTopic(index)}
+                                      className={`w-full p-5 rounded-xl text-left transition-all group/topic ${selectedTopicIndex === index
+                                        ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/30'
+                                        : 'bg-white border border-violet-200 hover:border-violet-400 hover:shadow-md'
+                                        }`}
+                                    >
+                                      <div className="flex items-start gap-4">
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 transition-all ${selectedTopicIndex === index
+                                          ? 'bg-white/20 text-white'
+                                          : 'bg-violet-100 text-violet-600 group-hover/topic:bg-violet-200'
+                                          }`}>
+                                          {selectedTopicIndex === index ? (
+                                            <Check className="w-4 h-4" />
+                                          ) : (
+                                            <span className="text-sm font-bold">{index + 1}</span>
+                                          )}
                                         </div>
-                                        {/* 제목 */}
-                                        <p className={`font-bold text-sm leading-snug mb-2 ${isSelected ? 'text-white' : 'text-zinc-800'
-                                          }`}>
-                                          {topic.title}
-                                        </p>
-                                        {/* 설명 */}
-                                        <p className={`text-xs leading-relaxed line-clamp-2 ${isSelected ? 'text-white/80' : 'text-zinc-500'
-                                          }`}>
-                                          {topic.description}
-                                        </p>
-                                        {/* 입장 뱃지 */}
-                                        {topic.stances && (
-                                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-3">
-                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
-                                              ? 'bg-emerald-400/30 text-emerald-100'
-                                              : 'bg-emerald-100 text-emerald-700'
-                                              }`}>
-                                              {topic.stances.pro}
-                                            </span>
-                                            <span className={`text-[10px] ${isSelected ? 'text-white/50' : 'text-zinc-400'
-                                              }`}>vs</span>
-                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${isSelected
-                                              ? 'bg-rose-400/30 text-rose-100'
-                                              : 'bg-rose-100 text-rose-700'
-                                              }`}>
-                                              {topic.stances.con}
-                                            </span>
-                                          </div>
-                                        )}
-                                      </motion.button>
-                                    )
-                                  })}
+                                        <div className="flex-1 min-w-0">
+                                          <p className={`font-bold text-sm leading-snug mb-2 ${selectedTopicIndex === index ? 'text-white' : 'text-zinc-800'
+                                            }`}>
+                                            {topic.title}
+                                          </p>
+                                          <p className={`text-xs leading-relaxed line-clamp-2 ${selectedTopicIndex === index ? 'text-white/80' : 'text-zinc-500'
+                                            }`}>
+                                            {topic.description}
+                                          </p>
+                                          {topic.stances && (
+                                            <div className="flex items-center gap-2 mt-3">
+                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${selectedTopicIndex === index
+                                                ? 'bg-emerald-400/30 text-emerald-100'
+                                                : 'bg-emerald-100 text-emerald-700'
+                                                }`}>
+                                                {topic.stances.pro}
+                                              </span>
+                                              <span className={`text-[10px] ${selectedTopicIndex === index ? 'text-white/50' : 'text-zinc-400'
+                                                }`}>vs</span>
+                                              <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${selectedTopicIndex === index
+                                                ? 'bg-rose-400/30 text-rose-100'
+                                                : 'bg-rose-100 text-rose-700'
+                                                }`}>
+                                                {topic.stances.con}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </motion.button>
+                                  ))}
                                 </div>
                               </motion.div>
                             )}
@@ -1002,24 +917,6 @@ export default function NewDiscussionPage() {
                   />
                 </div>
 
-                {/* Include Neutral Stance */}
-                <div className="flex items-center justify-between p-8 rounded-[3rem] bg-zinc-50 border border-zinc-200 transition-all hover:bg-zinc-100 hover:border-zinc-300">
-                  <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-500 shadow-inner">
-                      <MinusCircle className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="text-lg font-black text-zinc-900">{t('phases.environment.includeNeutral.title')}</p>
-                      <p className="text-sm text-zinc-500 font-medium">{t('phases.environment.includeNeutral.desc')}</p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={includeNeutral}
-                    onCheckedChange={setIncludeNeutral}
-                    className="data-[state=checked]:bg-primary"
-                  />
-                </div>
-
                 {/* Stances */}
                 <div className={`p-8 rounded-[3rem] bg-zinc-50 border border-zinc-200 transition-all ${useCustomStances ? 'border-primary/30 bg-primary/5' : 'hover:bg-zinc-100'}`}>
                   <div className="flex items-center justify-between mb-8">
@@ -1203,7 +1100,7 @@ export default function NewDiscussionPage() {
             <div className="flex flex-col md:flex-row justify-center items-center gap-6 pt-12 pb-20">
               <button
                 type="submit"
-                disabled={isLoading || isPreviewLoading || !createCheck.allowed}
+                disabled={isLoading || !createCheck.allowed}
                 className="h-20 w-full md:w-[350px] rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-black text-xl flex items-center justify-center gap-4 transition-all hover:shadow-[0_0_60px_rgba(99,102,241,0.4)] hover:-translate-y-1.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {isLoading ? (
@@ -1220,24 +1117,6 @@ export default function NewDiscussionPage() {
                   <>
                     {t('buttons.submit')}
                     <ArrowRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmit(onPreview)}
-                disabled={isLoading || isPreviewLoading || !createCheck.allowed}
-                className="h-16 w-full md:w-[200px] rounded-full bg-zinc-100 border border-zinc-200 text-zinc-700 font-bold text-lg flex items-center justify-center gap-3 transition-all hover:bg-zinc-200 hover:border-zinc-300 hover:-translate-y-1 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                {isPreviewLoading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    {t('buttons.previewSubmitting')}
-                  </>
-                ) : (
-                  <>
-                    <Eye className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    {t('buttons.preview')}
                   </>
                 )}
               </button>
