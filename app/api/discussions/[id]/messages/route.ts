@@ -169,16 +169,23 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
         // If student message, trigger AI response
         if (!isInstructor && role === 'user') {
-            // Call AI chat endpoint (will be implemented separately)
+            // Forward session cookie so downstream auth checks can validate caller context.
             try {
-                await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/discussions/${id}/chat`, {
+                const chatUrl = new URL(`/api/discussions/${id}/chat`, request.nextUrl.origin)
+                const cookieHeader = request.headers.get('cookie')
+
+                await fetch(chatUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(cookieHeader ? { cookie: cookieHeader } : {})
+                    },
                     body: JSON.stringify({
                         participantId,
                         userMessage: content,
                         discussionId: id
-                    })
+                    }),
+                    cache: 'no-store'
                 })
             } catch (aiError) {
                 console.error('AI response error:', aiError)

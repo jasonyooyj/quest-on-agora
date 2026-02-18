@@ -132,6 +132,131 @@ interface QuestionData {
   core_ability?: string;
 }
 
+type CurrentUser = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>;
+type AuthResult =
+  | { user: CurrentUser }
+  | { errorResponse: NextResponse };
+
+interface SessionOwnership {
+  id: string;
+  exam_id: string;
+  student_id: string;
+  is_active: boolean;
+  submitted_at: string | null;
+  last_heartbeat_at: string | null;
+  device_fingerprint: string | null;
+}
+
+const EXAM_MUTABLE_FIELDS = new Set([
+  "title",
+  "code",
+  "description",
+  "duration",
+  "questions",
+  "materials",
+  "materials_text",
+  "rubric",
+  "rubric_public",
+  "status",
+  "updated_at",
+]);
+
+async function requireAuthenticatedUser(): Promise<AuthResult> {
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      errorResponse: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  return { user: user as CurrentUser };
+}
+
+function requireInstructorRole(user: CurrentUser) {
+  if (user.role !== "instructor") {
+    return NextResponse.json(
+      { error: "Instructor access required" },
+      { status: 403 }
+    );
+  }
+  return null;
+}
+
+function requireStudentRole(user: CurrentUser) {
+  if (user.role !== "student") {
+    return NextResponse.json(
+      { error: "Student access required" },
+      { status: 403 }
+    );
+  }
+  return null;
+}
+
+async function getOwnedSession(
+  sessionId: string,
+  userId: string
+): Promise<{
+  supabase?: ReturnType<typeof getSupabaseClient>;
+  session?: SessionOwnership;
+  errorResponse?: NextResponse;
+}> {
+  const sessionLookup = await getSessionById(sessionId);
+  if (sessionLookup.errorResponse || !sessionLookup.supabase || !sessionLookup.session) {
+    return sessionLookup;
+  }
+
+  if (sessionLookup.session.student_id !== userId) {
+    return {
+      errorResponse: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+    };
+  }
+
+  return sessionLookup;
+}
+
+async function getSessionById(
+  sessionId: string
+): Promise<{
+  supabase?: ReturnType<typeof getSupabaseClient>;
+  session?: SessionOwnership;
+  errorResponse?: NextResponse;
+}> {
+  const supabase = getSupabaseClient();
+  const { data: session, error } = await supabase
+    .from("sessions")
+    .select(
+      "id, exam_id, student_id, is_active, submitted_at, last_heartbeat_at, device_fingerprint"
+    )
+    .eq("id", sessionId)
+    .single();
+
+  if (error || !session) {
+    return {
+      errorResponse: NextResponse.json(
+        { error: "Session not found" },
+        { status: 404 }
+      ),
+    };
+  }
+
+  return { supabase, session: session as SessionOwnership };
+}
+
+async function canInstructorAccessSession(userId: string, examId: string) {
+  const supabase = getSupabaseClient();
+  const { data: exam, error } = await supabase
+    .from("exams")
+    .select("id")
+    .eq("id", examId)
+    .eq("instructor_id", userId)
+    .single();
+
+  if (error || !exam) {
+    return false;
+  }
+  return true;
+}
+
 async function createExam(data: {
   title: string;
   code: string;
@@ -288,15 +413,53 @@ async function updateExam(data: {
   update: Record<string, unknown>;
 }) {
   try {
+    if (!data?.id || !data?.update) {
+      return NextResponse.json(
+        { error: "Exam ID and update payload are required" },
+        { status: 400 }
+      );
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireInstructorRole(user);
+    if (roleError) return roleError;
+
+    const sanitizedUpdate = Object.fromEntries(
+      Object.entries(data.update).filter(
+        ([key, value]) => EXAM_MUTABLE_FIELDS.has(key) && value !== undefined
+      )
+    );
+
+    if (Object.keys(sanitizedUpdate).length === 0) {
+      return NextResponse.json(
+        { error: "No valid fields to update" },
+        { status: 400 }
+      );
+    }
+
+    sanitizedUpdate.updated_at = new Date().toISOString();
+
     const supabase = getSupabaseClient();
     const { data: exam, error } = await supabase
       .from("exams")
-      .update(data.update)
+      .update(sanitizedUpdate)
       .eq("id", data.id)
+      .eq("instructor_id", user.id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === "PGRST116") {
+        return NextResponse.json(
+          { error: "Exam not found or access denied" },
+          { status: 404 }
+        );
+      }
+      throw error;
+    }
 
     return NextResponse.json({ exam });
   } catch (error) {
@@ -318,7 +481,37 @@ async function submitExam(data: {
   feedbackResponses?: unknown[];
 }) {
   try {
-    const supabase = getSupabaseClient();
+    if (!data?.sessionId || !Array.isArray(data.answers)) {
+      return NextResponse.json(
+        { error: "sessionId and answers are required" },
+        { status: 400 }
+      );
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireStudentRole(user);
+    if (roleError) return roleError;
+
+    const ownership = await getOwnedSession(data.sessionId, user.id);
+    if (ownership.errorResponse) {
+      return ownership.errorResponse;
+    }
+    if (!ownership.supabase || !ownership.session) {
+      throw new Error("Session lookup failed");
+    }
+
+    const { supabase, session: ownedSession } = ownership;
+
+    if (data.examId && data.examId !== ownedSession.exam_id) {
+      return NextResponse.json(
+        { error: "Session does not match exam" },
+        { status: 400 }
+      );
+    }
+
     // Compress the session data
     const sessionData = {
       chatHistory: data.chatHistory || [],
@@ -338,7 +531,7 @@ async function submitExam(data: {
         submitted_at: new Date().toISOString(),
         is_active: false, // Deactivate session on submission
       })
-      .eq("id", data.sessionId)
+      .eq("id", ownedSession.id)
       .select()
       .single();
 
@@ -357,7 +550,7 @@ async function submitExam(data: {
         const compressedSubmissionData = compressData(submissionData);
 
         return {
-          session_id: data.sessionId,
+          session_id: ownedSession.id,
           q_idx: index,
           answer: answerObj.text || answer,
           ai_feedback: data.feedback ? { feedback: data.feedback } : null,
@@ -399,18 +592,32 @@ async function submitExam(data: {
 
 async function getExam(data: { code: string }) {
   try {
+    if (!data?.code) {
+      return NextResponse.json({ error: "Exam code is required" }, { status: 400 });
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
     const supabase = getSupabaseClient();
-    const { data: exam, error } = await supabase
-      .from("exams")
-      .select("*")
-      .eq("code", data.code)
-      .single();
+    let query = supabase.from("exams").select("*").eq("code", data.code);
+
+    if (user.role === "instructor") {
+      query = query.eq("instructor_id", user.id);
+    }
+
+    const { data: exam, error } = await query.single();
 
     if (error) {
       if (error.code === "PGRST116") {
         return NextResponse.json({ error: "Exam not found" }, { status: 404 });
       }
       throw error;
+    }
+
+    if (user.role === "student" && exam.status !== "active") {
+      return NextResponse.json({ error: "Exam is not available" }, { status: 403 });
     }
 
     return NextResponse.json({ exam });
@@ -597,6 +804,17 @@ async function getInstructorExams() {
 
 async function createOrGetSession(data: { examId: string; studentId: string }) {
   try {
+    if (!data?.examId) {
+      return NextResponse.json({ error: "examId is required" }, { status: 400 });
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireStudentRole(user);
+    if (roleError) return roleError;
+
     const supabase = getSupabaseClient();
     if (process.env.NODE_ENV === "development") {
       console.log("Creating or getting session for:", data);
@@ -607,7 +825,7 @@ async function createOrGetSession(data: { examId: string; studentId: string }) {
       .from("sessions")
       .select("*")
       .eq("exam_id", data.examId)
-      .eq("student_id", data.studentId)
+      .eq("student_id", user.id)
       .order("created_at", { ascending: false });
 
     console.log("Session check result:", { existingSessions, checkError });
@@ -659,7 +877,7 @@ async function createOrGetSession(data: { examId: string; studentId: string }) {
       .insert([
         {
           exam_id: data.examId,
-          student_id: data.studentId,
+          student_id: user.id,
           used_clarifications: 0,
           created_at: new Date().toISOString(),
         },
@@ -689,10 +907,23 @@ async function initExamSession(data: {
   deviceFingerprint?: string;
 }) {
   try {
+    if (!data?.examCode) {
+      return NextResponse.json({ error: "examCode is required" }, { status: 400 });
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireStudentRole(user);
+    if (roleError) return roleError;
+
+    const studentId = user.id;
+
     const supabase = getSupabaseClient();
     console.log("[INIT_EXAM_SESSION] Starting session init:", {
       examCode: data.examCode,
-      studentId: data.studentId,
+      studentId,
       hasDeviceFingerprint: !!data.deviceFingerprint,
     });
 
@@ -736,7 +967,7 @@ async function initExamSession(data: {
       .from("sessions")
       .select("*")
       .eq("exam_id", exam.id)
-      .eq("student_id", data.studentId)
+      .eq("student_id", studentId)
       .eq("is_active", true)
       .is("submitted_at", null);
 
@@ -819,7 +1050,7 @@ async function initExamSession(data: {
       .from("sessions")
       .select("*")
       .eq("exam_id", exam.id)
-      .eq("student_id", data.studentId)
+      .eq("student_id", studentId)
       .order("created_at", { ascending: false });
 
     if (checkError) throw checkError;
@@ -933,7 +1164,7 @@ async function initExamSession(data: {
         .insert([
           {
             exam_id: exam.id,
-            student_id: data.studentId,
+            student_id: studentId,
             used_clarifications: 0,
             is_active: true,
             last_heartbeat_at: now,
@@ -965,12 +1196,42 @@ async function saveDraft(data: {
   answer: string;
 }) {
   try {
-    const supabase = getSupabaseClient();
+    if (!data?.sessionId || data?.questionId === undefined || typeof data.answer !== "string") {
+      return NextResponse.json(
+        { error: "sessionId, questionId and answer are required" },
+        { status: 400 }
+      );
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireStudentRole(user);
+    if (roleError) return roleError;
+
+    const ownership = await getOwnedSession(data.sessionId, user.id);
+    if (ownership.errorResponse) {
+      return ownership.errorResponse;
+    }
+    if (!ownership.supabase || !ownership.session) {
+      throw new Error("Session lookup failed");
+    }
+
+    const { supabase, session } = ownership;
+
+    if (session.submitted_at) {
+      return NextResponse.json(
+        { error: "Cannot edit a submitted session" },
+        { status: 400 }
+      );
+    }
+
     // Check if submission already exists
     const { data: existingSubmission, error: checkError } = await supabase
       .from("submissions")
       .select("*")
-      .eq("session_id", data.sessionId)
+      .eq("session_id", session.id)
       .eq("q_idx", data.questionId)
       .single();
 
@@ -1028,7 +1289,7 @@ async function saveDraft(data: {
         .from("submissions")
         .insert([
           {
-            session_id: data.sessionId,
+            session_id: session.id,
             q_idx: data.questionId,
             answer: data.answer,
             created_at: now,
@@ -1057,6 +1318,13 @@ async function saveAllDrafts(data: {
   drafts: Array<{ questionId: string; text: string }>;
 }) {
   try {
+    if (!data?.sessionId || !Array.isArray(data.drafts)) {
+      return NextResponse.json(
+        { error: "sessionId and drafts are required" },
+        { status: 400 }
+      );
+    }
+
     const results = [];
 
     for (const draft of data.drafts) {
@@ -1067,10 +1335,10 @@ async function saveAllDrafts(data: {
           answer: draft.text,
         });
 
-        if (result.status === 200) {
-          const resultData = await result.json();
-          results.push(resultData.submission);
-        }
+        if (!result.ok) return result;
+
+        const resultData = await result.json();
+        results.push(resultData.submission);
       }
     }
 
@@ -1089,44 +1357,60 @@ async function saveDraftAnswers(data: {
   answers: Array<{ questionId: string; text: string }>;
 }) {
   try {
-    const supabase = getSupabaseClient();
+    if (!data?.sessionId || !Array.isArray(data.answers)) {
+      return NextResponse.json(
+        { error: "sessionId and answers are required" },
+        { status: 400 }
+      );
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireStudentRole(user);
+    if (roleError) return roleError;
+
+    const ownership = await getOwnedSession(data.sessionId, user.id);
+    if (ownership.errorResponse) {
+      return ownership.errorResponse;
+    }
+    if (!ownership.supabase || !ownership.session) {
+      throw new Error("Session lookup failed");
+    }
+
+    const { supabase, session } = ownership;
+
+    const { data: exam, error: examError } = await supabase
+      .from("exams")
+      .select("questions")
+      .eq("id", session.exam_id)
+      .single();
+
+    if (examError || !exam || !Array.isArray(exam.questions)) {
+      return NextResponse.json({ error: "Exam not found" }, { status: 404 });
+    }
+
+    const questions = exam.questions as Array<{ id: string }>;
     const results = [];
 
     for (const answer of data.answers) {
       if (answer.text.trim()) {
-        // Find the question index from the questionId
-        const { data: session } = await supabase
-          .from("sessions")
-          .select("exam_id")
-          .eq("id", data.sessionId)
-          .single();
+        const questionIndex = questions.findIndex(
+          (q) => q.id === answer.questionId
+        );
 
-        if (session) {
-          const { data: exam } = await supabase
-            .from("exams")
-            .select("questions")
-            .eq("id", session.exam_id)
-            .single();
+        if (questionIndex !== -1) {
+          const result = await saveDraft({
+            sessionId: data.sessionId,
+            questionId: questionIndex.toString(),
+            answer: answer.text,
+          });
 
-          if (exam && exam.questions) {
-            const questions = exam.questions as Array<{ id: string }>;
-            const questionIndex = questions.findIndex(
-              (q) => q.id === answer.questionId
-            );
+          if (!result.ok) return result;
 
-            if (questionIndex !== -1) {
-              const result = await saveDraft({
-                sessionId: data.sessionId,
-                questionId: questionIndex.toString(),
-                answer: answer.text,
-              });
-
-              if (result.status === 200) {
-                const resultData = await result.json();
-                results.push(resultData.submission);
-              }
-            }
-          }
+          const resultData = await result.json();
+          results.push(resultData.submission);
         }
       }
     }
@@ -1143,11 +1427,41 @@ async function saveDraftAnswers(data: {
 
 async function getSessionSubmissions(data: { sessionId: string }) {
   try {
-    const supabase = getSupabaseClient();
+    if (!data?.sessionId) {
+      return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const sessionLookup = await getSessionById(data.sessionId);
+    if (sessionLookup.errorResponse) {
+      return sessionLookup.errorResponse;
+    }
+    if (!sessionLookup.supabase || !sessionLookup.session) {
+      throw new Error("Session lookup failed");
+    }
+
+    const { supabase, session } = sessionLookup;
+
+    if (user.role === "student") {
+      if (session.student_id !== user.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else if (user.role === "instructor") {
+      const canAccess = await canInstructorAccessSession(user.id, session.exam_id);
+      if (!canAccess) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { data: submissions, error } = await supabase
       .from("submissions")
       .select("*")
-      .eq("session_id", data.sessionId)
+      .eq("session_id", session.id)
       .order("q_idx", { ascending: true });
 
     if (error) throw error;
@@ -1164,11 +1478,41 @@ async function getSessionSubmissions(data: { sessionId: string }) {
 
 async function getSessionMessages(data: { sessionId: string }) {
   try {
-    const supabase = getSupabaseClient();
+    if (!data?.sessionId) {
+      return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
+    }
+
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const sessionLookup = await getSessionById(data.sessionId);
+    if (sessionLookup.errorResponse) {
+      return sessionLookup.errorResponse;
+    }
+    if (!sessionLookup.supabase || !sessionLookup.session) {
+      throw new Error("Session lookup failed");
+    }
+
+    const { supabase, session } = sessionLookup;
+
+    if (user.role === "student") {
+      if (session.student_id !== user.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else if (user.role === "instructor") {
+      const canAccess = await canInstructorAccessSession(user.id, session.exam_id);
+      if (!canAccess) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     const { data: messages, error } = await supabase
       .from("messages")
       .select("*")
-      .eq("session_id", data.sessionId)
+      .eq("session_id", session.id)
       .order("created_at", { ascending: true });
 
     if (error) throw error;
@@ -1392,40 +1736,44 @@ async function getFolderContents(data: { folder_id?: string | null }) {
 
 async function getBreadcrumb(data: { folder_id: string }) {
   try {
-    const supabase = getSupabaseClient();
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!data?.folder_id) {
+      return NextResponse.json({ error: "folder_id is required" }, { status: 400 });
     }
 
-    // Use recursive CTE to get all parent folders
-    const { data: rpcData, error } = await supabase.rpc("get_breadcrumb_path", {
-      folder_id: data.folder_id,
-    });
+    const supabase = getSupabaseClient();
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
 
-    if (error) {
-      // If RPC doesn't exist, use a simpler approach with multiple queries
-      const breadcrumb: Array<{ id: string; name: string }> = [];
-      let currentId: string | null = data.folder_id;
+    const roleError = requireInstructorRole(user);
+    if (roleError) return roleError;
 
-      while (currentId) {
-        const { data: node, error: nodeError } = await supabase
-          .from("exam_nodes")
-          .select("id, name, parent_id")
-          .eq("id", currentId)
-          .eq("instructor_id", user.id)
-          .single();
+    const breadcrumb: Array<{ id: string; name: string }> = [];
+    let currentId: string | null = data.folder_id;
 
-        if (nodeError || !node) break;
+    while (currentId) {
+      const { data: node, error: nodeError } = await supabase
+        .from("exam_nodes")
+        .select("id, name, parent_id")
+        .eq("id", currentId)
+        .eq("instructor_id", user.id)
+        .single();
 
-        breadcrumb.unshift({ id: node.id, name: node.name });
-        currentId = node.parent_id as string | null;
+      if (nodeError || !node) {
+        if (breadcrumb.length === 0) {
+          return NextResponse.json(
+            { error: "Folder not found or access denied" },
+            { status: 404 }
+          );
+        }
+        break;
       }
 
-      return NextResponse.json({ breadcrumb });
+      breadcrumb.unshift({ id: node.id, name: node.name });
+      currentId = node.parent_id as string | null;
     }
 
-    return NextResponse.json({ breadcrumb: rpcData || [] });
+    return NextResponse.json({ breadcrumb });
   } catch (error) {
     console.error("Get breadcrumb error:", error);
     return NextResponse.json(
@@ -1598,28 +1946,33 @@ async function sessionHeartbeat(data: {
   studentId: string;
 }) {
   try {
-    const supabase = getSupabaseClient();
-    // Verify the session belongs to the student
-    const { data: session, error: sessionError } = await supabase
-      .from("sessions")
-      .select("id, student_id, is_active, submitted_at")
-      .eq("id", data.sessionId)
-      .single();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    if (!data?.sessionId) {
+      return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
     }
 
-    if (session.student_id !== data.studentId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireStudentRole(user);
+    if (roleError) return roleError;
+
+    const ownership = await getOwnedSession(data.sessionId, user.id);
+    if (ownership.errorResponse) {
+      return ownership.errorResponse;
     }
+    if (!ownership.supabase || !ownership.session) {
+      throw new Error("Session lookup failed");
+    }
+
+    const { supabase, session } = ownership;
 
     // Only update heartbeat if session is active and not submitted
     if (session.is_active && !session.submitted_at) {
       const { error: updateError } = await supabase
         .from("sessions")
         .update({ last_heartbeat_at: new Date().toISOString() })
-        .eq("id", data.sessionId);
+        .eq("id", session.id);
 
       if (updateError) throw updateError;
 
@@ -1645,27 +1998,32 @@ async function deactivateSession(data: {
   studentId: string;
 }) {
   try {
-    const supabase = getSupabaseClient();
-    // Verify the session belongs to the student
-    const { data: session, error: sessionError } = await supabase
-      .from("sessions")
-      .select("id, student_id")
-      .eq("id", data.sessionId)
-      .single();
-
-    if (sessionError || !session) {
-      return NextResponse.json({ error: "Session not found" }, { status: 404 });
+    if (!data?.sessionId) {
+      return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
     }
 
-    if (session.student_id !== data.studentId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    const auth = await requireAuthenticatedUser();
+    if ("errorResponse" in auth) return auth.errorResponse;
+    const user = auth.user;
+
+    const roleError = requireStudentRole(user);
+    if (roleError) return roleError;
+
+    const ownership = await getOwnedSession(data.sessionId, user.id);
+    if (ownership.errorResponse) {
+      return ownership.errorResponse;
     }
+    if (!ownership.supabase || !ownership.session) {
+      throw new Error("Session lookup failed");
+    }
+
+    const { supabase, session } = ownership;
 
     // Deactivate the session
     const { error: updateError } = await supabase
       .from("sessions")
       .update({ is_active: false })
-      .eq("id", data.sessionId);
+      .eq("id", session.id);
 
     if (updateError) throw updateError;
 

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseRouteClient, createSupabaseAdminClient } from '@/lib/supabase-server'
 import { ChatOpenAI } from "@langchain/openai"
-import { PromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
 import { RunnableSequence } from "@langchain/core/runnables"
-import { HumanMessage, SystemMessage, AIMessage } from "@langchain/core/messages"
+import { HumanMessage, AIMessage } from "@langchain/core/messages"
 import { AI_MODEL, AI_PROVIDER } from '@/lib/openai'
 import { getGeminiChatModel } from '@/lib/gemini'
 import { sendMessageSchema } from '@/lib/validations/discussion'
 import { IterableReadableStream } from "@langchain/core/utils/stream"
 import { applyRateLimit, RATE_LIMITS } from '@/lib/rate-limiter'
+import { getCurrentUser } from '@/lib/auth'
 
 import type { DiscussionSettings } from '@/types/discussion'
 
@@ -31,6 +31,11 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     try {
         const { id } = await params
         const supabase = await createSupabaseRouteClient()
+        const user = await getCurrentUser()
+
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
 
         const body = await request.json()
         const validation = sendMessageSchema.safeParse(body)
@@ -58,12 +63,30 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             return NextResponse.json({ error: 'Discussion not found' }, { status: 404 })
         }
 
+        // Ensure participant belongs to this discussion and caller is authorized
+        const { data: participant } = await supabase
+            .from('discussion_participants')
+            .select('id, stance, student_id, session_id')
+            .eq('id', participantId)
+            .single()
+
+        if (!participant || participant.session_id !== discussion.id) {
+            return NextResponse.json({ error: 'Participant not found' }, { status: 404 })
+        }
+
+        const isOwnerInstructor = discussion.instructor_id === user.id
+        const isParticipantStudent = participant.student_id === user.id
+
+        if (!isOwnerInstructor && !isParticipantStudent) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
+
         // Verify API key exists based on provider
         if (AI_PROVIDER === 'openai' && !process.env.OPENAI_API_KEY) {
-            return handleMockResponse(discussionId || id, participantId, supabase)
+            return handleMockResponse(discussionId || id, participantId)
         }
         if (AI_PROVIDER === 'gemini' && !process.env.GOOGLE_API_KEY) {
-            return handleMockResponse(discussionId || id, participantId, supabase)
+            return handleMockResponse(discussionId || id, participantId)
         }
 
         // Save user message if not starting (starting message is empty)
@@ -95,13 +118,6 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             .select('role, content')
             .eq('participant_id', participantId)
             .order('created_at', { ascending: true })
-
-        // Get student information
-        const { data: participant } = await supabase
-            .from('discussion_participants')
-            .select('stance')
-            .eq('id', participantId)
-            .single()
 
         const settings = discussion.settings as DiscussionSettings | null
         // Use custom label if available, fallback to raw stance key, then to '미정'
@@ -267,18 +283,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     } catch (error) {
         console.error('AI chat error:', error)
-        const { id } = await params
-        const supabase = await createSupabaseRouteClient()
-        const body = await request.json()
-        return handleMockResponse(body.discussionId || id, body.participantId, supabase)
+        return NextResponse.json({ error: 'Failed to generate AI response' }, { status: 500 })
     }
 }
 
 // Mock response fallback when OpenAI is not available
 async function handleMockResponse(
     sessionId: string,
-    participantId: string,
-    _supabase: Awaited<ReturnType<typeof createSupabaseRouteClient>>
+    participantId: string
 ) {
     const mockResponses = [
         '흥미로운 관점이네요. 왜 그렇게 생각하시나요? 구체적인 근거가 있나요?',

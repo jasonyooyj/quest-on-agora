@@ -46,7 +46,7 @@ export const updateDiscussionSchema = z.object({
  */
 export const joinDiscussionSchema = z.object({
   joinCode: z.string()
-    .length(12, '참여 코드는 12자리입니다')
+    .length(6, '참여 코드는 6자리입니다')
     .regex(/^[A-Z0-9]+$/, '참여 코드는 영문 대문자와 숫자로만 구성됩니다'),
 })
 

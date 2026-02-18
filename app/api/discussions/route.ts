@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomInt } from 'node:crypto'
 import { createSupabaseRouteClient } from '@/lib/supabase-server'
 import { createDiscussionSchema } from '@/lib/validations/discussion'
 import { checkLimitAccess, incrementUsage, getSubscriptionInfo } from '@/lib/subscription'
@@ -192,7 +193,7 @@ function generateJoinCode(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
     let code = ''
     for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length))
+        code += chars.charAt(randomInt(0, chars.length))
     }
     return code
 }
